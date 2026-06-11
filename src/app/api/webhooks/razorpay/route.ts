@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { updateOrder } from "@/lib/orders";
+import { markPaid, updateOrder } from "@/lib/orders";
+import { sendOrderNotifications } from "@/lib/notify";
 
 /**
  * Razorpay server-to-server webhook — the authoritative "an order happened"
@@ -10,8 +11,8 @@ import { updateOrder } from "@/lib/orders";
  *   Events: payment.captured, payment.failed
  *
  * This fires even if the customer closes the browser the instant payment
- * completes, so no paid order is ever lost. This is also the place to
- * trigger order-confirmation email/WhatsApp to the customer and the client.
+ * completes, so no paid order is ever lost. markPaid is transition-aware,
+ * so if /api/verify already confirmed this payment, no duplicate emails.
  */
 export async function POST(req: Request) {
   const body = await req.text();
@@ -31,12 +32,8 @@ export async function POST(req: Request) {
   const payment = event.payload?.payment?.entity;
 
   if (event.event === "payment.captured" && payment) {
-    await updateOrder(payment.order_id, {
-      status: "paid",
-      paymentId: payment.id,
-      paidAt: new Date().toISOString(),
-    });
-    // TODO: send confirmation email (Resend/SES) + notify client (email/WhatsApp)
+    const { order, transitioned } = await markPaid(payment.order_id, payment.id);
+    if (order && transitioned) await sendOrderNotifications(order);
   }
 
   if (event.event === "payment.failed" && payment) {

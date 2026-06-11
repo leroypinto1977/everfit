@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { updateOrder } from "@/lib/orders";
+import { markPaid, updateOrder } from "@/lib/orders";
+import { sendOrderNotifications } from "@/lib/notify";
 
 /**
  * Called by the browser right after the Razorpay modal reports success.
@@ -9,6 +10,8 @@ import { updateOrder } from "@/lib/orders";
  *
  * This gives the user instant confirmation; the webhook remains the
  * authoritative source (it fires even if the user closes the tab here).
+ * markPaid is transition-aware, so whichever of the two arrives first
+ * sends the notification emails — never both.
  */
 export async function POST(req: Request) {
   const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await req.json();
@@ -28,11 +31,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  await updateOrder(razorpay_order_id, {
-    status: "paid",
-    paymentId: razorpay_payment_id,
-    paidAt: new Date().toISOString(),
-  });
+  const { order, transitioned } = await markPaid(razorpay_order_id, razorpay_payment_id);
+  if (order && transitioned) await sendOrderNotifications(order);
 
   return NextResponse.json({ ok: true });
 }

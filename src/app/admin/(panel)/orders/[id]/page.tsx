@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { listOrders } from "@/lib/orders";
+import { getOrder } from "@/lib/orders";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { markShipped, markDelivered } from "../actions";
 
@@ -12,7 +12,7 @@ export default async function OrderDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const order = (await listOrders()).find((o) => o.id === id);
+  const order = await getOrder(id);
   if (!order) notFound();
 
   const c = order.customer;
