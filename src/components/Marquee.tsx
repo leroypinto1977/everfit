@@ -1,12 +1,14 @@
+import { InfinityMark } from "./Logo";
+
 const items = [
+  "Be the woman",
   "14-day battery",
+  "Cycle insights",
   "110+ workout modes",
   "5 ATM water resistant",
   "24/7 heart rate",
   "Sleep stages",
-  "SpO2 monitoring",
-  "AMOLED display",
-  "Free shipping",
+  "Strong is infinite",
 ];
 
 export default function Marquee() {
@@ -17,7 +19,7 @@ export default function Marquee() {
         {row.map((item, i) => (
           <span key={i} className="flex items-center gap-12 font-display text-sm uppercase tracking-[0.25em] text-muted">
             {item}
-            <span className="text-accent">✦</span>
+            <InfinityMark className="h-3 text-accent" />
           </span>
         ))}
       </div>

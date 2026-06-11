@@ -12,16 +12,16 @@ const panels: { screen: BandScreen; kicker: string; title: string; body: string 
     body: "A 4-LED optical sensor samples continuously — resting rate, training zones and recovery alerts, with vibration warnings when you redline.",
   },
   {
-    screen: "sleep",
-    kicker: "Sleep lab on your wrist",
-    title: "Wake up smarter.",
-    body: "Light, deep and REM stages tracked through the night, scored every morning. Silent smart alarms wake you at the lightest point of your cycle.",
+    screen: "cycle",
+    kicker: "Cycle intelligence",
+    title: "In sync with her.",
+    body: "Cycle and ovulation tracking built in, not bolted on — phase-aware training suggestions and gentle predictions that learn your rhythm.",
   },
   {
-    screen: "spo2",
-    kicker: "SpO2 monitoring",
-    title: "Oxygen, on demand.",
-    body: "On-wrist blood oxygen readings in under 30 seconds — with all-night tracking that flags dips while you sleep at altitude or under strain.",
+    screen: "sleep",
+    kicker: "Sleep lab on your wrist",
+    title: "Wake up stronger.",
+    body: "Light, deep and REM stages tracked through the night, scored every morning. Silent smart alarms wake you at the lightest point of your sleep.",
   },
   {
     screen: "battery",
@@ -48,12 +48,12 @@ export default function Showcase() {
   return (
     <section id="showcase" ref={ref} className="relative" style={{ height: `${panels.length * 100}vh` }}>
       <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-        <div className="absolute right-1/4 top-1/3 h-96 w-96 rounded-full bg-accent/8 blur-[130px]" />
+        <div className="absolute right-1/4 top-1/3 h-96 w-96 rounded-full bg-brand-bright/15 blur-[130px]" />
 
         <div className="mx-auto grid w-full max-w-7xl items-center gap-16 px-6 lg:grid-cols-2">
           {/* pinned band, screen swaps with the active panel */}
           <motion.div style={{ rotate }} className="relative mx-auto w-60 sm:w-72">
-            <div className="absolute inset-0 -z-10 rounded-full bg-accent/12 blur-[70px]" />
+            <div className="absolute inset-0 -z-10 rounded-full bg-brand-bright/20 blur-[70px]" />
             <motion.div
               key={panels[active].screen}
               initial={{ opacity: 0, scale: 0.96 }}

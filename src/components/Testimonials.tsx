@@ -11,8 +11,8 @@ const reviews = [
   },
   {
     quote:
-      "Switched from a band 3× the price. Heart-rate zones during HIIT match my gym's chest strap almost exactly.",
-    name: "Vikram S.",
+      "The cycle tracking is the first I've used that doesn't feel like an afterthought. It adjusts my training weeks on its own.",
+    name: "Priya S.",
     tag: "CrossFit, Mumbai",
   },
   {
@@ -29,7 +29,7 @@ export default function Testimonials() {
       <Reveal>
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Reviews</p>
         <h2 className="font-display text-4xl font-bold tracking-tight sm:text-6xl">
-          Worn hard. <span className="text-muted">Rated harder.</span>
+          Women who don&apos;t skip. <span className="text-muted">Neither does Pulse.</span>
         </h2>
       </Reveal>
 

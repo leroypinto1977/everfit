@@ -1,15 +1,36 @@
-# EVERFIT — Pulse fitness band
+# EVHERFIT — Pulse fitness band
 
-Product website for the EVERFIT Pulse fitness band. Next.js (App Router) + Tailwind v4 +
-Motion (Framer Motion) + Lenis smooth scroll, with no-login guest checkout via Razorpay.
+Product website + admin panel for the EVHERFIT Pulse fitness band ("Be the woman").
+Next.js (App Router) + Tailwind v4 + Motion (Framer Motion) + Lenis smooth scroll,
+with no-login guest checkout via Razorpay.
+
+Brand (from the brand book): primary indigo `#2B337D`, black, off-white; Palette W pink
+`#EF6FA7` as the women's-line accent. Display face Renoric ≈ **Exo 2 italic**, body
+URW Geometric ≈ **Poppins** (Google Fonts approximations). Infinity mark is drawn as an
+inline SVG in `src/components/Logo.tsx` — horizontal lockup only, per the guidelines.
 
 ## Run it
 
 ```bash
-cp .env.example .env.local   # fill in Razorpay test keys
+cp .env.example .env.local   # fill in Razorpay test keys + ADMIN_KEY
 npm install
+npm run seed                 # optional: demo orders for the admin panel
 npm run dev
 ```
+
+## Admin panel — `/admin`
+
+Cookie-session login with `ADMIN_KEY` (hashed, httpOnly — no key in URLs).
+
+- **Dashboard** (`/admin`): revenue/orders/to-ship/AOV KPIs, animated 14-day revenue
+  chart, recent orders.
+- **Orders** (`/admin/orders`): status filter chips (to ship / shipped / delivered /
+  pending / failed) + search by name, phone, email, order ID, or PIN code.
+- **Order detail** (`/admin/orders/<id>`): full shipping + payment info, **Mark as
+  shipped** (with optional courier tracking number) and **Mark as delivered** actions.
+
+Order lifecycle: `created` → `paid` (webhook/verify) → `shipped` → `delivered`,
+with `failed` for failed payments.
 
 ## How orders work without a login (the Fittr model)
 
@@ -30,8 +51,8 @@ tells us — server to server — when money actually moves:
 
 ### How the client tracks orders
 
-- **`/admin/orders?key=<ADMIN_KEY>`** — order dashboard with customer, shipping address,
-  payment status, and revenue total. This is what they fulfil/ship from.
+- **`/admin`** — the admin panel above: every order with customer, shipping address,
+  payment status, and revenue totals. This is what they fulfil/ship from.
 - **Razorpay Dashboard** — every payment, settlement, and refund also shows up there
   (Razorpay emails them on each payment too, if enabled in dashboard settings).
 
@@ -51,7 +72,7 @@ tells us — server to server — when money actually moves:
   database (Neon Postgres on the Vercel Marketplace is a one-click fit).
 - **Add transactional email** (Resend is the easiest): order confirmation to the customer
   and a "new order" alert to the client, triggered from the webhook handler.
-- **Replace the `ADMIN_KEY` query param** with real auth if the admin area grows.
+- **Upgrade admin auth** (e.g. Clerk) if more than one staff account is ever needed.
 
 ## Where the animations live
 
@@ -65,7 +86,8 @@ tells us — server to server — when money actually moves:
 | `src/components/Showcase.tsx` | Pinned scroll section — band screen swaps per panel |
 | `src/components/Features.tsx` | 3D tilt-on-hover cards |
 | `src/components/Stats.tsx` | Spring-animated count-up numbers |
-| `src/components/BandVisual.tsx` | SVG band with animated ECG / sleep ring / SpO2 / battery screens |
+| `src/components/BandVisual.tsx` | SVG band with animated ECG / sleep ring / cycle ring / SpO2 / battery screens |
+| `src/components/Logo.tsx` | Infinity mark with stroke draw-on animation |
 | `src/app/globals.css` | Marquee, film grain, ECG dash, glow/float keyframes |
 
 All scroll/hover animations respect `prefers-reduced-motion`.

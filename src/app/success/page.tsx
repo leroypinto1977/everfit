@@ -30,7 +30,7 @@ function SuccessContent() {
 
         <h1 className="mt-8 font-display text-4xl font-bold tracking-tight">Order confirmed!</h1>
         <p className="mt-4 leading-relaxed text-muted">
-          Your EVERFIT Pulse is on its way. We&apos;ve emailed your receipt and will text tracking
+          Your EVHERFIT Pulse is on its way. We&apos;ve emailed your receipt and will text tracking
           details once it ships — usually within 24 hours.
         </p>
 

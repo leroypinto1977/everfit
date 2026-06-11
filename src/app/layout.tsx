@@ -1,22 +1,26 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
+import { Exo_2, Poppins } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 
-const display = Space_Grotesk({
+// Brand faces: Renoric (slanted display) ≈ Exo 2 italic,
+// URW Geometric (body) ≈ Poppins.
+const display = Exo_2({
   variable: "--font-display",
   subsets: ["latin"],
+  style: ["normal", "italic"],
 });
 
-const body = Inter({
+const body = Poppins({
   variable: "--font-body",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "EVERFIT — The fitness band that keeps up",
+  title: "EVHERFIT — Be the woman",
   description:
-    "Track heart rate, sleep, SpO2 and 110+ workout modes with 14-day battery life. EVERFIT Pulse — engineered for people who don't skip.",
+    "EVHERFIT Pulse: the fitness band designed for her, built for life. Heart rate, sleep, cycle insights, SpO2 and 110+ workout modes with 14-day battery.",
 };
 
 export default function RootLayout({

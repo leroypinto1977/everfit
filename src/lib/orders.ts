@@ -11,7 +11,7 @@ import path from "path";
  * file will NOT persist on Vercel.
  */
 
-export type OrderStatus = "created" | "paid" | "failed" | "shipped";
+export type OrderStatus = "created" | "paid" | "failed" | "shipped" | "delivered";
 
 export interface Order {
   id: string; // razorpay_order_id
@@ -19,6 +19,7 @@ export interface Order {
   status: OrderStatus;
   amount: number; // in paise
   currency: string;
+  tracking?: string; // courier tracking number, set when shipped
   customer: {
     name: string;
     email: string;

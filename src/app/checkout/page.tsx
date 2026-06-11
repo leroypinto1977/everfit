@@ -6,6 +6,7 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import BandVisual from "@/components/BandVisual";
+import { InfinityMark } from "@/components/Logo";
 
 declare global {
   interface Window {
@@ -48,10 +49,10 @@ export default function CheckoutPage() {
         amount: data.amount,
         currency: data.currency,
         order_id: data.orderId,
-        name: "EVERFIT",
-        description: "EVERFIT Pulse fitness band",
+        name: "EVHERFIT",
+        description: "EVHERFIT Pulse fitness band",
         prefill: { name: form.name, email: form.email, contact: form.phone },
-        theme: { color: "#b6ff2e" },
+        theme: { color: "#2b337d" },
         handler: async (response: {
           razorpay_order_id: string;
           razorpay_payment_id: string;
@@ -83,8 +84,9 @@ export default function CheckoutPage() {
 
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link href="/" className="font-display text-xl font-bold">
-            EVER<span className="text-accent">FIT</span>
+          <Link href="/" className="flex items-center gap-2.5">
+            <InfinityMark className="h-5 text-accent" />
+            <span className="font-display text-xl font-bold">EVHERFIT</span>
           </Link>
           <span className="text-xs uppercase tracking-[0.2em] text-muted">🔒 Secure checkout</span>
         </div>
@@ -164,8 +166,8 @@ export default function CheckoutPage() {
           <div className="mx-auto w-32">
             <BandVisual screen="heart" className="w-full" />
           </div>
-          <h2 className="mt-6 font-display text-xl font-bold">EVERFIT Pulse</h2>
-          <p className="mt-1 text-sm text-muted">Gen 2 · Midnight Black</p>
+          <h2 className="mt-6 font-display text-xl font-bold">EVHERFIT Pulse</h2>
+          <p className="mt-1 text-sm text-muted">Be the woman · Infinite Indigo</p>
 
           <dl className="mt-6 space-y-3 border-t border-line pt-6 text-sm">
             <div className="flex justify-between">

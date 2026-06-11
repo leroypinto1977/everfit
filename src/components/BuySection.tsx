@@ -9,7 +9,7 @@ import Reveal from "./Reveal";
 export default function BuySection() {
   return (
     <section className="relative overflow-hidden border-t border-line">
-      <div className="absolute left-1/2 top-0 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-accent/8 blur-[160px]" />
+      <div className="absolute left-1/2 top-0 h-[500px] w-[700px] -translate-x-1/2 rounded-full bg-brand-bright/15 blur-[160px]" />
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center px-6 py-32 text-center">
         <motion.div
@@ -19,18 +19,18 @@ export default function BuySection() {
           transition={{ duration: 0.9, ease: [0.21, 0.65, 0.36, 1] }}
           className="w-40 sm:w-48"
         >
-          <BandVisual screen="battery" className="w-full drop-shadow-2xl" />
+          <BandVisual screen="cycle" className="w-full drop-shadow-2xl" />
         </motion.div>
 
         <Reveal delay={0.15}>
           <h2 className="mt-12 font-display text-5xl font-bold tracking-tight sm:text-7xl">
-            <span className="text-shine">Start today.</span>
+            <span className="text-shine">Be the woman.</span>
           </h2>
         </Reveal>
 
         <Reveal delay={0.3}>
           <p className="mt-6 max-w-xl text-lg text-muted">
-            EVERFIT Pulse · <span className="text-foreground line-through opacity-50">₹4,999</span>{" "}
+            EVHERFIT Pulse · <span className="text-foreground line-through opacity-50">₹4,999</span>{" "}
             <span className="font-display text-2xl font-bold text-foreground">₹2,999</span> · Free
             shipping across India · 7-day returns
           </p>

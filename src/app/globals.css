@@ -1,20 +1,27 @@
 @import "tailwindcss";
 
+/* EVHERFIT brand tokens — from the brand book:
+   primary indigo #2B337D, black, off-white; Palette W pink for the
+   women's line (this band), used as the energy/CTA accent. */
 :root {
-  --background: #07090b;
-  --foreground: #f4f6f5;
-  --accent: #b6ff2e;
-  --accent-dim: #8fd11f;
-  --muted: #9aa3a0;
-  --card: #0e1114;
-  --line: rgba(244, 246, 245, 0.08);
+  --background: #0a0d22;
+  --foreground: #f4f5fa;
+  --brand: #2b337d;
+  --brand-bright: #5263d8;
+  --accent: #ef6fa7;
+  --accent-soft: #f8b5c1;
+  --muted: #9aa0c3;
+  --card: #11152e;
+  --line: rgba(244, 245, 250, 0.08);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --color-brand-bright: var(--brand-bright);
   --color-accent: var(--accent);
-  --color-accent-dim: var(--accent-dim);
+  --color-accent-soft: var(--accent-soft);
   --color-muted: var(--muted);
   --color-card: var(--card);
   --color-line: var(--line);
@@ -35,7 +42,12 @@ body {
 
 ::selection {
   background: var(--accent);
-  color: #07090b;
+  color: #0a0d22;
+}
+
+/* Renoric (brand display face) is slanted — echo it on display text */
+.font-display {
+  font-style: italic;
 }
 
 /* ---- film grain overlay ---- */
@@ -109,13 +121,24 @@ body {
   animation: shine 5s linear infinite;
 }
 
+/* ---- infinity logo draw-on ---- */
+@keyframes draw-loop {
+  from { stroke-dashoffset: 600; }
+  to { stroke-dashoffset: 0; }
+}
+.infinity-draw {
+  stroke-dasharray: 600;
+  animation: draw-loop 2.2s ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .grain::after,
   .animate-marquee,
   .ecg-path,
   .animate-breathe,
   .animate-float-slow,
-  .text-shine {
+  .text-shine,
+  .infinity-draw {
     animation: none;
   }
 }

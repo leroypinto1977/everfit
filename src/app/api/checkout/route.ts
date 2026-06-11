@@ -26,7 +26,7 @@ export async function POST(req: Request) {
   const rzpOrder = await razorpay.orders.create({
     amount: PRICE_PAISE,
     currency: "INR",
-    notes: { product: "EVERFIT Pulse", customer_name: name, customer_phone: phone },
+    notes: { product: "EVHERFIT Pulse", customer_name: name, customer_phone: phone },
   });
 
   await saveOrder({

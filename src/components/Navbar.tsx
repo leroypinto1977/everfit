@@ -4,10 +4,11 @@ import Link from "next/link";
 import { motion, useScroll, useMotionValueEvent } from "motion/react";
 import { useState } from "react";
 import Magnetic from "./Magnetic";
+import { InfinityMark } from "./Logo";
 
 const links = [
   { href: "#features", label: "Features" },
-  { href: "#showcase", label: "Sensors" },
+  { href: "#showcase", label: "Her health" },
   { href: "#specs", label: "Specs" },
   { href: "#reviews", label: "Reviews" },
 ];
@@ -30,8 +31,9 @@ export default function Navbar() {
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="font-display text-xl font-bold tracking-tight">
-          EVER<span className="text-accent">FIT</span>
+        <Link href="/" className="flex items-center gap-2.5">
+          <InfinityMark className="h-5 text-accent" />
+          <span className="font-display text-xl font-bold tracking-tight">EVHERFIT</span>
         </Link>
 
         <ul className="hidden gap-8 md:flex">

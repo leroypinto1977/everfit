@@ -6,12 +6,12 @@ import Reveal from "./Reveal";
 
 const features = [
   {
-    icon: "⌚",
-    title: "1.47″ AMOLED",
-    body: "A bright, always-on display with 100+ watch faces. Readable in direct sunlight at 600 nits.",
+    icon: "🌸",
+    title: "Cycle insights",
+    body: "Phase predictions, ovulation windows and training suggestions tuned to your rhythm — private by design.",
   },
   {
-    icon: "🏃",
+    icon: "🏃‍♀️",
     title: "110+ sport modes",
     body: "Running, lifting, yoga, HIIT, swimming — auto-detection starts tracking when you do.",
   },
@@ -21,9 +21,9 @@ const features = [
     body: "Pool sessions, monsoon runs, cold showers. Rated to 50 metres — wear it everywhere.",
   },
   {
-    icon: "📱",
-    title: "Calls & notifications",
-    body: "Take calls from your wrist, see messages, control music, find your phone.",
+    icon: "⌚",
+    title: "1.47″ AMOLED",
+    body: "A bright, always-on display with 100+ watch faces. Readable in direct sunlight at 600 nits.",
   },
   {
     icon: "🔋",
@@ -71,9 +71,9 @@ export default function Features() {
       <Reveal>
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Why Pulse</p>
         <h2 className="font-display text-4xl font-bold tracking-tight sm:text-6xl">
-          Everything you need.
+          Made for her.
           <br />
-          <span className="text-muted">Nothing you don&apos;t.</span>
+          <span className="text-muted">Down to the last detail.</span>
         </h2>
       </Reveal>
 

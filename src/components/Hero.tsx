@@ -6,6 +6,7 @@ import { motion, useScroll, useTransform } from "motion/react";
 import BandVisual from "./BandVisual";
 import SplitText from "./SplitText";
 import Magnetic from "./Magnetic";
+import { InfinityMark } from "./Logo";
 
 export default function Hero() {
   const ref = useRef<HTMLElement>(null);
@@ -19,12 +20,18 @@ export default function Hero() {
   const bandScale = useTransform(scrollYProgress, [0, 1], [1, 1.12]);
   const textOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
+  const markX = useTransform(scrollYProgress, [0, 1], ["0%", "12%"]);
 
   return (
     <section ref={ref} className="relative flex min-h-screen items-center overflow-hidden pt-24">
+      {/* giant watermark infinity, drifts with scroll */}
+      <motion.div style={{ x: markX }} className="pointer-events-none absolute -right-40 top-1/4 w-[760px] text-brand opacity-[0.18]">
+        <InfinityMark className="w-full" draw />
+      </motion.div>
+
       {/* ambient glows */}
-      <div className="animate-breathe absolute -left-40 top-1/4 h-[480px] w-[480px] rounded-full bg-accent/10 blur-[140px]" />
-      <div className="absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-accent/5 blur-[120px]" />
+      <div className="animate-breathe absolute -left-40 top-1/4 h-[480px] w-[480px] rounded-full bg-brand-bright/15 blur-[140px]" />
+      <div className="absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-accent/10 blur-[120px]" />
 
       {/* faint grid */}
       <div
@@ -45,29 +52,29 @@ export default function Hero() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-muted"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-            New · Pulse Gen 2
+            Pulse · Be the woman
           </motion.p>
 
           <h1 className="font-display text-5xl font-bold leading-[1.02] tracking-tight sm:text-7xl lg:text-8xl">
-            <SplitText text="Built for" delay={0.3} />
+            <SplitText text="Designed for her." delay={0.3} />
             <br />
-            <SplitText text="every rep." delay={0.55} className="text-accent" />
+            <SplitText text="Built for life." delay={0.62} className="text-accent" />
           </h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1, duration: 0.7 }}
+            transition={{ delay: 1.2, duration: 0.7 }}
             className="mt-7 max-w-md text-lg leading-relaxed text-muted"
           >
-            Heart rate, sleep, SpO2 and 110+ workout modes — tracked by a band
-            that runs 14 days on one charge. No subscriptions. No excuses.
+            The EVHERFIT Pulse tracks your heart, sleep, cycle and SpO2 — with
+            110+ workout modes and 14 days of battery. Strong is infinite.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3, duration: 0.7 }}
+            transition={{ delay: 1.4, duration: 0.7 }}
             className="mt-10 flex flex-wrap items-center gap-5"
           >
             <Magnetic>
@@ -93,7 +100,7 @@ export default function Hero() {
           transition={{ delay: 0.7, duration: 1, ease: [0.21, 0.65, 0.36, 1] }}
           className="relative mx-auto w-64 sm:w-72 lg:w-80"
         >
-          <div className="animate-breathe absolute inset-0 -z-10 rounded-full bg-accent/15 blur-[80px]" />
+          <div className="animate-breathe absolute inset-0 -z-10 rounded-full bg-brand-bright/25 blur-[80px]" />
           <div className="animate-float-slow">
             <BandVisual screen="heart" className="w-full drop-shadow-2xl" />
           </div>
