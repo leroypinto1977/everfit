@@ -1,5 +1,19 @@
-// Writes sample orders to .data/orders.json for local demos: npm run seed
-import { mkdir, writeFile } from "fs/promises";
+// Seeds sample orders for local demos: npm run seed
+// Targets the same store the app uses: Postgres when DATABASE_URL is set
+// (read from .env.local/.env if present), otherwise .data/orders.json.
+import { mkdir, writeFile, readFile } from "fs/promises";
+
+async function loadDatabaseUrl() {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  for (const file of [".env.local", ".env"]) {
+    try {
+      const env = await readFile(file, "utf8");
+      const m = env.match(/^DATABASE_URL="?([^"\n]+)"?$/m);
+      if (m) return m[1];
+    } catch {}
+  }
+  return null;
+}
 
 const names = [
   ["Ananya Rao", "Bengaluru", "Karnataka", "560034"],
@@ -64,6 +78,29 @@ const orders = names.map(([name, city, state, pincode], i) => {
 
 orders.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
-await mkdir(".data", { recursive: true });
-await writeFile(".data/orders.json", JSON.stringify(orders, null, 2));
-console.log(`Seeded ${orders.length} demo orders into .data/orders.json`);
+const databaseUrl = await loadDatabaseUrl();
+
+if (databaseUrl) {
+  const { Pool } = await import("pg");
+  const pool = new Pool({ connectionString: databaseUrl, max: 2 });
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS orders (
+       id text PRIMARY KEY,
+       data jsonb NOT NULL,
+       created_at timestamptz NOT NULL DEFAULT now()
+     )`
+  );
+  for (const order of orders) {
+    await pool.query(
+      `INSERT INTO orders (id, data, created_at) VALUES ($1, $2, $3)
+       ON CONFLICT (id) DO UPDATE SET data = $2, created_at = $3`,
+      [order.id, order, order.createdAt]
+    );
+  }
+  await pool.end();
+  console.log(`Seeded ${orders.length} demo orders into Postgres (DATABASE_URL)`);
+} else {
+  await mkdir(".data", { recursive: true });
+  await writeFile(".data/orders.json", JSON.stringify(orders, null, 2));
+  console.log(`Seeded ${orders.length} demo orders into .data/orders.json`);
+}

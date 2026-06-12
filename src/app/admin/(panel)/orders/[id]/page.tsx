@@ -31,6 +31,27 @@ export default async function OrderDetail({
         <StatusBadge status={order.status} />
       </div>
 
+      {/* fulfilment timeline */}
+      {order.status !== "failed" && (
+        <ol className="mt-8 flex flex-wrap items-center gap-2">
+          {(["created", "paid", "shipped", "delivered"] as const).map((step, i) => {
+            const reached = ["created", "paid", "shipped", "delivered"].indexOf(order.status) >= i;
+            return (
+              <li key={step} className="flex items-center gap-2">
+                {i > 0 && <span className={`h-0.5 w-8 ${reached ? "bg-[#2b337d]" : "bg-[#e3e5f0]"}`} />}
+                <span
+                  className={`rounded-full px-4 py-1.5 text-xs font-semibold capitalize ${
+                    reached ? "bg-[#2b337d] text-white" : "border border-[#e3e5f0] bg-white text-[#9aa0c3]"
+                  }`}
+                >
+                  {step === "created" ? "placed" : step}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
         {/* shipping */}
         <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6 lg:col-span-2">

@@ -16,6 +16,10 @@ const INDIGO_LIGHT = "#3a4496";
 const INK = "#282828";
 const PINK = "#e56ca5";
 
+// Round trig-derived coordinates so SSR and client serialize identically
+// (raw doubles differ in their last digits and cause hydration mismatches).
+const round = (n: number) => Math.round(n * 100) / 100;
+
 function Pods({ count = 6, y = 200, w = 360, x = 60 }: { count?: number; y?: number; w?: number; x?: number }) {
   const podW = (w / count) * 0.78;
   const gap = (w - podW * count) / (count - 1);
@@ -107,8 +111,8 @@ export default function ProductVisual({
           {/* segment pods around the ring */}
           {Array.from({ length: 10 }, (_, i) => {
             const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
-            const cx = 240 + Math.cos(a) * 129;
-            const cy = 230 + Math.sin(a) * 120;
+            const cx = round(240 + Math.cos(a) * 129);
+            const cy = round(230 + Math.sin(a) * 120);
             return (
               <ellipse
                 key={i}
@@ -117,7 +121,7 @@ export default function ProductVisual({
                 rx="30"
                 ry="44"
                 fill="url(#podGrad)"
-                transform={`rotate(${(a * 180) / Math.PI + 90} ${cx} ${cy})`}
+                transform={`rotate(${round((a * 180) / Math.PI + 90)} ${cx} ${cy})`}
               />
             );
           })}
@@ -146,8 +150,8 @@ export default function ProductVisual({
               return (
                 <circle
                   key={i}
-                  cx={240 + Math.cos(a) * r}
-                  cy={356 + Math.sin(a) * r * 0.92}
+                  cx={round(240 + Math.cos(a) * r)}
+                  cy={round(356 + Math.sin(a) * r * 0.92)}
                   r={2.4 + (i % 3)}
                   fill={i % 4 === 0 ? "#8d93ad" : "#5a5d6e"}
                 />

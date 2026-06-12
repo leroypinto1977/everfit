@@ -7,10 +7,10 @@ import Magnetic from "./Magnetic";
 import { InfinityMark } from "./Logo";
 
 const links = [
-  { href: "#features", label: "Why Infinity" },
-  { href: "#showcase", label: "The band" },
-  { href: "#pricing", label: "Weights" },
-  { href: "#reviews", label: "Reviews" },
+  { href: "/product", label: "The band" },
+  { href: "/#features", label: "Why Infinity" },
+  { href: "/#pricing", label: "Weights" },
+  { href: "/track", label: "Track order" },
 ];
 
 export default function Navbar() {

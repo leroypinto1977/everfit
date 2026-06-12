@@ -40,12 +40,17 @@ function SuccessContent() {
           </p>
         )}
 
-        <Link
-          href="/"
-          className="mt-10 inline-block rounded-full bg-brand px-8 py-4 font-display font-bold text-white transition-transform hover:scale-105"
-        >
-          Back to home
-        </Link>
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+          <Link
+            href="/"
+            className="inline-block rounded-full bg-brand px-8 py-4 font-display font-bold text-white transition-transform hover:scale-105"
+          >
+            Back to home
+          </Link>
+          <Link href="/track" className="text-sm text-brand underline-offset-2 hover:underline">
+            Track this order →
+          </Link>
+        </div>
       </motion.div>
     </main>
   );
