@@ -15,14 +15,16 @@ const columns = [
     links: [
       { href: "/track", label: "Track your order" },
       { href: "/contact", label: "Contact us" },
-      { href: "/refunds", label: "Returns & refunds" },
+      { href: "/shipping", label: "Shipping policy" },
+      { href: "/refunds", label: "Cancellations & refunds" },
     ],
   },
   {
-    title: "Legal",
+    title: "Company",
     links: [
+      { href: "/about", label: "About us" },
       { href: "/privacy", label: "Privacy policy" },
-      { href: "/terms", label: "Terms of service" },
+      { href: "/terms", label: "Terms & conditions" },
     ],
   },
 ];

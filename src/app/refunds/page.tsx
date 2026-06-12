@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
 import InfoPage from "@/components/InfoPage";
 
-export const metadata: Metadata = { title: "Returns & refunds — EVHERFIT" };
+export const metadata: Metadata = { title: "Cancellations, returns & refunds — EVHERFIT" };
 
 export default function RefundsPage() {
   return (
-    <InfoPage kicker="Help" title="Returns & refunds" updated="June 2026">
+    <InfoPage kicker="Help" title="Cancellations, returns & refunds" updated="June 2026">
+      <h2>Cancelling an order</h2>
+      <p>
+        You can cancel an order free of charge any time <strong>before it ships</strong>{" "}
+        (orders usually ship within 24 hours, so be quick). Write to us via the contact
+        page with your order ID, or WhatsApp us — once we confirm the cancellation, a
+        full refund is initiated the same day. If the order has already shipped, simply
+        refuse the delivery or use the 7-day return below.
+      </p>
       <h2>7-day returns</h2>
       <p>
         Changed your mind? You can return your EVHERFIT Infinity Band within 7 days of

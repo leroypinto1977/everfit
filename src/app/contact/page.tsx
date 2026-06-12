@@ -42,6 +42,18 @@ export default function ContactPage() {
           </a>
         ))}
       </div>
+      <div className="not-prose mt-4 rounded-3xl border border-line bg-card p-7">
+        <p className="font-display text-lg font-bold text-brand">📍 Registered office</p>
+        <p className="mt-2 leading-relaxed">
+          Evherfit
+          <br />
+          {/* TODO: replace with the client's registered business address before KYC */}
+          No. 123, Address Line, Locality,
+          <br />
+          City, State — 600 001, India
+        </p>
+        <p className="mt-2 text-sm text-muted">Business hours: Mon–Sat, 10am–6pm IST</p>
+      </div>
       <p className="mt-8">
         Tracking an order? The fastest way is the{" "}
         <Link href="/track" className="text-brand underline-offset-2 hover:underline">
