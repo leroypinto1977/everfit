@@ -7,28 +7,28 @@ import Reveal from "./Reveal";
 const features = [
   {
     icon: "🌸",
-    title: "Cycle insights",
-    body: "Phase predictions, ovulation windows and training suggestions tuned to your rhythm — private by design.",
+    title: "Contoured for her",
+    body: "Shaped to women's wrists and ankles — no bounce, no chafe, no slipping mid-flow.",
   },
   {
-    icon: "🏃‍♀️",
-    title: "110+ sport modes",
-    body: "Running, lifting, yoga, HIIT, swimming — auto-detection starts tracking when you do.",
+    icon: "⚖️",
+    title: "Even iron-sand core",
+    body: "Fine iron sand in segmented pods hugs the joint and spreads weight evenly — no pressure points.",
+  },
+  {
+    icon: "🚶‍♀️",
+    title: "Wear-anywhere resistance",
+    body: "Walks, yoga, pilates, barre, HIIT, physio. Strap in and your usual movement works harder.",
+  },
+  {
+    icon: "🔒",
+    title: "Dual-lock fit",
+    body: "Wide hook-and-loop strap through a steel D-ring. Stays put through burpees and box jumps.",
   },
   {
     icon: "💧",
-    title: "5 ATM waterproof",
-    body: "Pool sessions, monsoon runs, cold showers. Rated to 50 metres — wear it everywhere.",
-  },
-  {
-    icon: "⌚",
-    title: "1.47″ AMOLED",
-    body: "A bright, always-on display with 100+ watch faces. Readable in direct sunlight at 600 nits.",
-  },
-  {
-    icon: "🔋",
-    title: "14-day battery",
-    body: "Two full weeks of 24/7 tracking on one charge. Magnetic fast-charge in 60 minutes.",
+    title: "Sweatproof & washable",
+    body: "Soft-touch silicone shell wipes clean, and the whole band is machine washable.",
   },
   {
     icon: "🛡️",
@@ -57,9 +57,9 @@ function TiltCard({ children }: { children: React.ReactNode }) {
         my.set(0.5);
       }}
       style={{ rotateX: rx, rotateY: ry, transformPerspective: 900 }}
-      className="group relative h-full rounded-3xl border border-line bg-card p-8 transition-colors duration-300 hover:border-accent/40"
+      className="group relative h-full rounded-3xl border border-line bg-card p-8 shadow-[0_2px_20px_rgba(43,51,125,0.05)] transition-colors duration-300 hover:border-brand/30"
     >
-      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-accent/8 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-brand-soft/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       {children}
     </motion.div>
   );
@@ -69,11 +69,11 @@ export default function Features() {
   return (
     <section id="features" className="relative mx-auto max-w-7xl px-6 py-32">
       <Reveal>
-        <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Why Pulse</p>
-        <h2 className="font-display text-4xl font-bold tracking-tight sm:text-6xl">
+        <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Why Infinity</p>
+        <h2 className="font-display text-4xl font-bold tracking-tight text-brand sm:text-6xl">
           Made for her.
           <br />
-          <span className="text-muted">Down to the last detail.</span>
+          <span className="text-foreground/60">Down to the last stitch.</span>
         </h2>
       </Reveal>
 
@@ -82,7 +82,7 @@ export default function Features() {
           <Reveal key={f.title} delay={(i % 3) * 0.12}>
             <TiltCard>
               <span className="text-3xl">{f.icon}</span>
-              <h3 className="mt-5 font-display text-xl font-bold">{f.title}</h3>
+              <h3 className="mt-5 font-display text-xl font-bold text-brand">{f.title}</h3>
               <p className="mt-3 leading-relaxed text-muted">{f.body}</p>
             </TiltCard>
           </Reveal>

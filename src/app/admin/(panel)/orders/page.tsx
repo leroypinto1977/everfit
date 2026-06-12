@@ -101,7 +101,14 @@ export default async function OrdersPage({
                 <td className="max-w-52 px-6 py-4 text-[#6b7194]">
                   {o.customer.city}, {o.customer.state} {o.customer.pincode}
                 </td>
-                <td className="px-6 py-4 font-medium">₹{(o.amount / 100).toLocaleString("en-IN")}</td>
+                <td className="px-6 py-4 font-medium">
+                  ₹{(o.amount / 100).toLocaleString("en-IN")}
+                  {o.item && (
+                    <span className="block text-xs font-normal text-[#9aa0c3]">
+                      {o.item.replace("EVHERFIT Infinity Band — ", "")}
+                    </span>
+                  )}
+                </td>
                 <td className="px-6 py-4">
                   <StatusBadge status={o.status} />
                 </td>

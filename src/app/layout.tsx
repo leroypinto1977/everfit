@@ -20,7 +20,7 @@ const body = Poppins({
 export const metadata: Metadata = {
   title: "EVHERFIT — Be the woman",
   description:
-    "EVHERFIT Pulse: the fitness band designed for her, built for life. Heart rate, sleep, cycle insights, SpO2 and 110+ workout modes with 14-day battery.",
+    "The EVHERFIT Infinity Band: weighted resistance bands designed for her, built for life. Iron-sand core, silicone shell, sold as a pair — for walks, yoga and strength.",
 };
 
 export default function RootLayout({
@@ -30,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable} h-full antialiased`}>
-      <body className="grain min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col">
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

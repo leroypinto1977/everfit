@@ -7,9 +7,9 @@ import Magnetic from "./Magnetic";
 import { InfinityMark } from "./Logo";
 
 const links = [
-  { href: "#features", label: "Features" },
-  { href: "#showcase", label: "Her health" },
-  { href: "#specs", label: "Specs" },
+  { href: "#features", label: "Why Infinity" },
+  { href: "#showcase", label: "The band" },
+  { href: "#pricing", label: "Weights" },
   { href: "#reviews", label: "Reviews" },
 ];
 
@@ -26,13 +26,13 @@ export default function Navbar() {
       transition={{ duration: 0.7, ease: [0.21, 0.65, 0.36, 1], delay: 0.2 }}
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-background/70 backdrop-blur-xl border-b border-line"
+          ? "bg-card/80 backdrop-blur-xl border-b border-line shadow-[0_1px_24px_rgba(43,51,125,0.06)]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center gap-2.5">
-          <InfinityMark className="h-5 text-accent" />
+        <Link href="/" className="flex items-center gap-2.5 text-brand">
+          <InfinityMark className="h-5" />
           <span className="font-display text-xl font-bold tracking-tight">EVHERFIT</span>
         </Link>
 
@@ -41,10 +41,10 @@ export default function Navbar() {
             <li key={l.href}>
               <a
                 href={l.href}
-                className="group relative text-sm text-muted transition-colors hover:text-foreground"
+                className="group relative text-sm text-muted transition-colors hover:text-brand"
               >
                 {l.label}
-                <span className="absolute -bottom-1 left-0 h-px w-0 bg-accent transition-all duration-300 group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 h-px w-0 bg-brand transition-all duration-300 group-hover:w-full" />
               </a>
             </li>
           ))}
@@ -53,9 +53,9 @@ export default function Navbar() {
         <Magnetic>
           <Link
             href="/checkout"
-            className="rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-background transition-transform hover:scale-105 active:scale-95"
+            className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-105 active:scale-95"
           >
-            Buy now — ₹2,999
+            Buy — from ₹1,499
           </Link>
         </Magnetic>
       </nav>

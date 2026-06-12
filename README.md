@@ -1,13 +1,18 @@
-# EVHERFIT — Pulse fitness band
+# EVHERFIT — Infinity Band
 
-Product website + admin panel for the EVHERFIT Pulse fitness band ("Be the woman").
+Product website + admin panel for the **EVHERFIT Infinity Band** ("Be the woman") —
+a weighted resistance band (iron-sand core, silicone shell) worn on wrists/ankles,
+sold as a pair in three weights: 0.5 kg ₹1,499 · 1 kg ₹1,999 · 2 kg ₹2,499. Variants
+are priced server-side in `src/lib/product.ts`.
+
 Next.js (App Router) + Tailwind v4 + Motion (Framer Motion) + Lenis smooth scroll,
 with no-login guest checkout via Razorpay.
 
-Brand (from the brand book): primary indigo `#2B337D`, black, off-white; Palette W pink
-`#EF6FA7` as the women's-line accent. Display face Renoric ≈ **Exo 2 italic**, body
-URW Geometric ≈ **Poppins** (Google Fonts approximations). Infinity mark is drawn as an
-inline SVG in `src/components/Logo.tsx` — horizontal lockup only, per the guidelines.
+Brand (from the brand book): light surfaces (off-white `#F4F5F9`), primary indigo
+`#2B337D`, near-black; Palette W pink `#E56CA5` as the women's-line accent. Display
+face Renoric ≈ **Exo 2 italic**, body URW Geometric ≈ **Poppins** (Google Fonts
+approximations). Infinity mark is drawn as an inline SVG in `src/components/Logo.tsx`
+— horizontal lockup only, per the guidelines.
 
 ## Run it
 
@@ -83,11 +88,12 @@ tells us — server to server — when money actually moves:
 | `src/components/Magnetic.tsx` | Cursor-magnetic buttons (spring physics) |
 | `src/components/Reveal.tsx` | Scroll-into-view fade/rise/unblur |
 | `src/components/Hero.tsx` | Parallax on scroll, floating band, breathing glow |
-| `src/components/Showcase.tsx` | Pinned scroll section — band screen swaps per panel |
+| `src/components/Showcase.tsx` | Pinned scroll section — product view swaps per panel (loop / core / strap / pair) |
 | `src/components/Features.tsx` | 3D tilt-on-hover cards |
+| `src/components/Pricing.tsx` | Weight-variant cards with hover lift |
 | `src/components/Stats.tsx` | Spring-animated count-up numbers |
-| `src/components/BandVisual.tsx` | SVG band with animated ECG / sleep ring / cycle ring / SpO2 / battery screens |
+| `src/components/ProductVisual.tsx` | SVG weighted band — worn loop, iron-sand cutaway, strap lock, pair |
 | `src/components/Logo.tsx` | Infinity mark with stroke draw-on animation |
-| `src/app/globals.css` | Marquee, film grain, ECG dash, glow/float keyframes |
+| `src/app/globals.css` | Marquee, shine, glow/float keyframes |
 
 All scroll/hover animations respect `prefers-reduced-motion`.

@@ -11,7 +11,7 @@ function SuccessContent() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
-      <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-accent/10 blur-[140px]" />
+      <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-brand/10 blur-[140px]" />
 
       <motion.div
         initial={{ opacity: 0, y: 32 }}
@@ -23,15 +23,15 @@ function SuccessContent() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.2 }}
-          className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-accent text-4xl text-background"
+          className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand text-4xl text-white"
         >
           ✓
         </motion.div>
 
-        <h1 className="mt-8 font-display text-4xl font-bold tracking-tight">Order confirmed!</h1>
+        <h1 className="mt-8 font-display text-4xl font-bold tracking-tight text-brand">Order confirmed!</h1>
         <p className="mt-4 leading-relaxed text-muted">
-          Your EVHERFIT Pulse is on its way. We&apos;ve emailed your receipt and will text tracking
-          details once it ships — usually within 24 hours.
+          Your EVHERFIT Infinity Band pair is on its way. We&apos;ve emailed your receipt and will
+          text tracking details once it ships — usually within 24 hours.
         </p>
 
         {orderId && (
@@ -42,7 +42,7 @@ function SuccessContent() {
 
         <Link
           href="/"
-          className="mt-10 inline-block rounded-full bg-accent px-8 py-4 font-display font-bold text-background transition-transform hover:scale-105"
+          className="mt-10 inline-block rounded-full bg-brand px-8 py-4 font-display font-bold text-white transition-transform hover:scale-105"
         >
           Back to home
         </Link>

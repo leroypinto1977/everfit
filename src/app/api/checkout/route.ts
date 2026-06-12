@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { saveOrder } from "@/lib/orders";
-
-const PRICE_PAISE = 2999 * 100; // ₹2,999 — server-side source of truth
+import { getVariant, PRODUCT_NAME } from "@/lib/product";
 
 export async function POST(req: Request) {
-  const { name, email, phone, address, city, state, pincode } = await req.json();
+  const { name, email, phone, address, city, state, pincode, variant: variantKey } = await req.json();
 
   if (!name || !email || !phone || !address || !pincode) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -20,27 +19,31 @@ export async function POST(req: Request) {
     );
   }
 
+  // Price comes from the server-side variant map — the client only sends a key.
+  const variant = getVariant(variantKey);
+  const item = `${PRODUCT_NAME} — ${variant.weight} (${variant.label})`;
+
   const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
 
-  // Amount is fixed server-side so the client can never tamper with the price.
   const rzpOrder = await razorpay.orders.create({
-    amount: PRICE_PAISE,
+    amount: variant.price,
     currency: "INR",
-    notes: { product: "EVHERFIT Pulse", customer_name: name, customer_phone: phone },
+    notes: { product: item, customer_name: name, customer_phone: phone },
   });
 
   await saveOrder({
     id: rzpOrder.id,
     status: "created",
-    amount: PRICE_PAISE,
+    amount: variant.price,
     currency: "INR",
+    item,
     customer: { name, email, phone, address, city, state, pincode },
     createdAt: new Date().toISOString(),
   });
 
   return NextResponse.json({
     orderId: rzpOrder.id,
-    amount: PRICE_PAISE,
+    amount: variant.price,
     currency: "INR",
     keyId,
   });

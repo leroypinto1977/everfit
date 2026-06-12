@@ -24,17 +24,26 @@ const names = [
 
 const statuses = ["paid", "paid", "paid", "shipped", "shipped", "delivered", "created", "failed"];
 
+const variants = [
+  { item: "EVHERFIT Infinity Band — 0.5 kg × 2 (Tone)", amount: 149900 },
+  { item: "EVHERFIT Infinity Band — 1 kg × 2 (Strength)", amount: 199900 },
+  { item: "EVHERFIT Infinity Band — 1 kg × 2 (Strength)", amount: 199900 },
+  { item: "EVHERFIT Infinity Band — 2 kg × 2 (Power)", amount: 249900 },
+];
+
 const orders = names.map(([name, city, state, pincode], i) => {
   const daysAgo = Math.floor(Math.random() * 14);
   const created = new Date(Date.now() - daysAgo * 86_400_000 - Math.random() * 60_000_000);
   const status = statuses[i % statuses.length];
   const paid = status !== "created" && status !== "failed";
   const first = name.split(" ")[0].toLowerCase();
+  const variant = variants[i % variants.length];
   return {
     id: `order_DEMO${String(i + 1).padStart(4, "0")}`,
     ...(paid && { paymentId: `pay_DEMO${String(i + 1).padStart(4, "0")}` }),
     status,
-    amount: 299900,
+    amount: variant.amount,
+    item: variant.item,
     currency: "INR",
     ...(status === "shipped" || status === "delivered"
       ? { tracking: `DELHIVERY-99${String(100000 + i * 7919)}` }

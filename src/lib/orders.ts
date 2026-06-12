@@ -20,6 +20,7 @@ export interface Order {
   status: OrderStatus;
   amount: number; // in paise
   currency: string;
+  item?: string; // e.g. "EVHERFIT Infinity Band — 1 kg × 2 (Strength)"
   tracking?: string; // courier tracking number, set when shipped
   customer: {
     name: string;

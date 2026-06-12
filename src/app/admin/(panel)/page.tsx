@@ -41,7 +41,7 @@ export default async function AdminDashboard() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold italic">Dashboard</h1>
-          <p className="mt-1 text-sm text-[#6b7194]">EVHERFIT Pulse store overview</p>
+          <p className="mt-1 text-sm text-[#6b7194]">EVHERFIT Infinity Band store overview</p>
         </div>
         <Link
           href="/admin/orders"

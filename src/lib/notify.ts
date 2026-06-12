@@ -26,14 +26,15 @@ export async function sendOrderNotifications(order: Order) {
     resend.emails.send({
       from: FROM,
       to: c.email,
-      subject: "Your EVHERFIT Pulse is confirmed 🎉",
+      subject: "Your EVHERFIT Infinity Band is confirmed 🎉",
       html: `
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1c2030">
           <h1 style="color:#2b337d;font-style:italic">EVHERFIT</h1>
           <h2>Order confirmed — be the woman.</h2>
-          <p>Hi ${c.name}, thanks for your order! Your EVHERFIT Pulse ships within 24 hours;
-          we'll email tracking details once it's on the way.</p>
+          <p>Hi ${c.name}, thanks for your order! Your EVHERFIT Infinity Band pair ships within
+          24 hours; we'll email tracking details once it's on the way.</p>
           <table style="width:100%;border-collapse:collapse;margin:24px 0">
+            <tr><td style="padding:8px 0;color:#6b7194">Item</td><td align="right">${order.item ?? "EVHERFIT Infinity Band"}</td></tr>
             <tr><td style="padding:8px 0;color:#6b7194">Order</td><td align="right"><code>${order.id}</code></td></tr>
             <tr><td style="padding:8px 0;color:#6b7194">Amount</td><td align="right"><strong>${inr(order.amount)}</strong></td></tr>
             <tr><td style="padding:8px 0;color:#6b7194">Ship to</td><td align="right">${shipTo}</td></tr>
@@ -52,8 +53,9 @@ export async function sendOrderNotifications(order: Order) {
         subject: `New order ${inr(order.amount)} — ${c.name} (${c.city})`,
         html: `
           <div style="font-family:sans-serif;color:#1c2030">
-            <h2>New EVHERFIT Pulse order</h2>
+            <h2>New EVHERFIT order</h2>
             <p><strong>${c.name}</strong> · ${c.phone} · ${c.email}</p>
+            <p>${order.item ?? "EVHERFIT Infinity Band"}</p>
             <p>${shipTo}</p>
             <p>Order <code>${order.id}</code> · Payment <code>${order.paymentId ?? "—"}</code> · ${inr(order.amount)}</p>
             <p><a href="${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/admin/orders/${order.id}">Open in admin panel</a></p>

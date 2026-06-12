@@ -65,6 +65,12 @@ export default async function OrderDetail({
         <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
           <h2 className="font-semibold">Payment</h2>
           <dl className="mt-4 space-y-4 text-sm">
+            {order.item && (
+              <div>
+                <dt className="text-[#6b7194]">Item</dt>
+                <dd className="mt-1 font-medium">{order.item}</dd>
+              </div>
+            )}
             <div className="flex justify-between">
               <dt className="text-[#6b7194]">Amount</dt>
               <dd className="font-semibold">₹{(order.amount / 100).toLocaleString("en-IN")}</dd>

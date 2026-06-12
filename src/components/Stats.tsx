@@ -26,15 +26,15 @@ function Counter({ to, suffix = "", duration = 1.6 }: { to: number; suffix?: str
 }
 
 const stats = [
-  { value: 14, suffix: " days", label: "Battery life" },
-  { value: 110, suffix: "+", label: "Workout modes" },
-  { value: 50, suffix: "m", label: "Water resistance" },
-  { value: 600, suffix: " nits", label: "Display brightness" },
+  { value: 2, suffix: " bands", label: "In every box" },
+  { value: 3, suffix: " weights", label: "0.5 to 2 kg per band" },
+  { value: 120, suffix: "+ washes", label: "Tested, zero leaks" },
+  { value: 1, suffix: "-year", label: "Warranty included" },
 ];
 
 export default function Stats() {
   return (
-    <section id="specs" className="border-y border-line bg-card/50">
+    <section className="border-y border-line bg-brand-soft/40">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px lg:grid-cols-4">
         {stats.map((s, i) => (
           <motion.div
@@ -45,7 +45,7 @@ export default function Stats() {
             transition={{ delay: i * 0.1, duration: 0.6 }}
             className="px-8 py-14 text-center"
           >
-            <p className="font-display text-4xl font-bold text-accent sm:text-5xl">
+            <p className="font-display text-4xl font-bold text-brand sm:text-5xl">
               <Counter to={s.value} suffix={s.suffix} />
             </p>
             <p className="mt-3 text-sm uppercase tracking-[0.2em] text-muted">{s.label}</p>
