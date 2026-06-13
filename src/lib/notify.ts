@@ -37,7 +37,13 @@ export async function sendOrderNotifications(order: Order) {
           <table style="width:100%;border-collapse:collapse;margin:24px 0">
             <tr><td style="padding:8px 0;color:#6b7194">Item</td><td align="right">${order.item ?? "EVHERFIT Infinity Band"}</td></tr>
             <tr><td style="padding:8px 0;color:#6b7194">Order</td><td align="right"><code>${order.id}</code></td></tr>
-            <tr><td style="padding:8px 0;color:#6b7194">Amount</td><td align="right"><strong>${inr(order.amount)}</strong></td></tr>
+            ${
+              order.discount > 0
+                ? `<tr><td style="padding:8px 0;color:#6b7194">Subtotal</td><td align="right">${inr(order.amount + order.discount)}</td></tr>
+            <tr><td style="padding:8px 0;color:#6b7194">Discount${order.couponCode ? ` (${order.couponCode})` : ""}</td><td align="right" style="color:#1d9e75">−${inr(order.discount)}</td></tr>`
+                : ""
+            }
+            <tr><td style="padding:8px 0;color:#6b7194">Amount paid</td><td align="right"><strong>${inr(order.amount)}</strong></td></tr>
             <tr><td style="padding:8px 0;color:#6b7194">Ship to</td><td align="right">${shipTo}</td></tr>
           </table>
           <p style="color:#6b7194;font-size:13px">Questions? Just reply to this email.</p>
@@ -58,7 +64,7 @@ export async function sendOrderNotifications(order: Order) {
             <p><strong>${c.name}</strong> · ${c.phone} · ${c.email}</p>
             <p>${order.item ?? "EVHERFIT Infinity Band"}</p>
             <p>${shipTo}</p>
-            <p>Order <code>${order.id}</code> · Payment <code>${order.paymentId ?? "—"}</code> · ${inr(order.amount)}</p>
+            <p>Order <code>${order.id}</code> · Payment <code>${order.paymentId ?? "—"}</code> · ${inr(order.amount)}${order.couponCode ? ` · code ${order.couponCode} (−${inr(order.discount)})` : ""}</p>
             <p><a href="${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/admin/orders/${order.id}">Open in admin panel</a></p>
           </div>`,
       })
