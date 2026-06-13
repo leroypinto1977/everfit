@@ -64,6 +64,20 @@ export const productVariants = pgTable("product_variants", {
   sort: integer("sort").notNull().default(0),
 });
 
+/** Discount codes. Usage is counted when an order is PAID, not created. */
+export const coupons = pgTable("coupons", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  code: text("code").notNull().unique(), // stored uppercase
+  type: text("type").notNull(), // "percent" | "flat"
+  value: integer("value").notNull(), // percent (1–100) or paise
+  minAmount: integer("min_amount"), // paise, order must reach this
+  maxUses: integer("max_uses"), // null = unlimited
+  usedCount: integer("used_count").notNull().default(0),
+  active: boolean("active").notNull().default(true),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 /* ---------- customers ---------- */
 
 export const customers = pgTable("customers", {
@@ -85,11 +99,13 @@ export const orders = pgTable("orders", {
   id: text("id").primaryKey(), // razorpay order_id
   customerId: uuid("customer_id").references(() => customers.id, { onDelete: "set null" }),
   status: text("status").notNull(), // created|paid|shipped|delivered|cancelled|refunded|failed
-  amount: integer("amount").notNull(), // paise
+  amount: integer("amount").notNull(), // paise, charged amount (after discount)
   currency: text("currency").notNull().default("INR"),
   item: text("item"), // display string, e.g. "EVHERFIT Infinity Band — 1 kg × 2 (Strength)"
   variantKey: text("variant_key"),
   qty: integer("qty").notNull().default(1),
+  couponCode: text("coupon_code"),
+  discount: integer("discount").notNull().default(0), // paise taken off list price
   paymentId: text("payment_id"),
   courier: text("courier"),
   tracking: text("tracking"),

@@ -141,8 +141,16 @@ export default async function OrderDetail({
                 <dd className="mt-1 font-medium">{order.item}</dd>
               </div>
             )}
+            {order.discount > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-[#6b7194]">
+                  Discount {order.couponCode && <span className="font-mono text-xs">({order.couponCode})</span>}
+                </dt>
+                <dd className="text-emerald-700">−₹{(order.discount / 100).toLocaleString("en-IN")}</dd>
+              </div>
+            )}
             <div className="flex justify-between">
-              <dt className="text-[#6b7194]">Amount</dt>
+              <dt className="text-[#6b7194]">Amount {order.discount > 0 && "paid"}</dt>
               <dd className="font-semibold">₹{(order.amount / 100).toLocaleString("en-IN")}</dd>
             </div>
             <div className="flex justify-between">

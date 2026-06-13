@@ -14,6 +14,7 @@ const navItems = [
   { href: "/admin/orders", label: "📦 Orders" },
   { href: "/admin/customers", label: "👤 Customers" },
   { href: "/admin/products", label: "🏷️ Products" },
+  { href: "/admin/coupons", label: "🎟️ Coupons" },
   { href: "/admin/revenue", label: "💰 Revenue" },
   { href: "/admin/settings", label: "⚙️ Settings" },
 ];

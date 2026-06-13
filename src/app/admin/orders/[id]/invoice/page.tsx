@@ -80,10 +80,18 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <tr className="border-b border-[#eef0f7]">
             <td className="py-4">{order.item ?? "EVHERFIT Infinity Band"}</td>
             <td className="py-4 text-center">{order.qty}</td>
-            <td className="py-4 text-right">{inr(order.amount)}</td>
+            <td className="py-4 text-right">{inr(order.amount + order.discount)}</td>
           </tr>
         </tbody>
         <tfoot>
+          {order.discount > 0 && (
+            <tr>
+              <td colSpan={2} className="py-2 text-right text-[#6b7194]">
+                Discount {order.couponCode && `(${order.couponCode})`}
+              </td>
+              <td className="py-2 text-right">−{inr(order.discount)}</td>
+            </tr>
+          )}
           <tr>
             <td colSpan={2} className="py-2 text-right text-[#6b7194]">
               Shipping

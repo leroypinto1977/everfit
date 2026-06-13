@@ -76,7 +76,7 @@ export async function getVariantMix(from: Date, to: Date) {
 /** Flat rows for the accounting CSV export. */
 export async function getOrdersForExport(from: Date, to: Date) {
   const rows = await db().execute(sql`
-    SELECT o.id, o.invoice_no, o.status, o.amount, o.currency, o.item, o.variant_key, o.qty,
+    SELECT o.id, o.invoice_no, o.status, o.amount, o.discount, o.coupon_code, o.currency, o.item, o.variant_key, o.qty,
            o.payment_id, o.name, o.email, o.phone, o.city, o.state, o.pincode,
            o.created_at, o.paid_at, o.shipped_at, o.delivered_at,
            r.amount AS refund_amount, r.id AS refund_id

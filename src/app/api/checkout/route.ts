@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { razorpay } from "@/lib/razorpay";
 import { saveOrder } from "@/lib/orders";
 import { getPurchasableVariant } from "@/lib/catalog";
+import { evaluateCoupon } from "@/lib/coupons";
 
 export async function POST(req: Request) {
-  const { name, email, phone, address, city, state, pincode, variant: variantKey } = await req.json();
+  const { name, email, phone, address, city, state, pincode, variant: variantKey, coupon } = await req.json();
 
   if (!name || !email || !phone || !address || !pincode) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -24,12 +25,25 @@ export async function POST(req: Request) {
 
   const item = `${variant.productName} — ${variant.weight} (${variant.label})`;
 
+  // Discount is recomputed server-side; a client-sent code is just a hint.
+  let discount = 0;
+  let couponCode: string | undefined;
+  if (coupon) {
+    const result = await evaluateCoupon(String(coupon), variant.price);
+    if ("error" in result) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+    discount = result.discount;
+    couponCode = result.code;
+  }
+  const amount = variant.price - discount;
+
   let rzpOrder;
   try {
     rzpOrder = await razorpay().orders.create({
-      amount: variant.price,
+      amount,
       currency: "INR",
-      notes: { product: item, customer_name: name, customer_phone: phone },
+      notes: { product: item, customer_name: name, customer_phone: phone, ...(couponCode && { coupon: couponCode }) },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Payment setup failed";
@@ -38,16 +52,18 @@ export async function POST(req: Request) {
 
   await saveOrder({
     id: rzpOrder.id,
-    amount: variant.price,
+    amount,
     currency: "INR",
     item,
     variantKey: variant.key,
+    couponCode,
+    discount,
     customer: { name, email, phone, address, city: city ?? "", state: state ?? "", pincode },
   });
 
   return NextResponse.json({
     orderId: rzpOrder.id,
-    amount: variant.price,
+    amount,
     currency: "INR",
     keyId: process.env.RAZORPAY_KEY_ID,
   });

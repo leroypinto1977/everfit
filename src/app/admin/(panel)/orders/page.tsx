@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { listOrders, type OrderStatus } from "@/lib/orders";
 import StatusBadge from "@/components/admin/StatusBadge";
+import QuickShip from "./QuickShip";
 
 export const dynamic = "force-dynamic";
 
@@ -89,12 +90,13 @@ export default async function OrdersPage({
               <th className="px-6 py-4">Amount</th>
               <th className="px-6 py-4">Status</th>
               <th className="px-6 py-4">Date</th>
+              <th className="px-6 py-4" />
             </tr>
           </thead>
           <tbody>
             {orders.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-6 py-14 text-center text-[#9aa0c3]">
+                <td colSpan={7} className="px-6 py-14 text-center text-[#9aa0c3]">
                   No orders match.
                 </td>
               </tr>
@@ -127,6 +129,9 @@ export default async function OrdersPage({
                 </td>
                 <td className="px-6 py-4 text-xs text-[#9aa0c3]">
                   {new Date(o.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                </td>
+                <td className="px-6 py-4 text-right">
+                  {o.status === "paid" && <QuickShip orderId={o.id} />}
                 </td>
               </tr>
             ))}

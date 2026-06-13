@@ -38,7 +38,46 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [couponInput, setCouponInput] = useState("");
+  const [coupon, setCoupon] = useState<{ code: string; discount: number } | null>(null);
+  const [couponMsg, setCouponMsg] = useState<string | null>(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+
   const variant = variants.find((v) => v.key === variantKey) ?? pick(null);
+  // a discount is tied to a price, so drop it whenever the variant changes
+  const discount = coupon && variant ? Math.min(coupon.discount, variant.price) : 0;
+  const total = variant.price - discount;
+
+  async function applyCoupon() {
+    if (!couponInput.trim()) return;
+    setCouponLoading(true);
+    setCouponMsg(null);
+    try {
+      const res = await fetch("/api/coupon", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponInput, variant: variant.key }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setCoupon(null);
+        setCouponMsg(data.error ?? "That code isn't valid.");
+      } else {
+        setCoupon({ code: data.code, discount: data.discount });
+        setCouponMsg(null);
+      }
+    } catch {
+      setCouponMsg("Couldn't check that code — try again.");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
+  function clearCoupon() {
+    setCoupon(null);
+    setCouponInput("");
+    setCouponMsg(null);
+  }
 
   async function pay(e: React.FormEvent) {
     e.preventDefault();
@@ -49,7 +88,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, variant: variant.key }),
+        body: JSON.stringify({ ...form, variant: variant.key, coupon: coupon?.code }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Something went wrong");
@@ -158,7 +197,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
             whileTap={{ scale: 0.98 }}
             className="mt-8 w-full rounded-full bg-brand py-4 font-display text-lg font-bold text-white disabled:opacity-60"
           >
-            {loading ? "Opening payment…" : `Pay ${inr(variant.price)}`}
+            {loading ? "Opening payment…" : `Pay ${inr(total)}`}
           </motion.button>
 
           <p className="mt-4 text-center text-xs text-muted">
@@ -201,6 +240,39 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
             ))}
           </div>
 
+          {/* coupon */}
+          <div className="mt-6 border-t border-line pt-6">
+            {coupon && discount > 0 ? (
+              <div className="flex items-center justify-between rounded-xl bg-accent-soft px-4 py-3 text-sm">
+                <span className="font-semibold text-accent">
+                  {coupon.code} applied
+                  <span className="block text-xs font-normal text-accent/80">−{inr(discount)}</span>
+                </span>
+                <button type="button" onClick={clearCoupon} className="text-xs text-accent underline-offset-2 hover:underline">
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder="Discount code"
+                  className="w-full rounded-xl border border-line bg-card px-4 py-2.5 text-sm uppercase outline-none transition-all focus:border-brand/60"
+                />
+                <button
+                  type="button"
+                  onClick={applyCoupon}
+                  disabled={couponLoading || !couponInput.trim()}
+                  className="shrink-0 rounded-xl border border-brand px-4 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-brand hover:text-white disabled:opacity-50"
+                >
+                  {couponLoading ? "…" : "Apply"}
+                </button>
+              </div>
+            )}
+            {couponMsg && <p className="mt-2 text-xs text-red-600">{couponMsg}</p>}
+          </div>
+
           <dl className="mt-6 space-y-3 border-t border-line pt-6 text-sm">
             <div className="flex justify-between">
               <dt className="text-muted">Price (pair)</dt>
@@ -210,13 +282,19 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
               <dt className="text-muted">Launch discount</dt>
               <dd className="text-accent">−{inr(variant.mrp - variant.price)}</dd>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between">
+                <dt className="text-muted">Code {coupon?.code}</dt>
+                <dd className="text-accent">−{inr(discount)}</dd>
+              </div>
+            )}
             <div className="flex justify-between">
               <dt className="text-muted">Shipping</dt>
               <dd className="text-accent">Free</dd>
             </div>
             <div className="flex justify-between border-t border-line pt-3 font-display text-lg font-bold text-brand">
               <dt>Total</dt>
-              <dd>{inr(variant.price)}</dd>
+              <dd>{inr(total)}</dd>
             </div>
           </dl>
         </motion.aside>

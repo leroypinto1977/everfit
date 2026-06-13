@@ -15,6 +15,13 @@
       "when": 1781306753727,
       "tag": "0001_backfill",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781321957127,
+      "tag": "0002_coupons",
+      "breakpoints": true
     }
   ]
 }

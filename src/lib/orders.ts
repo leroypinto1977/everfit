@@ -1,6 +1,7 @@
 import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { customers, orderEvents, orders, productVariants, refunds } from "@/db/schema";
+import { redeemCoupon } from "./coupons";
 
 /**
  * Order persistence on Neon Postgres (Drizzle). Every status transition is
@@ -27,6 +28,8 @@ export interface Order {
   item?: string;
   variantKey?: string;
   qty: number;
+  couponCode?: string;
+  discount: number; // paise off list price
   courier?: string;
   tracking?: string;
   invoiceNo?: number;
@@ -68,6 +71,8 @@ function toOrder(r: Row): Order {
     item: r.item ?? undefined,
     variantKey: r.variantKey ?? undefined,
     qty: r.qty,
+    couponCode: r.couponCode ?? undefined,
+    discount: r.discount,
     courier: r.courier ?? undefined,
     tracking: r.tracking ?? undefined,
     invoiceNo: r.invoiceNo ?? undefined,
@@ -107,6 +112,8 @@ export async function saveOrder(input: {
   item: string;
   variantKey: string;
   qty?: number;
+  couponCode?: string;
+  discount?: number;
   customer: Order["customer"];
 }) {
   const c = input.customer;
@@ -145,6 +152,8 @@ export async function saveOrder(input: {
     item: input.item,
     variantKey: input.variantKey,
     qty: input.qty ?? 1,
+    couponCode: input.couponCode ?? null,
+    discount: input.discount ?? 0,
     name: c.name,
     email: c.email,
     phone: c.phone,
@@ -252,6 +261,7 @@ export async function markPaid(id: string, paymentId: string) {
   if (!rows[0]) return { order: await getOrder(id), transitioned: false };
 
   await adjustStock(rows[0].variantKey, -rows[0].qty);
+  if (rows[0].couponCode) await redeemCoupon(rows[0].couponCode);
   await logEvent(id, "paid", "system", `Razorpay payment ${paymentId}`);
   return { order: toOrder(rows[0]), transitioned: true };
 }
