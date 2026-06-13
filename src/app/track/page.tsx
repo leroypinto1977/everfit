@@ -7,12 +7,16 @@ import Footer from "@/components/Footer";
 
 interface TrackResult {
   id: string;
-  status: "created" | "paid" | "failed" | "shipped" | "delivered";
+  status: "created" | "paid" | "failed" | "shipped" | "delivered" | "cancelled" | "refunded";
   item: string;
   city: string;
   createdAt: string;
   paidAt: string | null;
+  shippedAt: string | null;
+  deliveredAt: string | null;
   tracking: string | null;
+  courier: string | null;
+  trackingUrl: string | null;
 }
 
 const steps = [
@@ -25,7 +29,9 @@ const steps = [
 const stepIndex: Record<TrackResult["status"], number> = {
   created: 0,
   failed: 0,
+  cancelled: 0,
   paid: 1,
+  refunded: 1,
   shipped: 2,
   delivered: 3,
 };
@@ -138,12 +144,27 @@ export default function TrackPage() {
                     will be auto-refunded by your bank within 5–7 days. Place the order again
                     any time.
                   </p>
+                ) : result.status === "cancelled" ? (
+                  <p className="mt-6 rounded-xl bg-gray-50 px-4 py-3 text-sm text-muted">
+                    This order was cancelled before payment. Place a new order any time.
+                  </p>
+                ) : result.status === "refunded" ? (
+                  <p className="mt-6 rounded-xl bg-brand-soft px-4 py-3 text-sm text-brand">
+                    This order has been refunded — the amount typically reaches your account
+                    within 5–7 working days of the refund being initiated.
+                  </p>
                 ) : (
                   <ol className="mt-8 space-y-0">
                     {steps.map((s, i) => {
                       const done = i <= reached;
                       const timestamp =
-                        s.key === "created" ? fmt(result.createdAt) : s.key === "paid" ? fmt(result.paidAt) : null;
+                        s.key === "created"
+                          ? fmt(result.createdAt)
+                          : s.key === "paid"
+                            ? fmt(result.paidAt)
+                            : s.key === "shipped"
+                              ? fmt(result.shippedAt)
+                              : fmt(result.deliveredAt);
                       return (
                         <li key={s.key} className="relative flex gap-4 pb-8 last:pb-0">
                           {i < steps.length - 1 && (
@@ -168,7 +189,19 @@ export default function TrackPage() {
                             {timestamp && done && <p className="text-sm text-muted">{timestamp}</p>}
                             {s.key === "shipped" && result.tracking && done && (
                               <p className="mt-1 rounded-lg bg-brand-soft px-3 py-1.5 font-mono text-xs text-brand">
-                                {result.tracking}
+                                {result.courier && <span className="mr-2 font-sans font-semibold">{result.courier}</span>}
+                                {result.trackingUrl ? (
+                                  <a
+                                    href={result.trackingUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="underline underline-offset-2"
+                                  >
+                                    {result.tracking} ↗
+                                  </a>
+                                ) : (
+                                  result.tracking
+                                )}
                               </p>
                             )}
                             {s.key === "shipped" && reached === 1 && (

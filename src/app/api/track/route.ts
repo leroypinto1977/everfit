@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getOrder } from "@/lib/orders";
+import { courierName, trackingUrl } from "@/lib/couriers";
 
 /**
  * Public order tracking. The caller must present the order ID *and* the
@@ -32,6 +33,10 @@ export async function POST(req: Request) {
     city: order.customer.city,
     createdAt: order.createdAt,
     paidAt: order.paidAt ?? null,
+    shippedAt: order.shippedAt ?? null,
+    deliveredAt: order.deliveredAt ?? null,
     tracking: order.tracking ?? null,
+    courier: order.courier ? courierName(order.courier) : null,
+    trackingUrl: trackingUrl(order.courier, order.tracking),
   });
 }

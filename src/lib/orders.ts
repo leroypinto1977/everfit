@@ -1,27 +1,36 @@
-import { promises as fs } from "fs";
-import path from "path";
-import { Pool } from "pg";
+import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { db } from "@/db";
+import { customers, orderEvents, orders, productVariants, refunds } from "@/db/schema";
 
 /**
- * Order persistence with two backends:
- *
- * - DATABASE_URL set (production — e.g. Neon Postgres from the Vercel
- *   Marketplace): a single `orders` table with the order as JSONB.
- * - No DATABASE_URL (local dev): a JSON file under .data/ so the flow
- *   works with zero setup. Serverless filesystems are ephemeral, so this
- *   fallback does NOT persist across deploys/instances on Vercel.
+ * Order persistence on Neon Postgres (Drizzle). Every status transition is
+ * guarded by a conditional UPDATE (atomic — safe against the verify/webhook
+ * race) and recorded in order_events so the admin timeline shows who did
+ * what. DATABASE_URL is required; the old JSON-file fallback is gone.
  */
 
-export type OrderStatus = "created" | "paid" | "failed" | "shipped" | "delivered";
+export type OrderStatus =
+  | "created"
+  | "paid"
+  | "shipped"
+  | "delivered"
+  | "cancelled"
+  | "refunded"
+  | "failed";
 
 export interface Order {
-  id: string; // razorpay_order_id
+  id: string; // razorpay order_id
   paymentId?: string;
   status: OrderStatus;
-  amount: number; // in paise
+  amount: number; // paise
   currency: string;
-  item?: string; // e.g. "EVHERFIT Infinity Band — 1 kg × 2 (Strength)"
-  tracking?: string; // courier tracking number, set when shipped
+  item?: string;
+  variantKey?: string;
+  qty: number;
+  courier?: string;
+  tracking?: string;
+  invoiceNo?: number;
+  customerId?: string;
   customer: {
     name: string;
     email: string;
@@ -33,133 +42,311 @@ export interface Order {
   };
   createdAt: string;
   paidAt?: string;
+  shippedAt?: string;
+  deliveredAt?: string;
+  cancelledAt?: string;
+  refundedAt?: string;
 }
 
-interface OrderStore {
-  save(order: Order): Promise<void>;
-  update(id: string, patch: Partial<Order>): Promise<Order | null>;
-  get(id: string): Promise<Order | null>;
-  list(): Promise<Order[]>;
+export interface OrderEvent {
+  id: string;
+  type: string;
+  note: string | null;
+  actor: string;
+  createdAt: string;
 }
 
-/* ---------- JSON file backend (local dev) ---------- */
+type Row = typeof orders.$inferSelect;
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const FILE = path.join(DATA_DIR, "orders.json");
-
-const fileStore: OrderStore = {
-  async save(order) {
-    const orders = await this.list();
-    orders.unshift(order);
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(FILE, JSON.stringify(orders, null, 2));
-  },
-  async update(id, patch) {
-    const orders = await this.list();
-    const idx = orders.findIndex((o) => o.id === id);
-    if (idx === -1) return null;
-    orders[idx] = { ...orders[idx], ...patch };
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(FILE, JSON.stringify(orders, null, 2));
-    return orders[idx];
-  },
-  async get(id) {
-    return (await this.list()).find((o) => o.id === id) ?? null;
-  },
-  async list() {
-    try {
-      return JSON.parse(await fs.readFile(FILE, "utf8"));
-    } catch {
-      return [];
-    }
-  },
-};
-
-/* ---------- Postgres backend (production) ---------- */
-
-let pool: Pool | undefined;
-let schemaReady: Promise<unknown> | undefined;
-
-function db() {
-  pool ??= new Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
-  schemaReady ??= pool.query(
-    `CREATE TABLE IF NOT EXISTS orders (
-       id text PRIMARY KEY,
-       data jsonb NOT NULL,
-       created_at timestamptz NOT NULL DEFAULT now()
-     )`
-  );
-  return { pool, schemaReady };
+function toOrder(r: Row): Order {
+  return {
+    id: r.id,
+    paymentId: r.paymentId ?? undefined,
+    status: r.status as OrderStatus,
+    amount: r.amount,
+    currency: r.currency,
+    item: r.item ?? undefined,
+    variantKey: r.variantKey ?? undefined,
+    qty: r.qty,
+    courier: r.courier ?? undefined,
+    tracking: r.tracking ?? undefined,
+    invoiceNo: r.invoiceNo ?? undefined,
+    customerId: r.customerId ?? undefined,
+    customer: {
+      name: r.name,
+      email: r.email,
+      phone: r.phone,
+      address: r.address,
+      city: r.city,
+      state: r.state,
+      pincode: r.pincode,
+    },
+    createdAt: r.createdAt.toISOString(),
+    paidAt: r.paidAt?.toISOString(),
+    shippedAt: r.shippedAt?.toISOString(),
+    deliveredAt: r.deliveredAt?.toISOString(),
+    cancelledAt: r.cancelledAt?.toISOString(),
+    refundedAt: r.refundedAt?.toISOString(),
+  };
 }
 
-const pgStore: OrderStore = {
-  async save(order) {
-    const { pool, schemaReady } = db();
-    await schemaReady;
-    await pool.query(
-      "INSERT INTO orders (id, data, created_at) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING",
-      [order.id, order, order.createdAt]
+export function normalizePhone(phone: string) {
+  return phone.replace(/\D/g, "").slice(-10);
+}
+
+async function logEvent(orderId: string, type: string, actor: string, note?: string) {
+  await db().insert(orderEvents).values({ orderId, type, actor, note });
+}
+
+/* ---------- create ---------- */
+
+export async function saveOrder(input: {
+  id: string;
+  amount: number;
+  currency: string;
+  item: string;
+  variantKey: string;
+  qty?: number;
+  customer: Order["customer"];
+}) {
+  const c = input.customer;
+
+  // keep one customer record per phone; the latest order wins the details
+  const [cust] = await db()
+    .insert(customers)
+    .values({
+      phone: normalizePhone(c.phone),
+      name: c.name,
+      email: c.email,
+      address: c.address,
+      city: c.city,
+      state: c.state,
+      pincode: c.pincode,
+    })
+    .onConflictDoUpdate({
+      target: customers.phone,
+      set: {
+        name: c.name,
+        email: c.email,
+        address: c.address,
+        city: c.city,
+        state: c.state,
+        pincode: c.pincode,
+      },
+    })
+    .returning({ id: customers.id });
+
+  await db().insert(orders).values({
+    id: input.id,
+    customerId: cust.id,
+    status: "created",
+    amount: input.amount,
+    currency: input.currency,
+    item: input.item,
+    variantKey: input.variantKey,
+    qty: input.qty ?? 1,
+    name: c.name,
+    email: c.email,
+    phone: c.phone,
+    address: c.address,
+    city: c.city,
+    state: c.state,
+    pincode: c.pincode,
+  });
+
+  await logEvent(input.id, "created", "customer");
+}
+
+/* ---------- read ---------- */
+
+export async function getOrder(id: string): Promise<Order | null> {
+  const rows = await db().select().from(orders).where(eq(orders.id, id)).limit(1);
+  return rows[0] ? toOrder(rows[0]) : null;
+}
+
+export async function listOrders(opts?: {
+  status?: OrderStatus | "";
+  q?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ orders: Order[]; total: number }> {
+  const conditions = [];
+  if (opts?.status) conditions.push(eq(orders.status, opts.status));
+  if (opts?.q) {
+    const like = `%${opts.q.trim()}%`;
+    conditions.push(
+      or(
+        ilike(orders.id, like),
+        ilike(orders.name, like),
+        ilike(orders.phone, like),
+        ilike(orders.email, like),
+        ilike(orders.pincode, like)
+      )
     );
-  },
-  async update(id, patch) {
-    const { pool, schemaReady } = db();
-    await schemaReady;
-    // patch fields are flat, so a shallow jsonb merge is safe
-    const res = await pool.query(
-      "UPDATE orders SET data = data || $2 WHERE id = $1 RETURNING data",
-      [id, patch]
-    );
-    return res.rows[0]?.data ?? null;
-  },
-  async get(id) {
-    const { pool, schemaReady } = db();
-    await schemaReady;
-    const res = await pool.query("SELECT data FROM orders WHERE id = $1", [id]);
-    return res.rows[0]?.data ?? null;
-  },
-  async list() {
-    const { pool, schemaReady } = db();
-    await schemaReady;
-    const res = await pool.query("SELECT data FROM orders ORDER BY created_at DESC LIMIT 500");
-    return res.rows.map((r) => r.data);
-  },
-};
+  }
+  const where = conditions.length ? and(...conditions) : undefined;
 
-const store: OrderStore = process.env.DATABASE_URL ? pgStore : fileStore;
+  const [rows, totals] = await Promise.all([
+    db()
+      .select()
+      .from(orders)
+      .where(where)
+      .orderBy(desc(orders.createdAt))
+      .limit(opts?.limit ?? 50)
+      .offset(opts?.offset ?? 0),
+    db().select({ n: count() }).from(orders).where(where),
+  ]);
 
-/* ---------- public API ---------- */
-
-export async function saveOrder(order: Order) {
-  await store.save(order);
+  return { orders: rows.map(toOrder), total: totals[0].n };
 }
 
-export async function updateOrder(id: string, patch: Partial<Order>) {
-  return store.update(id, patch);
+export async function getOrderEvents(orderId: string): Promise<OrderEvent[]> {
+  const rows = await db()
+    .select()
+    .from(orderEvents)
+    .where(eq(orderEvents.orderId, orderId))
+    .orderBy(desc(orderEvents.createdAt));
+  return rows.map((e) => ({
+    id: e.id,
+    type: e.type,
+    note: e.note,
+    actor: e.actor,
+    createdAt: e.createdAt.toISOString(),
+  }));
 }
 
-export async function getOrder(id: string) {
-  return store.get(id);
+export async function getOrderRefunds(orderId: string) {
+  return db().select().from(refunds).where(eq(refunds.orderId, orderId));
 }
 
-export async function listOrders(): Promise<Order[]> {
-  return store.list();
+/* ---------- stock ---------- */
+
+async function adjustStock(variantKey: string | null | undefined, delta: number) {
+  if (!variantKey) return;
+  await db()
+    .update(productVariants)
+    .set({ stock: sql`${productVariants.stock} + ${delta}` })
+    .where(and(eq(productVariants.key, variantKey), sql`${productVariants.stock} IS NOT NULL`));
 }
+
+/* ---------- transitions ---------- */
 
 /**
- * Transition an order to paid exactly once. Both the browser verify call
- * and the Razorpay webhook race to confirm a payment — `transitioned`
- * tells the caller whether THIS call won (and should send notifications).
+ * Transition an order to paid exactly once. Both the browser verify call and
+ * the Razorpay webhook race to confirm a payment — `transitioned` tells the
+ * caller whether THIS call won (and should send notifications). Also assigns
+ * the invoice number and decrements tracked stock.
  */
 export async function markPaid(id: string, paymentId: string) {
-  const existing = await store.get(id);
-  if (!existing) return { order: null, transitioned: false };
-  if (["paid", "shipped", "delivered"].includes(existing.status)) {
-    return { order: existing, transitioned: false };
+  const rows = await db()
+    .update(orders)
+    .set({
+      status: "paid",
+      paymentId,
+      paidAt: new Date(),
+      invoiceNo: sql`nextval('invoice_seq')::int`,
+    })
+    .where(and(eq(orders.id, id), inArray(orders.status, ["created", "failed"])))
+    .returning();
+
+  if (!rows[0]) return { order: await getOrder(id), transitioned: false };
+
+  await adjustStock(rows[0].variantKey, -rows[0].qty);
+  await logEvent(id, "paid", "system", `Razorpay payment ${paymentId}`);
+  return { order: toOrder(rows[0]), transitioned: true };
+}
+
+/** Failed payment — only flips orders still awaiting payment (never clobbers a paid one). */
+export async function markFailed(id: string, note?: string) {
+  const rows = await db()
+    .update(orders)
+    .set({ status: "failed" })
+    .where(and(eq(orders.id, id), eq(orders.status, "created")))
+    .returning();
+  if (rows[0]) await logEvent(id, "failed", "system", note);
+  return rows[0] ? toOrder(rows[0]) : null;
+}
+
+export async function markShipped(
+  id: string,
+  opts: { courier?: string; tracking?: string; actor: string }
+) {
+  const rows = await db()
+    .update(orders)
+    .set({
+      status: "shipped",
+      shippedAt: new Date(),
+      courier: opts.courier || null,
+      tracking: opts.tracking || null,
+    })
+    .where(and(eq(orders.id, id), eq(orders.status, "paid")))
+    .returning();
+  if (rows[0]) {
+    const via = [opts.courier, opts.tracking].filter(Boolean).join(" ");
+    await logEvent(id, "shipped", opts.actor, via || undefined);
   }
-  const order = await store.update(id, {
-    status: "paid",
-    paymentId,
-    paidAt: new Date().toISOString(),
-  });
-  return { order, transitioned: order !== null };
+  return rows[0] ? toOrder(rows[0]) : null;
+}
+
+export async function markDelivered(id: string, actor: string) {
+  const rows = await db()
+    .update(orders)
+    .set({ status: "delivered", deliveredAt: new Date() })
+    .where(and(eq(orders.id, id), eq(orders.status, "shipped")))
+    .returning();
+  if (rows[0]) await logEvent(id, "delivered", actor);
+  return rows[0] ? toOrder(rows[0]) : null;
+}
+
+/** Cancel an order that never got paid. Paid orders go through refunds instead. */
+export async function cancelOrder(id: string, actor: string) {
+  const rows = await db()
+    .update(orders)
+    .set({ status: "cancelled", cancelledAt: new Date() })
+    .where(and(eq(orders.id, id), inArray(orders.status, ["created", "failed"])))
+    .returning();
+  if (rows[0]) await logEvent(id, "cancelled", actor);
+  return rows[0] ? toOrder(rows[0]) : null;
+}
+
+/** Record a Razorpay refund: flips status, restores tracked stock. */
+export async function markRefunded(
+  id: string,
+  refund: { refundId: string; amount: number; reason?: string },
+  actor: string
+) {
+  const rows = await db()
+    .update(orders)
+    .set({ status: "refunded", refundedAt: new Date() })
+    .where(and(eq(orders.id, id), inArray(orders.status, ["paid", "shipped", "delivered"])))
+    .returning();
+  if (!rows[0]) return null;
+
+  await db()
+    .insert(refunds)
+    .values({
+      id: refund.refundId,
+      orderId: id,
+      amount: refund.amount,
+      reason: refund.reason,
+    })
+    .onConflictDoNothing();
+  await adjustStock(rows[0].variantKey, rows[0].qty);
+  await logEvent(id, "refund_initiated", actor, refund.reason);
+  return toOrder(rows[0]);
+}
+
+/** Razorpay webhook confirmation that a refund reached the customer. */
+export async function markRefundProcessed(refundId: string) {
+  const rows = await db()
+    .update(refunds)
+    .set({ status: "processed" })
+    .where(eq(refunds.id, refundId))
+    .returning();
+  if (rows[0]) await logEvent(rows[0].orderId, "refund_processed", "system");
+  return rows[0] ?? null;
+}
+
+export async function addOrderNote(id: string, note: string, actor: string) {
+  await logEvent(id, "note", actor, note);
 }

@@ -8,8 +8,11 @@ import Pricing from "@/components/Pricing";
 import Testimonials from "@/components/Testimonials";
 import BuySection from "@/components/BuySection";
 import Footer from "@/components/Footer";
+import { getCatalog } from "@/lib/catalog";
 
-export default function Home() {
+export default async function Home() {
+  const { variants } = await getCatalog();
+
   return (
     <main>
       <Navbar />
@@ -18,7 +21,7 @@ export default function Home() {
       <Features />
       <Showcase />
       <Stats />
-      <Pricing />
+      <Pricing variants={variants} />
       <Testimonials />
       <BuySection />
       <Footer />

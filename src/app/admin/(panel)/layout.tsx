@@ -9,8 +9,17 @@ async function logout() {
   redirect("/admin/login");
 }
 
+const navItems = [
+  { href: "/admin", label: "📊 Dashboard" },
+  { href: "/admin/orders", label: "📦 Orders" },
+  { href: "/admin/customers", label: "👤 Customers" },
+  { href: "/admin/products", label: "🏷️ Products" },
+  { href: "/admin/revenue", label: "💰 Revenue" },
+  { href: "/admin/settings", label: "⚙️ Settings" },
+];
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  await requireAdmin();
+  const user = await requireAdmin();
 
   return (
     <div className="flex min-h-screen w-full bg-[#f3f4fa] text-[#1c2030]">
@@ -22,18 +31,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </Link>
 
         <nav className="flex flex-1 flex-col gap-1 px-3">
-          <Link
-            href="/admin"
-            className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#4a5072] transition-colors hover:bg-[#f3f4fa] hover:text-[#2b337d]"
-          >
-            📊 Dashboard
-          </Link>
-          <Link
-            href="/admin/orders"
-            className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#4a5072] transition-colors hover:bg-[#f3f4fa] hover:text-[#2b337d]"
-          >
-            📦 Orders
-          </Link>
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#4a5072] transition-colors hover:bg-[#f3f4fa] hover:text-[#2b337d]"
+            >
+              {item.label}
+            </Link>
+          ))}
           <a
             href="https://dashboard.razorpay.com"
             target="_blank"
@@ -45,6 +51,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </nav>
 
         <div className="border-t border-[#e3e5f0] p-3">
+          <p className="px-4 py-2 text-xs text-[#9aa0c3]">
+            <span className="block font-medium text-[#4a5072]">{user.name}</span>
+            {user.role === "owner" ? "Owner" : "Staff"}
+          </p>
           <Link
             href="/"
             className="block rounded-xl px-4 py-2.5 text-sm text-[#6b7194] transition-colors hover:bg-[#f3f4fa]"

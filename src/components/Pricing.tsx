@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { VARIANTS, inr } from "@/lib/product";
+import { VARIANTS, inr, type Variant } from "@/lib/product";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
 
-export default function Pricing() {
+export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] }) {
   return (
     <section id="pricing" className="mx-auto max-w-7xl px-6 py-32">
       <Reveal>
@@ -21,7 +21,7 @@ export default function Pricing() {
       </Reveal>
 
       <div className="mt-14 grid gap-6 md:grid-cols-3">
-        {VARIANTS.map((v, i) => (
+        {variants.map((v, i) => (
           <Reveal key={v.key} delay={i * 0.12}>
             <motion.div
               whileHover={{ y: -6 }}
@@ -56,16 +56,26 @@ export default function Pricing() {
                 </span>
               </div>
 
-              <Magnetic strength={0.25}>
-                <Link
-                  href={`/checkout?w=${v.key}`}
-                  className={`mt-6 block rounded-full py-3.5 text-center font-display font-bold transition-transform hover:scale-[1.03] active:scale-95 ${
-                    v.popular ? "bg-white text-brand" : "bg-brand text-white"
+              {v.soldOut ? (
+                <span
+                  className={`mt-6 block cursor-not-allowed rounded-full py-3.5 text-center font-display font-bold opacity-50 ${
+                    v.popular ? "bg-white/60 text-brand" : "bg-line text-muted"
                   }`}
                 >
-                  Buy {v.label.toLowerCase()} →
-                </Link>
-              </Magnetic>
+                  Sold out
+                </span>
+              ) : (
+                <Magnetic strength={0.25}>
+                  <Link
+                    href={`/checkout?w=${v.key}`}
+                    className={`mt-6 block rounded-full py-3.5 text-center font-display font-bold transition-transform hover:scale-[1.03] active:scale-95 ${
+                      v.popular ? "bg-white text-brand" : "bg-brand text-white"
+                    }`}
+                  >
+                    Buy {v.label.toLowerCase()} →
+                  </Link>
+                </Magnetic>
+              )}
             </motion.div>
           </Reveal>
         ))}

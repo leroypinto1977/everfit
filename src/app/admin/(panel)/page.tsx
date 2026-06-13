@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listOrders } from "@/lib/orders";
+import { listVariantsAdmin } from "@/lib/catalog";
 import KpiCard from "@/components/admin/KpiCard";
 import RevenueChart, { type DayPoint } from "@/components/admin/RevenueChart";
 import StatusBadge from "@/components/admin/StatusBadge";
@@ -9,7 +10,11 @@ export const dynamic = "force-dynamic";
 const fulfilled = new Set(["paid", "shipped", "delivered"]);
 
 export default async function AdminDashboard() {
-  const orders = await listOrders();
+  const [{ orders }, variants] = await Promise.all([
+    listOrders({ limit: 500 }),
+    listVariantsAdmin(),
+  ]);
+  const lowStock = variants.filter((v) => v.active && v.stock !== null && v.stock <= 5);
   const paidOrders = orders.filter((o) => fulfilled.has(o.status));
   const revenue = paidOrders.reduce((sum, o) => sum + o.amount, 0) / 100;
   const toShip = orders.filter((o) => o.status === "paid").length;
@@ -57,6 +62,16 @@ export default async function AdminDashboard() {
         <KpiCard index={2} label="To ship" value={String(toShip)} hint="paid, awaiting dispatch" />
         <KpiCard index={3} label="Avg. order value" value={`₹${aov.toLocaleString("en-IN")}`} />
       </div>
+
+      {lowStock.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-800">
+          ⚠️ Low stock:{" "}
+          {lowStock.map((v) => `${v.weight} (${v.stock} left)`).join(", ")} —{" "}
+          <Link href="/admin/products" className="font-semibold underline">
+            manage products
+          </Link>
+        </div>
+      )}
 
       <div className="mt-6">
         <RevenueChart days={days} />

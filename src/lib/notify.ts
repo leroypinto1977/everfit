@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import type { Order } from "./orders";
+import { courierName, trackingUrl } from "./couriers";
 
 /**
  * Order notifications via Resend — entirely optional: without
@@ -69,4 +70,68 @@ export async function sendOrderNotifications(order: Order) {
     if (r.status === "rejected") console.error("Order email failed:", r.reason);
     else if (r.value.error) console.error("Order email failed:", r.value.error);
   }
+}
+
+/** Wrapper shared by the fulfilment emails — same brand frame as the confirmation. */
+async function sendCustomerEmail(order: Order, subject: string, bodyHtml: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  try {
+    const res = await new Resend(apiKey).emails.send({
+      from: FROM,
+      to: order.customer.email,
+      subject,
+      html: `
+        <div style="font-family:sans-serif;max-width:520px;margin:0 auto;color:#1c2030">
+          <h1 style="color:#2b337d;font-style:italic">EVHERFIT</h1>
+          ${bodyHtml}
+          <p style="color:#6b7194;font-size:13px">Track anytime: <a href="${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/track">order tracking</a> · Questions? Just reply to this email.</p>
+        </div>`,
+    });
+    if (res.error) console.error("Order email failed:", res.error);
+  } catch (err) {
+    console.error("Order email failed:", err);
+  }
+}
+
+export async function sendShippedEmail(order: Order) {
+  const link = trackingUrl(order.courier, order.tracking);
+  const via = order.courier ? ` via ${courierName(order.courier)}` : "";
+  await sendCustomerEmail(
+    order,
+    "Your EVHERFIT order is on the way 📦",
+    `
+      <h2>Shipped${via}!</h2>
+      <p>Hi ${order.customer.name}, your ${order.item ?? "EVHERFIT Infinity Band"} just left our warehouse.</p>
+      ${
+        order.tracking
+          ? `<p>Tracking number: <strong>${order.tracking}</strong>${
+              link ? ` — <a href="${link}">track your package</a>` : ""
+            }</p>`
+          : ""
+      }
+      <p>Order <code>${order.id}</code></p>`
+  );
+}
+
+export async function sendDeliveredEmail(order: Order) {
+  await sendCustomerEmail(
+    order,
+    "Delivered — time to train 💪",
+    `
+      <h2>Your Infinity Band has arrived.</h2>
+      <p>Hi ${order.customer.name}, your order <code>${order.id}</code> was delivered. Be the woman.</p>
+      <p>If anything's not right, reply to this email within 7 days and we'll sort it out.</p>`
+  );
+}
+
+export async function sendRefundEmail(order: Order, amount: number) {
+  await sendCustomerEmail(
+    order,
+    "Your EVHERFIT refund is on its way",
+    `
+      <h2>Refund initiated</h2>
+      <p>Hi ${order.customer.name}, we've initiated a refund of <strong>${inr(amount)}</strong> for order
+      <code>${order.id}</code>. It typically reaches your account in 5–7 working days.</p>`
+  );
 }

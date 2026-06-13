@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { markPaid, updateOrder } from "@/lib/orders";
+import { markPaid, markFailed } from "@/lib/orders";
 import { sendOrderNotifications } from "@/lib/notify";
 
 /**
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
     .digest("hex");
 
   if (expected !== razorpay_signature) {
-    await updateOrder(razorpay_order_id, { status: "failed" });
+    await markFailed(razorpay_order_id, "Signature verification failed");
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 

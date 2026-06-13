@@ -1,7 +1,8 @@
 /**
  * The EVHERFIT Infinity Band — weighted resistance band, sold as a pair.
- * Single source of truth for variants; the checkout API prices from this
- * map so the client can never tamper with amounts.
+ * Live prices/stock come from the DB catalog (src/lib/catalog.ts) and are
+ * passed to components as props; the VARIANTS below are only the fallback
+ * for environments without DATABASE_URL (and the original seed data).
  */
 
 export interface Variant {
@@ -12,6 +13,7 @@ export interface Variant {
   price: number; // paise, for the pair
   mrp: number; // paise, struck-through price
   popular?: boolean;
+  soldOut?: boolean;
 }
 
 export const PRODUCT_NAME = "EVHERFIT Infinity Band";

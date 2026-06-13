@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import ProductGallery from "@/components/ProductGallery";
 import ProductBuyPanel from "@/components/ProductBuyPanel";
 import Reveal from "@/components/Reveal";
+import { getCatalog } from "@/lib/catalog";
 
 export const metadata: Metadata = {
   title: "EVHERFIT Infinity Band — weighted resistance bands for her",
@@ -48,7 +49,9 @@ const faqs = [
   },
 ];
 
-export default function ProductPage() {
+export default async function ProductPage() {
+  const { variants } = await getCatalog();
+
   return (
     <main>
       <Navbar />
@@ -86,7 +89,7 @@ export default function ProductPage() {
               </ul>
 
               <div className="mt-8">
-                <ProductBuyPanel />
+                <ProductBuyPanel variants={variants} />
               </div>
             </div>
           </Reveal>
