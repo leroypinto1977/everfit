@@ -198,6 +198,25 @@ export function lowStockAdmin(items: { weight: string; sku: string; stock: numbe
   };
 }
 
+export function passwordReset(input: { name: string; resetUrl: string }): Email {
+  return {
+    subject: "Reset your EVHERFIT admin password",
+    html: shell(
+      [
+        heading("Reset your password"),
+        paragraph(
+          `Hi ${input.name.split(" ")[0]}, we received a request to reset the password on your EVHERFIT admin account. Click below to choose a new one — the link is valid for 1 hour.`
+        ),
+        button("Reset my password", input.resetUrl),
+        paragraph(
+          `If you didn't request this, you can safely ignore this email — your password won't change until you open the link and set a new one.`
+        ),
+      ].join(""),
+      { preheader: "Reset your EVHERFIT admin password (link valid for 1 hour).", headerBar: brand.indigoDeep }
+    ),
+  };
+}
+
 export function teammateWelcome(input: { name: string; email: string; role: string }): Email {
   return {
     subject: "You've been added to the EVHERFIT admin",

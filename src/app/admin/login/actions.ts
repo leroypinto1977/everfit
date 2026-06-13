@@ -5,15 +5,20 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { adminUsers } from "@/db/schema";
 import {
+  createPasswordReset,
   createSession,
   isValidSetupKey,
   loginRateLimited,
   needsSetup,
+  resetPasswordWithToken,
   verifyPassword,
 } from "@/lib/admin-auth";
 import { createAdminUser } from "@/lib/team";
+import { sendPasswordResetEmail } from "@/lib/notify";
+import { siteUrl } from "@/lib/email/render";
 
 type FormState = { error?: string } | undefined;
+type ResetState = { error?: string; ok?: boolean } | undefined;
 
 export async function login(_prev: FormState, formData: FormData): Promise<FormState> {
   const email = String(formData.get("email") ?? "").toLowerCase().trim();
@@ -54,4 +59,37 @@ export async function setupOwner(_prev: FormState, formData: FormData): Promise<
   const user = await createAdminUser({ name, email, password, role: "owner" });
   await createSession(user.id);
   redirect("/admin");
+}
+
+/** Request a reset link. Always reports success — never reveals if the email exists. */
+export async function requestPasswordReset(_prev: ResetState, formData: FormData): Promise<ResetState> {
+  const email = String(formData.get("email") ?? "").toLowerCase().trim();
+  if (!email) return { error: "Enter your email." };
+  if (loginRateLimited(`reset:${email}`)) {
+    return { error: "Too many requests — wait a minute and try again." };
+  }
+
+  const reset = await createPasswordReset(email);
+  if (reset) {
+    await sendPasswordResetEmail({
+      name: reset.user.name,
+      email: reset.user.email,
+      resetUrl: siteUrl(`/admin/reset?token=${reset.token}`),
+    });
+  }
+  // ok regardless of whether the account exists — no email enumeration
+  return { ok: true };
+}
+
+/** Set a new password from a valid reset token, then send to sign-in. */
+export async function resetPassword(_prev: ResetState, formData: FormData): Promise<ResetState> {
+  const token = String(formData.get("token") ?? "");
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  if (password !== confirm) return { error: "Those passwords don't match." };
+
+  const ok = await resetPasswordWithToken(token, password);
+  if (!ok) return { error: "This reset link is invalid or has expired. Request a new one." };
+  redirect("/admin/login?reset=1");
 }

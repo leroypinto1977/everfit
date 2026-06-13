@@ -3,7 +3,7 @@ import { and, count, eq, gt } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { adminSessions, adminUsers } from "@/db/schema";
+import { adminSessions, adminUsers, passwordResets } from "@/db/schema";
 
 /**
  * Per-user admin auth, self-hosted:
@@ -140,4 +140,62 @@ export function isValidSetupKey(key: string) {
   const a = Buffer.from(sha256(key));
   const b = Buffer.from(sha256(expected));
   return a.length === b.length && timingSafeEqual(a, b);
+}
+
+/* ---------- password reset ---------- */
+
+const RESET_TTL_MIN = 60;
+
+/**
+ * Issue a reset token for an active account. Returns the raw token + user
+ * (only the hash is stored). Returns null when no active account matches —
+ * the caller must still respond neutrally so emails can't be enumerated.
+ */
+export async function createPasswordReset(email: string) {
+  const rows = await db()
+    .select({ id: adminUsers.id, name: adminUsers.name, active: adminUsers.active })
+    .from(adminUsers)
+    .where(eq(adminUsers.email, email.toLowerCase().trim()))
+    .limit(1);
+  const user = rows[0];
+  if (!user || !user.active) return null;
+
+  const token = randomBytes(32).toString("hex");
+  await db().insert(passwordResets).values({
+    tokenHash: sha256(token),
+    userId: user.id,
+    expiresAt: new Date(Date.now() + RESET_TTL_MIN * 60 * 1000),
+  });
+  return { token, user: { id: user.id, name: user.name, email } };
+}
+
+/** True if the token is known and unexpired. */
+export async function isValidResetToken(token: string) {
+  if (!token) return false;
+  const rows = await db()
+    .select({ userId: passwordResets.userId })
+    .from(passwordResets)
+    .where(and(eq(passwordResets.tokenHash, sha256(token)), gt(passwordResets.expiresAt, new Date())))
+    .limit(1);
+  return rows.length > 0;
+}
+
+/**
+ * Consume a reset token and set the new password. Single-use: the token (and
+ * every live session for that user) is destroyed, forcing a fresh sign-in.
+ */
+export async function resetPasswordWithToken(token: string, newPassword: string) {
+  if (!token || newPassword.length < 8) return false;
+  const rows = await db()
+    .select({ userId: passwordResets.userId })
+    .from(passwordResets)
+    .where(and(eq(passwordResets.tokenHash, sha256(token)), gt(passwordResets.expiresAt, new Date())))
+    .limit(1);
+  const userId = rows[0]?.userId;
+  if (!userId) return false;
+
+  await db().update(adminUsers).set({ passwordHash: hashPassword(newPassword) }).where(eq(adminUsers.id, userId));
+  await db().delete(passwordResets).where(eq(passwordResets.userId, userId));
+  await db().delete(adminSessions).where(eq(adminSessions.userId, userId));
+  return true;
 }

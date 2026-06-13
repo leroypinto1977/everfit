@@ -7,6 +7,7 @@ import {
   orderConfirmation,
   orderDelivered,
   orderShipped,
+  passwordReset,
   paymentFailed,
   refundInitiated,
   teammateWelcome,
@@ -79,4 +80,17 @@ export async function sendLowStockAlert(items: { weight: string; sku: string; st
 
 export async function sendTeammateWelcome(input: { name: string; email: string; role: string }) {
   await send(input.email, teammateWelcome(input), { replyTo: false });
+}
+
+/**
+ * Password-reset link. When email isn't configured (no RESEND_API_KEY) the
+ * link is logged to the server console so the flow is still usable in dev —
+ * in production Resend should be configured, so this never leaks there.
+ */
+export async function sendPasswordResetEmail(input: { name: string; email: string; resetUrl: string }) {
+  if (!process.env.RESEND_API_KEY) {
+    console.info(`[password reset] no RESEND_API_KEY — reset link for ${input.email}: ${input.resetUrl}`);
+    return;
+  }
+  await send(input.email, passwordReset(input), { replyTo: false });
 }

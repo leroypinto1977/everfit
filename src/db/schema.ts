@@ -35,6 +35,15 @@ export const adminSessions = pgTable("admin_sessions", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const passwordResets = pgTable("password_resets", {
+  tokenHash: text("token_hash").primaryKey(), // sha256 of the emailed token
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => adminUsers.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 /* ---------- catalog ---------- */
 
 export const products = pgTable("products", {

@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import { login, setupOwner } from "./actions";
 import { InfinityMark } from "@/components/Logo";
@@ -10,6 +12,7 @@ const inputCls =
 
 export default function LoginForm({ needsSetup }: { needsSetup: boolean }) {
   const [state, action, pending] = useActionState(needsSetup ? setupOwner : login, undefined);
+  const justReset = useSearchParams().get("reset") === "1";
 
   return (
     <main className="flex min-h-screen items-stretch bg-[#f3f4fa] text-[#1c2030]">
@@ -71,6 +74,11 @@ export default function LoginForm({ needsSetup }: { needsSetup: boolean }) {
               autoComplete={needsSetup ? "new-password" : "current-password"}
               className={inputCls}
             />
+            {justReset && !state?.error && (
+              <p className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                Password updated — sign in with your new password.
+              </p>
+            )}
             {state?.error && (
               <motion.p
                 initial={{ opacity: 0 }}
@@ -88,6 +96,14 @@ export default function LoginForm({ needsSetup }: { needsSetup: boolean }) {
               {pending ? "One moment…" : needsSetup ? "Create owner account" : "Sign in"}
             </button>
           </form>
+
+          {!needsSetup && (
+            <p className="mt-5 text-center text-sm text-[#6b7194]">
+              <Link href="/admin/forgot" className="text-[#2b337d] underline-offset-2 hover:underline">
+                Forgot your password?
+              </Link>
+            </p>
+          )}
         </motion.div>
       </div>
     </main>

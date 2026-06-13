@@ -6,6 +6,7 @@ import {
   orderConfirmation,
   orderDelivered,
   orderShipped,
+  passwordReset,
   paymentFailed,
   refundInitiated,
   teammateWelcome,
@@ -69,5 +70,6 @@ export function emailPreviews(): EmailPreview[] {
       ]),
     },
     { key: "teammate-welcome", when: "New teammate · sent when the owner adds an admin user", email: teammateWelcome({ name: "Priya Sharma", email: "priya@evherfit.com", role: "Staff" }) },
+    { key: "password-reset", when: "Admin · sent when someone requests a password reset", email: passwordReset({ name: "Ananya Rao", resetUrl: "https://evherfit.com/admin/reset?token=sample" }) },
   ];
 }
