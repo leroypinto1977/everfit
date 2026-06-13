@@ -9,6 +9,7 @@ import {
   setAdminUserActive,
   setAdminUserRole,
 } from "@/lib/team";
+import { sendTeammateWelcome } from "@/lib/notify";
 
 type FormState = { error?: string; ok?: string } | undefined;
 
@@ -28,6 +29,7 @@ export async function addUserAction(_prev: FormState, formData: FormData): Promi
   } catch {
     return { error: "Couldn't create the account — is that email already in use?" };
   }
+  await sendTeammateWelcome({ name, email, role: role === "owner" ? "Owner" : "Staff" });
   revalidatePath("/admin/settings");
   return { ok: `${name} can now sign in with that email and password. Ask them to change it after first login.` };
 }

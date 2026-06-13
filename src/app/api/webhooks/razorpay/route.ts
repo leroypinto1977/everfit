@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { markPaid, markFailed, markRefundProcessed } from "@/lib/orders";
-import { sendOrderNotifications } from "@/lib/notify";
+import { sendLowStockAlert, sendOrderNotifications, sendPaymentFailedEmail } from "@/lib/notify";
 
 /**
  * Razorpay server-to-server webhook — the authoritative "an order happened"
@@ -32,12 +32,18 @@ export async function POST(req: Request) {
   const payment = event.payload?.payment?.entity;
 
   if (event.event === "payment.captured" && payment) {
-    const { order, transitioned } = await markPaid(payment.order_id, payment.id);
-    if (order && transitioned) await sendOrderNotifications(order);
+    const { order, transitioned, lowStock } = await markPaid(payment.order_id, payment.id);
+    if (order && transitioned) {
+      await sendOrderNotifications(order);
+      await sendLowStockAlert(lowStock);
+    }
   }
 
   if (event.event === "payment.failed" && payment) {
-    await markFailed(payment.order_id, payment.error_description ?? undefined);
+    // markFailed only flips orders still awaiting payment, so the recovery
+    // nudge fires once for a genuinely failed attempt.
+    const order = await markFailed(payment.order_id, payment.error_description ?? undefined);
+    if (order) await sendPaymentFailedEmail(order);
   }
 
   // optional event — enable refund.processed in the Razorpay webhook config

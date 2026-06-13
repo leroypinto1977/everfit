@@ -230,12 +230,17 @@ export async function getOrderRefunds(orderId: string) {
 
 /* ---------- stock ---------- */
 
+export const LOW_STOCK_THRESHOLD = 5;
+
+/** Adjust tracked stock and return the variant's new level (null = untracked). */
 async function adjustStock(variantKey: string | null | undefined, delta: number) {
-  if (!variantKey) return;
-  await db()
+  if (!variantKey) return null;
+  const rows = await db()
     .update(productVariants)
     .set({ stock: sql`${productVariants.stock} + ${delta}` })
-    .where(and(eq(productVariants.key, variantKey), sql`${productVariants.stock} IS NOT NULL`));
+    .where(and(eq(productVariants.key, variantKey), sql`${productVariants.stock} IS NOT NULL`))
+    .returning({ weight: productVariants.weight, sku: productVariants.sku, stock: productVariants.stock });
+  return rows[0] ?? null;
 }
 
 /* ---------- transitions ---------- */
@@ -258,12 +263,20 @@ export async function markPaid(id: string, paymentId: string) {
     .where(and(eq(orders.id, id), inArray(orders.status, ["created", "failed"])))
     .returning();
 
-  if (!rows[0]) return { order: await getOrder(id), transitioned: false };
+  if (!rows[0]) return { order: await getOrder(id), transitioned: false, lowStock: [] };
 
-  await adjustStock(rows[0].variantKey, -rows[0].qty);
+  const variant = await adjustStock(rows[0].variantKey, -rows[0].qty);
   if (rows[0].couponCode) await redeemCoupon(rows[0].couponCode);
   await logEvent(id, "paid", "system", `Razorpay payment ${paymentId}`);
-  return { order: toOrder(rows[0]), transitioned: true };
+
+  // flag a low-stock alert only on the transition past the threshold (not every sale)
+  const lowStock =
+    variant && variant.stock !== null && variant.stock <= LOW_STOCK_THRESHOLD &&
+    variant.stock + rows[0].qty > LOW_STOCK_THRESHOLD
+      ? [{ weight: variant.weight, sku: variant.sku, stock: variant.stock }]
+      : [];
+
+  return { order: toOrder(rows[0]), transitioned: true, lowStock };
 }
 
 /** Failed payment — only flips orders still awaiting payment (never clobbers a paid one). */
