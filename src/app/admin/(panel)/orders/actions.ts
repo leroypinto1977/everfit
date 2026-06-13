@@ -31,6 +31,27 @@ export async function markShippedAction(formData: FormData) {
   refresh(id);
 }
 
+/**
+ * Mark several paid orders shipped at once (shared courier, no tracking —
+ * tracking goes per-order via quick-ship). Each shipped order still gets its
+ * email. markShipped is status-guarded, so non-paid ids are simply skipped.
+ */
+export async function bulkShipAction(formData: FormData) {
+  const user = await requireAdmin();
+  const ids = formData.getAll("ids").map(String);
+  const courier = String(formData.get("courier") ?? "").trim() || undefined;
+
+  const shipped = [];
+  for (const id of ids) {
+    const order = await markShipped(id, { courier, actor: user.email });
+    if (order) shipped.push(order);
+  }
+  await Promise.allSettled(shipped.map((o) => sendShippedEmail(o)));
+
+  revalidatePath("/admin/orders");
+  revalidatePath("/admin");
+}
+
 export async function markDeliveredAction(formData: FormData) {
   const user = await requireAdmin();
   const id = String(formData.get("id"));
