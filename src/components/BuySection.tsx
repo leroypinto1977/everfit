@@ -46,7 +46,7 @@ export default function BuySection() {
             <Magnetic strength={0.5}>
               <Link
                 href="/checkout"
-                className="inline-block rounded-full bg-accent px-12 py-5 font-display text-lg font-bold text-white transition-transform hover:scale-105 active:scale-95"
+                className="inline-block rounded-full bg-accent px-12 py-5 font-display text-lg font-bold text-white transition hover:brightness-95"
               >
                 Get yours →
               </Link>

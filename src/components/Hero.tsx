@@ -71,7 +71,7 @@ export default function Hero() {
             <Magnetic>
               <Link
                 href="/checkout"
-                className="rounded-full bg-brand px-8 py-4 font-display text-base font-bold text-white transition-transform hover:scale-105 active:scale-95"
+                className="rounded-full bg-brand px-8 py-4 font-display text-base font-bold text-white transition hover:brightness-95"
               >
                 Get the pair — from ₹1,499
               </Link>

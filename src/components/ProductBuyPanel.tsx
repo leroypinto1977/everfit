@@ -62,7 +62,7 @@ export default function ProductBuyPanel({ variants = VARIANTS }: { variants?: Va
           <Magnetic strength={0.25}>
             <Link
               href={`/checkout?w=${variant.key}`}
-              className="block rounded-full bg-brand py-4 text-center font-display text-lg font-bold text-white transition-transform hover:scale-[1.02] active:scale-95"
+              className="block rounded-full bg-brand py-4 text-center font-display text-lg font-bold text-white transition hover:brightness-95"
             >
               Buy now — {inr(variant.price)} →
             </Link>

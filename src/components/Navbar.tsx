@@ -53,7 +53,7 @@ export default function Navbar() {
         <Magnetic>
           <Link
             href="/checkout"
-            className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-105 active:scale-95"
+            className="rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95"
           >
             Buy — from ₹1,499
           </Link>

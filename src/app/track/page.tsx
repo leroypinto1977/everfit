@@ -105,7 +105,7 @@ export default function TrackPage() {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-xl bg-brand px-6 py-3.5 font-semibold text-white transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-60"
+              className="rounded-xl bg-brand px-6 py-3.5 font-semibold text-white transition hover:brightness-95 disabled:opacity-60"
             >
               {loading ? "Checking…" : "Track"}
             </button>

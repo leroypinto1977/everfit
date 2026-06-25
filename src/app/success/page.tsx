@@ -43,7 +43,7 @@ function SuccessContent() {
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/"
-            className="inline-block rounded-full bg-brand px-8 py-4 font-display font-bold text-white transition-transform hover:scale-105"
+            className="inline-block rounded-full bg-brand px-8 py-4 font-display font-bold text-white transition hover:brightness-95"
           >
             Back to home
           </Link>

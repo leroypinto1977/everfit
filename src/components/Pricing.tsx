@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
 import { VARIANTS, inr, type Variant } from "@/lib/product";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
@@ -23,9 +22,7 @@ export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] 
       <div className="mt-14 grid gap-6 md:grid-cols-3">
         {variants.map((v, i) => (
           <Reveal key={v.key} delay={i * 0.12}>
-            <motion.div
-              whileHover={{ y: -6 }}
-              transition={{ type: "spring", stiffness: 250, damping: 20 }}
+            <div
               className={`relative flex h-full flex-col rounded-3xl border p-8 ${
                 v.popular
                   ? "border-brand bg-brand text-white shadow-[0_24px_60px_rgba(43,51,125,0.35)]"
@@ -68,7 +65,7 @@ export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] 
                 <Magnetic strength={0.25}>
                   <Link
                     href={`/checkout?w=${v.key}`}
-                    className={`mt-6 block rounded-full py-3.5 text-center font-display font-bold transition-transform hover:scale-[1.03] active:scale-95 ${
+                    className={`mt-6 block rounded-full py-3.5 text-center font-display font-bold transition hover:brightness-95 ${
                       v.popular ? "bg-white text-brand" : "bg-brand text-white"
                     }`}
                   >
@@ -76,7 +73,7 @@ export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] 
                   </Link>
                 </Magnetic>
               )}
-            </motion.div>
+            </div>
           </Reveal>
         ))}
       </div>

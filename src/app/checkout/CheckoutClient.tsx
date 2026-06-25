@@ -193,9 +193,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
           <motion.button
             type="submit"
             disabled={loading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="mt-8 w-full rounded-full bg-brand py-4 font-display text-lg font-bold text-white disabled:opacity-60"
+            className="mt-8 w-full rounded-full bg-brand py-4 font-display text-lg font-bold text-white transition hover:brightness-95 disabled:opacity-60"
           >
             {loading ? "Opening payment…" : `Pay ${inr(total)}`}
           </motion.button>
