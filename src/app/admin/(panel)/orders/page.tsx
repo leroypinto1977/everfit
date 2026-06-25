@@ -43,14 +43,16 @@ export default async function OrdersPage({
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <>
-      <h1 className="font-display text-3xl font-bold italic">Orders</h1>
-      <p className="mt-1 text-sm text-[#6b7194]">
-        {total} order{total === 1 ? "" : "s"}
-        {status || q ? " match" : ""}
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl font-bold italic">Orders</h1>
+        <p className="mt-1 text-sm text-[#6b7194]">
+          {total} order{total === 1 ? "" : "s"}
+          {status || q ? " match" : ""}
+        </p>
+      </div>
 
-      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex flex-wrap gap-2">
           {filters.map((f) => (
             <Link
@@ -82,7 +84,7 @@ export default async function OrdersPage({
       <OrdersTable orders={orders} />
 
       {pages > 1 && (
-        <div className="mt-6 flex items-center justify-between text-sm text-[#6b7194]">
+        <div className="flex items-center justify-between text-sm text-[#6b7194]">
           <span>
             Page {page} of {pages}
           </span>
@@ -106,6 +108,6 @@ export default async function OrdersPage({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

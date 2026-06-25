@@ -10,13 +10,15 @@ export default async function SettingsPage() {
   const team = me.role === "owner" ? await listAdminUsers() : [];
 
   return (
-    <>
-      <h1 className="font-display text-3xl font-bold italic">Settings</h1>
-      <p className="mt-1 text-sm text-[#6b7194]">
-        Signed in as {me.name} ({me.email}) · {me.role}
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl font-bold italic">Settings</h1>
+        <p className="mt-1 text-sm text-[#6b7194]">
+          Signed in as {me.name} ({me.email}) · {me.role}
+        </p>
+      </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
           <h2 className="font-semibold">Your password</h2>
           <ChangePasswordForm />
@@ -35,18 +37,18 @@ export default async function SettingsPage() {
       </div>
 
       {me.role === "owner" && (
-        <div className="mt-6 overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
           <div className="px-6 py-4">
             <h2 className="font-semibold">Team</h2>
           </div>
           <table className="w-full text-left text-sm">
             <thead className="border-y border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
               <tr>
-                <th className="px-6 py-3">Member</th>
-                <th className="px-6 py-3">Role</th>
-                <th className="px-6 py-3">Last login</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3" />
+                <th className="px-6 py-4">Member</th>
+                <th className="px-6 py-4">Role</th>
+                <th className="px-6 py-4">Last login</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4" />
               </tr>
             </thead>
             <tbody>
@@ -108,6 +110,6 @@ export default async function SettingsPage() {
           </table>
         </div>
       )}
-    </>
+    </div>
   );
 }

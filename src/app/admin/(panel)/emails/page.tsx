@@ -8,14 +8,16 @@ export default async function EmailsPage() {
   const previews = emailPreviews();
 
   return (
-    <>
-      <h1 className="font-display text-3xl font-bold italic">Email previews</h1>
-      <p className="mt-1 text-sm text-[#6b7194]">
-        Every transactional email the store sends, with sample data. Live sending requires
-        RESEND_API_KEY and a verified sending domain.
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl font-bold italic">Email previews</h1>
+        <p className="mt-1 text-sm text-[#6b7194]">
+          Every transactional email the store sends, with sample data. Live sending requires
+          RESEND_API_KEY and a verified sending domain.
+        </p>
+      </div>
 
-      <div className="mt-8 space-y-8">
+      <div className="space-y-6">
         {previews.map((p) => (
           <div key={p.key} className="overflow-hidden rounded-2xl border border-[#e3e5f0] bg-white">
             <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-[#e3e5f0] px-6 py-4">
@@ -32,6 +34,6 @@ export default async function EmailsPage() {
           </div>
         ))}
       </div>
-    </>
+    </div>
   );
 }

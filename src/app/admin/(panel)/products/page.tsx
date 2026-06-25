@@ -20,17 +20,19 @@ export default async function ProductsPage() {
   }
 
   return (
-    <>
-      <h1 className="font-display text-3xl font-bold italic">Products</h1>
-      <p className="mt-1 text-sm text-[#6b7194]">
-        Prices and stock go live on the storefront the moment you save.
-        {!canEdit && " Editing is restricted to the owner account."}
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl font-bold italic">Products</h1>
+        <p className="mt-1 text-sm text-[#6b7194]">
+          Prices and stock go live on the storefront the moment you save.
+          {!canEdit && " Editing is restricted to the owner account."}
+        </p>
+      </div>
 
       {/* product */}
       <form
         action={updateProductAction}
-        className="mt-8 flex flex-wrap items-end gap-4 rounded-2xl border border-[#e3e5f0] bg-white p-6"
+        className="flex flex-wrap items-end gap-4 rounded-2xl border border-[#e3e5f0] bg-white p-6"
       >
         <input type="hidden" name="id" value={product.id} />
         <div className="min-w-72 flex-1">
@@ -54,8 +56,9 @@ export default async function ProductsPage() {
       </form>
 
       {/* variants */}
-      <h2 className="mt-10 font-semibold">Variants</h2>
-      <div className="mt-3 space-y-4">
+      <div>
+        <h2 className="font-semibold">Variants</h2>
+        <div className="mt-4 space-y-4">
         {variants.map((v) => (
           <form
             key={v.id}
@@ -130,12 +133,13 @@ export default async function ProductsPage() {
             )}
           </form>
         ))}
-      </div>
+        </div>
 
-      <p className="mt-4 text-xs text-[#9aa0c3]">
-        Stock left blank = not tracked (never sells out). Stock is reduced automatically when an order is
-        paid and restored on refunds. Sold-out variants stay visible but can&apos;t be purchased.
-      </p>
-    </>
+        <p className="mt-4 text-xs text-[#9aa0c3]">
+          Stock left blank = not tracked (never sells out). Stock is reduced automatically when an order is
+          paid and restored on refunds. Sold-out variants stay visible but can&apos;t be purchased.
+        </p>
+      </div>
+    </div>
   );
 }

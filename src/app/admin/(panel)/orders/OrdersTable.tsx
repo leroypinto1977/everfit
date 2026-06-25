@@ -35,7 +35,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
           ref={formRef}
           action={bulkShipAction}
           onSubmit={() => setSelected(new Set())}
-          className="mt-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[#2b337d]/30 bg-[#2b337d]/[0.04] px-5 py-4"
+          className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#2b337d]/30 bg-[#2b337d]/[0.04] px-5 py-4"
         >
           {[...selected].map((id) => (
             <input key={id} type="hidden" name="ids" value={id} />
@@ -75,7 +75,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
         </form>
       )}
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
             <tr>
@@ -151,7 +151,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
                   <td className="px-6 py-4">
                     <StatusBadge status={o.status} />
                   </td>
-                  <td className="px-6 py-4 text-xs text-[#9aa0c3]">
+                  <td className="whitespace-nowrap px-6 py-4 text-xs text-[#9aa0c3]">
                     {new Date(o.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
                   </td>
                   <td className="px-6 py-4 text-right">

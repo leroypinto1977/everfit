@@ -7,7 +7,7 @@ export default function RefundForm({ orderId, amount }: { orderId: string; amoun
   const [state, action, pending] = useActionState(refundOrderAction, undefined);
 
   return (
-    <form action={action} className="mt-6 rounded-2xl border border-purple-200 bg-purple-50/40 p-6">
+    <form action={action} className="rounded-2xl border border-purple-200 bg-purple-50/40 p-6">
       <h2 className="font-semibold text-purple-900">Refund this order</h2>
       <p className="mt-1 text-sm text-purple-900/70">
         Issues a full refund of ₹{(amount / 100).toLocaleString("en-IN")} through Razorpay and restores

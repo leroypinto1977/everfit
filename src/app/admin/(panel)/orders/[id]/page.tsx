@@ -4,6 +4,7 @@ import { getOrder, getOrderEvents, getOrderRefunds } from "@/lib/orders";
 import { getAdminUser } from "@/lib/admin-auth";
 import { COURIERS, courierName, trackingUrl } from "@/lib/couriers";
 import StatusBadge from "@/components/admin/StatusBadge";
+import { InvoiceIcon } from "@/components/admin/icons";
 import { addNoteAction, cancelOrderAction, markDeliveredAction, markShippedAction } from "../actions";
 import RefundForm from "./RefundForm";
 
@@ -39,32 +40,35 @@ export default async function OrderDetail({
   const trackLink = trackingUrl(order.courier, order.tracking);
 
   return (
-    <>
-      <Link href="/admin/orders" className="text-sm text-[#6b7194] hover:text-[#2b337d]">
-        ← All orders
-      </Link>
+    <div className="space-y-6">
+      <div>
+        <Link href="/admin/orders" className="text-sm text-[#6b7194] hover:text-[#2b337d]">
+          ← All orders
+        </Link>
 
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-3xl font-bold italic">{c.name}</h1>
-          <p className="mt-1 font-mono text-sm text-[#9aa0c3]">{order.id}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          {order.invoiceNo && (
-            <Link
-              href={`/admin/orders/${order.id}/invoice`}
-              className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm text-[#4a5072] hover:border-[#2b337d]/40"
-            >
-              🧾 Invoice EVH-{String(order.invoiceNo).padStart(4, "0")}
-            </Link>
-          )}
-          <StatusBadge status={order.status} />
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="font-display text-3xl font-bold italic">{c.name}</h1>
+            <p className="mt-1 font-mono text-sm text-[#9aa0c3]">{order.id}</p>
+          </div>
+          <div className="flex items-center gap-3">
+            {order.invoiceNo && (
+              <Link
+                href={`/admin/orders/${order.id}/invoice`}
+                className="inline-flex items-center gap-2 rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm text-[#4a5072] hover:border-[#2b337d]/40"
+              >
+                <InvoiceIcon className="h-4 w-4" />
+                Invoice EVH-{String(order.invoiceNo).padStart(4, "0")}
+              </Link>
+            )}
+            <StatusBadge status={order.status} />
+          </div>
         </div>
       </div>
 
       {/* fulfilment timeline */}
       {!["failed", "cancelled", "refunded"].includes(order.status) && (
-        <ol className="mt-8 flex flex-wrap items-center gap-2">
+        <ol className="flex flex-wrap items-center gap-2">
           {(["created", "paid", "shipped", "delivered"] as const).map((step, i) => {
             const reached = ["created", "paid", "shipped", "delivered"].indexOf(order.status) >= i;
             return (
@@ -83,7 +87,7 @@ export default async function OrderDetail({
         </ol>
       )}
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* shipping */}
         <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6 lg:col-span-2">
           <h2 className="font-semibold">Shipping details</h2>
@@ -188,7 +192,7 @@ export default async function OrderDetail({
       {order.status === "paid" && (
         <form
           action={markShippedAction}
-          className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-[#e3e5f0] bg-white p-6"
+          className="flex flex-wrap items-end gap-3 rounded-2xl border border-[#e3e5f0] bg-white p-6"
         >
           <input type="hidden" name="id" value={order.id} />
           <div className="w-44">
@@ -230,7 +234,7 @@ export default async function OrderDetail({
       )}
 
       {order.status === "shipped" && (
-        <form action={markDeliveredAction} className="mt-6 rounded-2xl border border-[#e3e5f0] bg-white p-6">
+        <form action={markDeliveredAction} className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
           <input type="hidden" name="id" value={order.id} />
           <button
             type="submit"
@@ -242,7 +246,7 @@ export default async function OrderDetail({
       )}
 
       {["created", "failed"].includes(order.status) && (
-        <form action={cancelOrderAction} className="mt-6 rounded-2xl border border-[#e3e5f0] bg-white p-6">
+        <form action={cancelOrderAction} className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
           <input type="hidden" name="id" value={order.id} />
           <p className="text-sm text-[#6b7194]">This order never reached payment.</p>
           <button
@@ -259,7 +263,7 @@ export default async function OrderDetail({
       )}
 
       {/* activity */}
-      <div className="mt-6 rounded-2xl border border-[#e3e5f0] bg-white p-6">
+      <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
         <h2 className="font-semibold">Activity</h2>
         <ol className="mt-4 space-y-3 text-sm">
           {events.map((e) => (
@@ -292,6 +296,6 @@ export default async function OrderDetail({
           </button>
         </form>
       </div>
-    </>
+    </div>
   );
 }

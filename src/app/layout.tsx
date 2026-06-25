@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Exo_2, Poppins } from "next/font/google";
+import { Exo_2, Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 
@@ -17,6 +17,14 @@ const body = Poppins({
   weight: ["400", "500", "600", "700"],
 });
 
+// Admin panel uses a clean, neutral UI face (Inter) — kept off the
+// brand storefront so the dashboard reads crisp and standardised.
+const admin = Inter({
+  variable: "--font-admin",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
 export const metadata: Metadata = {
   title: "EVHERFIT — Be the woman",
   description:
@@ -29,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} h-full antialiased`}>
+    <html lang="en" className={`${display.variable} ${body.variable} ${admin.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
         <SmoothScroll>{children}</SmoothScroll>
       </body>

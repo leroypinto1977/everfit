@@ -53,6 +53,21 @@ body {
   font-style: italic;
 }
 
+/* ---- admin panel: clean, standardised UI face (Inter) ----
+   Scoped to the dashboard so the brand's italic display face stays on
+   the storefront and the login. Headings drop the italic slant and use
+   the same neutral face for a crisp, neat admin look. */
+.admin-ui {
+  font-family: var(--font-admin), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.011em;
+}
+.admin-ui .font-display {
+  font-family: var(--font-admin), system-ui, sans-serif;
+  font-style: normal;
+  letter-spacing: -0.02em;
+}
+
 /* ---- marquee ---- */
 @keyframes marquee {
   from { transform: translateX(0); }

@@ -2,6 +2,9 @@ import Link from "next/link";
 import { requireAdmin, destroySession } from "@/lib/admin-auth";
 import { redirect } from "next/navigation";
 import { InfinityMark } from "@/components/Logo";
+import { StoreIcon } from "@/components/admin/icons";
+import AdminNav from "./AdminNav";
+import ProfileMenu from "./ProfileMenu";
 
 async function logout() {
   "use server";
@@ -9,72 +12,53 @@ async function logout() {
   redirect("/admin/login");
 }
 
-const navItems = [
-  { href: "/admin", label: "📊 Dashboard" },
-  { href: "/admin/orders", label: "📦 Orders" },
-  { href: "/admin/customers", label: "👤 Customers" },
-  { href: "/admin/products", label: "🏷️ Products" },
-  { href: "/admin/coupons", label: "🎟️ Coupons" },
-  { href: "/admin/revenue", label: "💰 Revenue" },
-  { href: "/admin/emails", label: "✉️ Emails" },
-  { href: "/admin/settings", label: "⚙️ Settings" },
-];
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await requireAdmin();
 
   return (
-    <div className="flex min-h-screen w-full bg-[#f3f4fa] text-[#1c2030]">
-      {/* sidebar */}
-      <aside className="fixed inset-y-0 left-0 flex w-60 flex-col border-r border-[#e3e5f0] bg-white">
-        <Link href="/admin" className="flex items-center gap-2.5 px-6 py-6">
+    <div className="admin-ui flex h-screen overflow-hidden bg-[#f3f4fa] text-[#1c2030]">
+      {/* sidebar — brand + navigation. The right border only runs below the
+          brand row so the brand merges seamlessly into the top navbar. */}
+      <aside className="flex h-full w-64 shrink-0 flex-col bg-white">
+        <Link
+          href="/admin"
+          className="flex h-16 shrink-0 items-center gap-2.5 border-b border-[#e3e5f0] px-6"
+        >
           <InfinityMark className="h-5 text-[#2b337d]" />
-          <span className="font-display text-lg font-bold italic text-[#2b337d]">EVHERFIT</span>
+          <span
+            className="text-lg font-bold italic text-[#2b337d]"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            EVHERFIT
+          </span>
         </Link>
 
-        <nav className="flex flex-1 flex-col gap-1 px-3">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#4a5072] transition-colors hover:bg-[#f3f4fa] hover:text-[#2b337d]"
-            >
-              {item.label}
-            </Link>
-          ))}
-          <a
-            href="https://dashboard.razorpay.com"
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-xl px-4 py-2.5 text-sm font-medium text-[#4a5072] transition-colors hover:bg-[#f3f4fa] hover:text-[#2b337d]"
-          >
-            💳 Razorpay ↗
-          </a>
-        </nav>
-
-        <div className="border-t border-[#e3e5f0] p-3">
-          <p className="px-4 py-2 text-xs text-[#9aa0c3]">
-            <span className="block font-medium text-[#4a5072]">{user.name}</span>
-            {user.role === "owner" ? "Owner" : "Staff"}
-          </p>
-          <Link
-            href="/"
-            className="block rounded-xl px-4 py-2.5 text-sm text-[#6b7194] transition-colors hover:bg-[#f3f4fa]"
-          >
-            ← View store
-          </Link>
-          <form action={logout}>
-            <button
-              type="submit"
-              className="w-full rounded-xl px-4 py-2.5 text-left text-sm text-[#6b7194] transition-colors hover:bg-[#f3f4fa]"
-            >
-              Sign out
-            </button>
-          </form>
+        <div className="flex min-h-0 flex-1 flex-col border-r border-[#e3e5f0]">
+          <AdminNav />
         </div>
       </aside>
 
-      <main className="ml-60 flex-1 px-10 py-10">{children}</main>
+      {/* content column — top navbar + scrollable page */}
+      <main className="flex flex-1 flex-col overflow-hidden">
+        <header className="flex h-16 shrink-0 items-center gap-4 border-b border-[#e3e5f0] bg-white px-8">
+          {/* left spacer keeps the centre item truly centred */}
+          <div className="flex-1" />
+
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#e3e5f0] px-4 py-2 text-sm font-medium text-[#4a5072] transition-colors hover:border-[#2b337d]/30 hover:bg-[#f3f4fa] hover:text-[#2b337d]"
+          >
+            <StoreIcon className="h-4 w-4" />
+            View store
+          </Link>
+
+          <div className="flex flex-1 justify-end">
+            <ProfileMenu user={user} logoutAction={logout} />
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto px-8 py-8">{children}</div>
+      </main>
     </div>
   );
 }

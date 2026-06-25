@@ -16,13 +16,15 @@ export default async function CustomersPage({
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <>
-      <h1 className="font-display text-3xl font-bold italic">Customers</h1>
-      <p className="mt-1 text-sm text-[#6b7194]">
-        {total} customer{total === 1 ? "" : "s"} — one per phone number, built automatically from orders
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl font-bold italic">Customers</h1>
+        <p className="mt-1 text-sm text-[#6b7194]">
+          {total} customer{total === 1 ? "" : "s"} — one per phone number, built automatically from orders
+        </p>
+      </div>
 
-      <form className="mt-6">
+      <form>
         <input
           type="search"
           name="q"
@@ -32,7 +34,7 @@ export default async function CustomersPage({
         />
       </form>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
             <tr>
@@ -88,7 +90,7 @@ export default async function CustomersPage({
       </div>
 
       {pages > 1 && (
-        <div className="mt-6 flex items-center justify-between text-sm text-[#6b7194]">
+        <div className="flex items-center justify-between text-sm text-[#6b7194]">
           <span>
             Page {page} of {pages}
           </span>
@@ -112,6 +114,6 @@ export default async function CustomersPage({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

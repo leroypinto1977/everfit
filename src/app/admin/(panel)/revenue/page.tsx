@@ -2,6 +2,7 @@ import { getAdminUser } from "@/lib/admin-auth";
 import { getDailyRevenue, getRevenueStats, getVariantMix } from "@/lib/revenue";
 import KpiCard from "@/components/admin/KpiCard";
 import RevenueChart, { type DayPoint } from "@/components/admin/RevenueChart";
+import { DownloadIcon } from "@/components/admin/icons";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +59,7 @@ export default async function RevenuePage({
   const exportUrl = `/api/admin/export?from=${toInput(from)}&to=${toInput(to)}`;
 
   return (
-    <>
+    <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold italic">Revenue</h1>
@@ -67,14 +68,15 @@ export default async function RevenuePage({
         {user?.role === "owner" && (
           <a
             href={exportUrl}
-            className="rounded-xl border border-[#dcdfee] bg-white px-5 py-2.5 text-sm font-semibold text-[#4a5072] hover:border-[#2b337d]/40"
+            className="inline-flex items-center gap-2 rounded-xl border border-[#dcdfee] bg-white px-5 py-2.5 text-sm font-semibold text-[#4a5072] hover:border-[#2b337d]/40"
           >
-            ⬇ Export CSV
+            <DownloadIcon className="h-4 w-4" />
+            Export CSV
           </a>
         )}
       </div>
 
-      <form className="mt-6 flex flex-wrap items-end gap-3">
+      <form className="flex flex-wrap items-end gap-3">
         <div>
           <label htmlFor="from" className="mb-1 block text-xs text-[#6b7194]">
             From
@@ -107,20 +109,16 @@ export default async function RevenuePage({
         </button>
       </form>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard index={0} label="Gross revenue" value={`₹${(stats.grossRevenue / 100).toLocaleString("en-IN")}`} hint={`${stats.paidOrders} paid orders`} />
         <KpiCard index={1} label="Refunded" value={`₹${(stats.refundedAmount / 100).toLocaleString("en-IN")}`} hint={`${stats.refundCount} refunds`} />
         <KpiCard index={2} label="Net revenue" value={`₹${(stats.netRevenue / 100).toLocaleString("en-IN")}`} hint="gross − refunds" />
         <KpiCard index={3} label="Avg. order value" value={`₹${Math.round(stats.avgOrderValue / 100).toLocaleString("en-IN")}`} />
       </div>
 
-      {days && (
-        <div className="mt-6">
-          <RevenueChart days={days} />
-        </div>
-      )}
+      {days && <RevenueChart days={days} />}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
           <h2 className="font-semibold">Sales by variant</h2>
           <table className="mt-4 w-full text-left text-sm">
@@ -167,6 +165,6 @@ export default async function RevenuePage({
           </p>
         </div>
       </div>
-    </>
+    </div>
   );
 }

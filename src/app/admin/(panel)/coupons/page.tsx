@@ -12,18 +12,20 @@ export default async function CouponsPage() {
   const now = new Date().getTime();
 
   return (
-    <>
-      <h1 className="font-display text-3xl font-bold italic">Coupons</h1>
-      <p className="mt-1 text-sm text-[#6b7194]">
-        Discount codes redeemable at checkout. Usage counts only when an order is paid.
-      </p>
+    <div className="space-y-6">
+      <div>
+        <h1 className="font-display text-3xl font-bold italic">Coupons</h1>
+        <p className="mt-1 text-sm text-[#6b7194]">
+          Discount codes redeemable at checkout. Usage counts only when an order is paid.
+        </p>
+      </div>
 
-      <div className="mt-8 rounded-2xl border border-[#e3e5f0] bg-white p-6">
+      <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
         <h2 className="font-semibold">Create a code</h2>
         <CouponForm />
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
+      <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
             <tr>
@@ -96,6 +98,6 @@ export default async function CouponsPage() {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 }
