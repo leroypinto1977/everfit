@@ -41,7 +41,7 @@ export default async function SettingsPage() {
           <div className="px-6 py-4">
             <h2 className="font-semibold">Team</h2>
           </div>
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[640px] text-left text-sm">
             <thead className="border-y border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
               <tr>
                 <th className="px-6 py-4">Member</th>

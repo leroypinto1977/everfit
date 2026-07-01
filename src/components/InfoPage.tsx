@@ -1,4 +1,3 @@
-import Navbar from "./Navbar";
 import Footer from "./Footer";
 
 /** Shared shell for legal/support pages — brand-book light layout. */
@@ -15,7 +14,6 @@ export default function InfoPage({
 }) {
   return (
     <main className="flex min-h-screen flex-col">
-      <Navbar />
       <div className="mx-auto w-full max-w-3xl flex-1 px-6 pb-24 pt-36">
         <p className="text-xs uppercase tracking-[0.3em] text-accent">{kicker}</p>
         <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-brand sm:text-5xl">{title}</h1>

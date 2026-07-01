@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 interface TrackResult {
@@ -73,8 +72,6 @@ export default function TrackPage() {
 
   return (
     <main className="flex min-h-screen flex-col">
-      <Navbar />
-
       <div className="mx-auto w-full max-w-2xl flex-1 px-6 pb-24 pt-36">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
           <p className="text-xs uppercase tracking-[0.3em] text-accent">Order status</p>

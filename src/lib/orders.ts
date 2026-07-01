@@ -1,7 +1,9 @@
+import crypto from "crypto";
 import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { customers, orderEvents, orders, productVariants, refunds } from "@/db/schema";
+import { customers, inventoryMovements, orderEvents, orders, productVariants, refunds } from "@/db/schema";
 import { redeemCoupon } from "./coupons";
+import { getPurchasableVariant } from "./catalog";
 
 /**
  * Order persistence on Neon Postgres (Drizzle). Every status transition is
@@ -20,9 +22,11 @@ export type OrderStatus =
   | "failed";
 
 export interface Order {
-  id: string; // razorpay order_id
+  id: string; // razorpay order_id, or manual_<uuid>
   paymentId?: string;
   status: OrderStatus;
+  source: string; // "online" | "manual"
+  paymentMethod?: string;
   amount: number; // paise
   currency: string;
   item?: string;
@@ -66,6 +70,8 @@ function toOrder(r: Row): Order {
     id: r.id,
     paymentId: r.paymentId ?? undefined,
     status: r.status as OrderStatus,
+    source: r.source,
+    paymentMethod: r.paymentMethod ?? undefined,
     amount: r.amount,
     currency: r.currency,
     item: r.item ?? undefined,
@@ -232,15 +238,34 @@ export async function getOrderRefunds(orderId: string) {
 
 export const LOW_STOCK_THRESHOLD = 5;
 
-/** Adjust tracked stock and return the variant's new level (null = untracked). */
-async function adjustStock(variantKey: string | null | undefined, delta: number) {
+/**
+ * Adjust tracked stock, log a ledger movement, and return the variant's new
+ * level (null = untracked, no change made).
+ */
+async function adjustStock(
+  variantKey: string | null | undefined,
+  delta: number,
+  reason: "sale" | "return" | "manual_sale",
+  orderId?: string
+) {
   if (!variantKey) return null;
   const rows = await db()
     .update(productVariants)
     .set({ stock: sql`${productVariants.stock} + ${delta}` })
     .where(and(eq(productVariants.key, variantKey), sql`${productVariants.stock} IS NOT NULL`))
-    .returning({ weight: productVariants.weight, sku: productVariants.sku, stock: productVariants.stock });
-  return rows[0] ?? null;
+    .returning({
+      id: productVariants.id,
+      weight: productVariants.weight,
+      sku: productVariants.sku,
+      stock: productVariants.stock,
+    });
+  const v = rows[0];
+  if (v) {
+    await db()
+      .insert(inventoryMovements)
+      .values({ variantId: v.id, delta, reason, orderId: orderId ?? null });
+  }
+  return v ?? null;
 }
 
 /* ---------- transitions ---------- */
@@ -251,7 +276,7 @@ async function adjustStock(variantKey: string | null | undefined, delta: number)
  * caller whether THIS call won (and should send notifications). Also assigns
  * the invoice number and decrements tracked stock.
  */
-export async function markPaid(id: string, paymentId: string) {
+export async function markPaid(id: string, paymentId: string, method?: string) {
   const rows = await db()
     .update(orders)
     .set({
@@ -259,13 +284,24 @@ export async function markPaid(id: string, paymentId: string) {
       paymentId,
       paidAt: new Date(),
       invoiceNo: sql`nextval('invoice_seq')::int`,
+      ...(method ? { paymentMethod: method } : {}),
     })
     .where(and(eq(orders.id, id), inArray(orders.status, ["created", "failed"])))
     .returning();
 
-  if (!rows[0]) return { order: await getOrder(id), transitioned: false, lowStock: [] };
+  if (!rows[0]) {
+    // the other path (verify/webhook) already marked it paid — still backfill
+    // the payment method if this call is the one that knows it (the webhook)
+    if (method) {
+      await db()
+        .update(orders)
+        .set({ paymentMethod: method })
+        .where(and(eq(orders.id, id), sql`${orders.paymentMethod} IS NULL`));
+    }
+    return { order: await getOrder(id), transitioned: false, lowStock: [] };
+  }
 
-  const variant = await adjustStock(rows[0].variantKey, -rows[0].qty);
+  const variant = await adjustStock(rows[0].variantKey, -rows[0].qty, "sale", id);
   if (rows[0].couponCode) await redeemCoupon(rows[0].couponCode);
   await logEvent(id, "paid", "system", `Razorpay payment ${paymentId}`);
 
@@ -354,7 +390,7 @@ export async function markRefunded(
       reason: refund.reason,
     })
     .onConflictDoNothing();
-  await adjustStock(rows[0].variantKey, rows[0].qty);
+  await adjustStock(rows[0].variantKey, rows[0].qty, "return", id);
   await logEvent(id, "refund_initiated", actor, refund.reason);
   return toOrder(rows[0]);
 }
@@ -372,4 +408,76 @@ export async function markRefundProcessed(refundId: string) {
 
 export async function addOrderNote(id: string, note: string, actor: string) {
   await logEvent(id, "note", actor, note);
+}
+
+/* ---------- manual / offline sales ---------- */
+
+/**
+ * Record an offline sale (cash / in-person). Creates a paid order with
+ * source = "manual", decrements tracked stock (logged as a manual_sale
+ * movement), and assigns an invoice number — so it flows into revenue exactly
+ * like an online order.
+ */
+export async function recordManualSale(input: {
+  variantKey: string;
+  qty: number;
+  amount: number; // paise, total charged
+  paymentMethod: string; // cash | upi | card | other
+  customerName?: string;
+  customerPhone?: string;
+  note?: string;
+  paidAt?: Date;
+  actor: string;
+}) {
+  const variant = await getPurchasableVariant(input.variantKey);
+  if (!variant) throw new Error("Unknown product variant");
+
+  const qty = Math.max(1, Math.floor(input.qty));
+  const id = `manual_${crypto.randomUUID()}`;
+  const paidAt = input.paidAt ?? new Date();
+  const name = input.customerName?.trim() || "Walk-in customer";
+  const phone = input.customerPhone?.trim() || "";
+  const item = `${variant.productName} — ${variant.weight} × ${qty} (${variant.label})`;
+
+  // link to a customer record only when a phone number is supplied
+  let customerId: string | null = null;
+  if (phone) {
+    const [cust] = await db()
+      .insert(customers)
+      .values({ phone: normalizePhone(phone), name, email: "" })
+      .onConflictDoUpdate({ target: customers.phone, set: { name } })
+      .returning({ id: customers.id });
+    customerId = cust.id;
+  }
+
+  await db()
+    .insert(orders)
+    .values({
+      id,
+      customerId,
+      status: "paid",
+      source: "manual",
+      paymentMethod: input.paymentMethod,
+      amount: input.amount,
+      currency: "INR",
+      item,
+      variantKey: input.variantKey,
+      qty,
+      paidAt,
+      invoiceNo: sql`nextval('invoice_seq')::int`,
+      name,
+      email: "",
+      phone,
+      address: "",
+      pincode: "",
+    });
+
+  await adjustStock(input.variantKey, -qty, "manual_sale", id);
+  await logEvent(
+    id,
+    "paid",
+    input.actor,
+    `Manual sale · ${input.paymentMethod}${input.note ? ` · ${input.note}` : ""}`
+  );
+  return id;
 }

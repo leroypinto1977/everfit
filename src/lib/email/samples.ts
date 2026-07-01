@@ -24,6 +24,8 @@ export const sampleOrder: Order = {
   id: "order_PREVIEW123",
   paymentId: "pay_PREVIEW123",
   status: "paid",
+  source: "online",
+  paymentMethod: "upi",
   amount: 169915,
   currency: "INR",
   item: "EVHERFIT Infinity Band — 1 kg × 2 (Strength)",

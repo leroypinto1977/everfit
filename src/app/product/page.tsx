@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
-import Navbar from "@/components/Navbar";
+import Link from "next/link";
 import Footer from "@/components/Footer";
 import ProductGallery from "@/components/ProductGallery";
 import ProductBuyPanel from "@/components/ProductBuyPanel";
+import Features from "@/components/Features";
+import Showcase from "@/components/Showcase";
+import Stats from "@/components/Stats";
+import Pricing from "@/components/Pricing";
 import Reveal from "@/components/Reveal";
 import { getCatalog } from "@/lib/catalog";
 
@@ -54,16 +58,15 @@ export default async function ProductPage() {
 
   return (
     <main>
-      <Navbar />
-
-      <div className="mx-auto max-w-7xl px-6 pb-24 pt-32">
+      <div className="mx-auto max-w-7xl px-6 pt-32">
         <Reveal>
           <p className="text-xs uppercase tracking-[0.3em] text-muted">
-            Home · <span className="text-brand">The Infinity Band</span>
+            <Link href="/" className="transition-colors hover:text-brand">Home</Link> ·{" "}
+            <span className="text-brand">The Infinity Band</span>
           </p>
         </Reveal>
 
-        <div className="mt-8 grid gap-14 lg:grid-cols-[1.1fr_1fr]">
+        <div className="mt-8 grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
           <Reveal>
             <ProductGallery />
           </Reveal>
@@ -94,9 +97,15 @@ export default async function ProductPage() {
             </div>
           </Reveal>
         </div>
+      </div>
 
+      <Features />
+      <Showcase />
+      <Stats />
+
+      <div className="mx-auto max-w-7xl px-6 py-24">
         {/* specs + box */}
-        <div className="mt-24 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
+        <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr]">
           <Reveal>
             <section>
               <h2 className="font-display text-3xl font-bold tracking-tight text-brand">Specifications</h2>
@@ -133,10 +142,14 @@ export default async function ProductPage() {
             </section>
           </Reveal>
         </div>
+      </div>
 
+      <Pricing variants={variants} />
+
+      <div className="mx-auto max-w-7xl px-6 pb-24">
         {/* FAQ */}
         <Reveal>
-          <section className="mt-24 max-w-3xl">
+          <section className="max-w-3xl">
             <h2 className="font-display text-3xl font-bold tracking-tight text-brand">Questions, answered</h2>
             <div className="mt-8 space-y-3">
               {faqs.map((f) => (

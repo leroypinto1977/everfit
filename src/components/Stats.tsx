@@ -43,9 +43,9 @@ export default function Stats() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ delay: i * 0.1, duration: 0.6 }}
-            className="px-8 py-14 text-center"
+            className="px-6 py-10 text-center sm:px-8 sm:py-14"
           >
-            <p className="font-display text-4xl font-bold text-brand sm:text-5xl">
+            <p className="font-display text-3xl font-bold text-brand sm:text-4xl lg:text-5xl">
               <Counter to={s.value} suffix={s.suffix} />
             </p>
             <p className="mt-3 text-sm uppercase tracking-[0.2em] text-muted">{s.label}</p>

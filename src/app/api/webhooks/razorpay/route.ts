@@ -32,7 +32,7 @@ export async function POST(req: Request) {
   const payment = event.payload?.payment?.entity;
 
   if (event.event === "payment.captured" && payment) {
-    const { order, transitioned, lowStock } = await markPaid(payment.order_id, payment.id);
+    const { order, transitioned, lowStock } = await markPaid(payment.order_id, payment.id, payment.method);
     if (order && transitioned) {
       await sendOrderNotifications(order);
       await sendLowStockAlert(lowStock);

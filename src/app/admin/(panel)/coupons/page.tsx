@@ -26,7 +26,7 @@ export default async function CouponsPage() {
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
-        <table className="w-full text-left text-sm">
+        <table className="w-full min-w-[700px] text-left text-sm">
           <thead className="border-b border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
             <tr>
               <th className="px-6 py-4">Code</th>

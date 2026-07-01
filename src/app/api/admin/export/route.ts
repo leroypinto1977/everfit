@@ -9,21 +9,32 @@ export async function GET(req: Request) {
   if (user.role !== "owner") return NextResponse.json({ error: "Owner only" }, { status: 403 });
 
   const { searchParams } = new URL(req.url);
-  const from = new Date(`${searchParams.get("from")}T00:00:00`);
-  const to = new Date(`${searchParams.get("to")}T00:00:00`);
+  const fromStr = searchParams.get("from");
+  const toStr = searchParams.get("to");
+  const from = new Date(`${fromStr}T00:00:00`);
+  const to = new Date(`${toStr}T00:00:00`);
   if (isNaN(from.getTime()) || isNaN(to.getTime())) {
     return NextResponse.json({ error: "from and to dates are required (YYYY-MM-DD)" }, { status: 400 });
+  }
+  if (from.getTime() > to.getTime()) {
+    return NextResponse.json({ error: "from must be on or before to" }, { status: 400 });
   }
   const toExclusive = new Date(to);
   toExclusive.setDate(toExclusive.getDate() + 1);
 
-  const rows = await getOrdersForExport(from, toExclusive);
-  const csv = toCsv(rows);
+  try {
+    const rows = await getOrdersForExport(from, toExclusive);
+    const csv = toCsv(rows);
 
-  return new NextResponse(csv, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="evherfit-orders-${searchParams.get("from")}-to-${searchParams.get("to")}.csv"`,
-    },
-  });
+    return new NextResponse(csv, {
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="evherfit-orders-${fromStr}-to-${toStr}.csv"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (err) {
+    console.error("Order export failed", err);
+    return NextResponse.json({ error: "Export failed. Please try again." }, { status: 500 });
+  }
 }

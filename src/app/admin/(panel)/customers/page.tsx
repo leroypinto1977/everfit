@@ -25,17 +25,21 @@ export default async function CustomersPage({
       </div>
 
       <form>
+        <label htmlFor="customer-search" className="sr-only">
+          Search customers
+        </label>
         <input
+          id="customer-search"
           type="search"
           name="q"
           defaultValue={q}
           placeholder="Search name, phone, email, city…"
-          className="w-80 rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d]"
+          className="w-full rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d] sm:w-80"
         />
       </form>
 
       <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
-        <table className="w-full text-left text-sm">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-b border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
             <tr>
               <th className="px-6 py-4">Customer</th>

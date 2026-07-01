@@ -76,7 +76,7 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
       )}
 
       <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
-        <table className="w-full text-left text-sm">
+        <table className="w-full min-w-[860px] text-left text-sm">
           <thead className="border-b border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
             <tr>
               <th className="w-10 px-4 py-4">
@@ -132,6 +132,11 @@ export default function OrdersTable({ orders }: { orders: Order[] }) {
                       {o.customer.name}
                     </Link>
                     <span className="block font-mono text-xs text-[#9aa0c3]">{o.id}</span>
+                    {o.source === "manual" && (
+                      <span className="mt-1 inline-block rounded-full bg-[#eef0f8] px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-[#2b337d]">
+                        Manual{o.paymentMethod ? ` · ${o.paymentMethod}` : ""}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-[#6b7194]">
                     {o.customer.phone}

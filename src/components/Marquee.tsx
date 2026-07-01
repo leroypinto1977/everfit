@@ -2,13 +2,13 @@ import { InfinityMark } from "./Logo";
 
 const items = [
   "Be the woman",
-  "Iron-sand core",
-  "Wrists & ankles",
-  "Sold as a pair",
-  "Machine washable",
+  "Fitness for life",
+  "Live strong. Live long.",
   "Strong is infinite",
-  "Free shipping",
+  "Where strength meets longevity",
+  "Empower your every move",
   "Grace in motion",
+  "Forever fit. Forever her.",
 ];
 
 export default function Marquee() {

@@ -1,8 +1,7 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { motion, useScroll, useMotionValueEvent, useTransform } from "motion/react";
 import ProductVisual, { type ProductView } from "./ProductVisual";
+import Reveal from "./Reveal";
 
 const panels: { view: ProductView; kicker: string; title: string; body: string }[] = [
   {
@@ -31,70 +30,34 @@ const panels: { view: ProductView; kicker: string; title: string; body: string }
   },
 ];
 
+/**
+ * The band, view by view. Plain stacked rows (image + copy), alternating sides
+ * on desktop — scrolls naturally, no scroll-jacking / pinned sections.
+ */
 export default function Showcase() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end end"],
-  });
-
-  useMotionValueEvent(scrollYProgress, "change", (p) => {
-    setActive(Math.min(panels.length - 1, Math.floor(p * panels.length)));
-  });
-
-  const rotate = useTransform(scrollYProgress, [0, 1], [-8, 8]);
-
   return (
-    <section id="showcase" ref={ref} className="relative bg-card" style={{ height: `${panels.length * 100}vh` }}>
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-        <div className="absolute right-1/4 top-1/3 h-96 w-96 rounded-full bg-brand/8 blur-[130px]" />
-
-        <div className="mx-auto grid w-full max-w-7xl items-center gap-16 px-6 lg:grid-cols-2">
-          {/* pinned product, view swaps with the active panel */}
-          <motion.div style={{ rotate }} className="relative mx-auto w-72 sm:w-96">
-            <div className="absolute inset-8 -z-10 rounded-full bg-brand-soft blur-[60px]" />
-            <motion.div
-              key={panels[active].view}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.45, ease: "easeOut" }}
-            >
-              <ProductVisual view={panels[active].view} className="w-full" />
-            </motion.div>
-          </motion.div>
-
-          {/* text crossfades */}
-          <div className="relative min-h-[280px]">
-            {panels.map((panel, i) => (
-              <motion.div
-                key={panel.view}
-                className="absolute inset-0"
-                animate={{
-                  opacity: active === i ? 1 : 0,
-                  y: active === i ? 0 : active > i ? -28 : 28,
-                }}
-                transition={{ duration: 0.5, ease: [0.21, 0.65, 0.36, 1] }}
-              >
-                <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">{panel.kicker}</p>
-                <h3 className="font-display text-4xl font-bold tracking-tight text-brand sm:text-5xl">{panel.title}</h3>
-                <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">{panel.body}</p>
-              </motion.div>
-            ))}
-
-            {/* progress dots */}
-            <div className="absolute -left-10 top-2 hidden flex-col gap-3 lg:flex">
-              {panels.map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-2 w-2 rounded-full transition-all duration-300 ${
-                    active === i ? "scale-125 bg-brand" : "bg-line"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+    <section id="showcase" className="bg-card">
+      <div className="mx-auto max-w-7xl space-y-20 px-6 py-20 sm:py-28 lg:space-y-28">
+        {panels.map((panel, i) => {
+          const flip = i % 2 === 1;
+          return (
+            <Reveal key={panel.view}>
+              <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+                <div className={`relative mx-auto w-60 sm:w-80 ${flip ? "lg:order-2" : ""}`}>
+                  <div className="absolute inset-8 -z-10 rounded-full bg-brand-soft blur-[60px]" />
+                  <ProductVisual view={panel.view} className="w-full" />
+                </div>
+                <div className={flip ? "lg:order-1" : ""}>
+                  <p className="mb-3 text-xs uppercase tracking-[0.3em] text-accent">{panel.kicker}</p>
+                  <h3 className="font-display text-3xl font-bold tracking-tight text-brand sm:text-4xl lg:text-5xl">
+                    {panel.title}
+                  </h3>
+                  <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">{panel.body}</p>
+                </div>
+              </div>
+            </Reveal>
+          );
+        })}
       </div>
     </section>
   );

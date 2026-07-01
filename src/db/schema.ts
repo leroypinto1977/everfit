@@ -105,9 +105,11 @@ export const customers = pgTable("customers", {
 /* ---------- orders ---------- */
 
 export const orders = pgTable("orders", {
-  id: text("id").primaryKey(), // razorpay order_id
+  id: text("id").primaryKey(), // razorpay order_id, or manual_<uuid> for offline sales
   customerId: uuid("customer_id").references(() => customers.id, { onDelete: "set null" }),
   status: text("status").notNull(), // created|paid|shipped|delivered|cancelled|refunded|failed
+  source: text("source").notNull().default("online"), // "online" (shop) | "manual" (offline entry)
+  paymentMethod: text("payment_method"), // upi|card|netbanking|wallet|cash|other (set for manual; optional online)
   amount: integer("amount").notNull(), // paise, charged amount (after discount)
   currency: text("currency").notNull().default("INR"),
   item: text("item"), // display string, e.g. "EVHERFIT Infinity Band — 1 kg × 2 (Strength)"
@@ -155,5 +157,19 @@ export const refunds = pgTable("refunds", {
   amount: integer("amount").notNull(), // paise
   status: text("status").notNull().default("initiated"), // initiated|processed|failed
   reason: text("reason"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+/** Append-only inventory ledger: every stock change with its reason. */
+export const inventoryMovements = pgTable("inventory_movements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  variantId: uuid("variant_id")
+    .notNull()
+    .references(() => productVariants.id, { onDelete: "cascade" }),
+  delta: integer("delta").notNull(), // signed: +restock, -sale
+  reason: text("reason").notNull(), // sale|return|restock|adjustment|manual_sale
+  note: text("note"),
+  orderId: text("order_id").references(() => orders.id, { onDelete: "set null" }),
+  actor: text("actor").notNull().default("system"), // admin email or "system"
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

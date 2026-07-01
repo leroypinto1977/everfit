@@ -258,9 +258,19 @@ export default async function OrderDetail({
         </form>
       )}
 
-      {user?.role === "owner" && ["paid", "shipped", "delivered"].includes(order.status) && (
-        <RefundForm orderId={order.id} amount={order.amount} />
-      )}
+      {user?.role === "owner" &&
+        ["paid", "shipped", "delivered"].includes(order.status) &&
+        (order.source === "manual" ? (
+          <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6 text-sm text-[#6b7194]">
+            <h2 className="font-semibold text-[#1c2030]">Refund</h2>
+            <p className="mt-2 leading-relaxed">
+              This is a manual sale ({order.paymentMethod ?? "offline"}). Razorpay refunds don&apos;t apply —
+              settle the refund offline and add a note for the record.
+            </p>
+          </div>
+        ) : (
+          <RefundForm orderId={order.id} amount={order.amount} />
+        ))}
 
       {/* activity */}
       <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">

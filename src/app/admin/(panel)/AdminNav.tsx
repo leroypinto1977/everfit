@@ -8,6 +8,7 @@ import {
   OrdersIcon,
   CustomersIcon,
   ProductsIcon,
+  InventoryIcon,
   CouponsIcon,
   RevenueIcon,
   EmailsIcon,
@@ -27,13 +28,14 @@ const items: Item[] = [
   { href: "/admin/orders", label: "Orders", icon: OrdersIcon },
   { href: "/admin/customers", label: "Customers", icon: CustomersIcon },
   { href: "/admin/products", label: "Products", icon: ProductsIcon },
+  { href: "/admin/inventory", label: "Inventory", icon: InventoryIcon },
   { href: "/admin/coupons", label: "Coupons", icon: CouponsIcon },
   { href: "/admin/revenue", label: "Revenue", icon: RevenueIcon },
   { href: "/admin/emails", label: "Emails", icon: EmailsIcon },
   { href: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ];
 
-export default function AdminNav() {
+export default function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -47,6 +49,7 @@ export default function AdminNav() {
           <Link
             key={href}
             href={href}
+            onClick={onNavigate}
             aria-current={active ? "page" : undefined}
             className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
               active

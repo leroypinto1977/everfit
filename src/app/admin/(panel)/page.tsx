@@ -87,7 +87,8 @@ export default async function AdminDashboard() {
             No orders yet — they&apos;ll appear here the moment someone checks out.
           </p>
         ) : (
-          <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left text-sm">
             <tbody>
               {recent.map((o) => (
                 <tr key={o.id} className="border-t border-[#eef0f7] transition-colors hover:bg-[#f8f9fd]">
@@ -111,6 +112,7 @@ export default async function AdminDashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

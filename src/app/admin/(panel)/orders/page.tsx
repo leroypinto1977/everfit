@@ -44,12 +44,20 @@ export default async function OrdersPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-display text-3xl font-bold italic">Orders</h1>
-        <p className="mt-1 text-sm text-[#6b7194]">
-          {total} order{total === 1 ? "" : "s"}
-          {status || q ? " match" : ""}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl font-bold italic">Orders</h1>
+          <p className="mt-1 text-sm text-[#6b7194]">
+            {total} order{total === 1 ? "" : "s"}
+            {status || q ? " match" : ""}
+          </p>
+        </div>
+        <Link
+          href="/admin/sales/new"
+          className="rounded-xl bg-[#2b337d] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#232a68]"
+        >
+          + Manual sale
+        </Link>
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -69,14 +77,18 @@ export default async function OrdersPage({
           ))}
         </div>
 
-        <form className="flex gap-2">
+        <form className="flex w-full gap-2 sm:w-auto">
           {status && <input type="hidden" name="status" value={status} />}
+          <label htmlFor="order-search" className="sr-only">
+            Search orders
+          </label>
           <input
+            id="order-search"
             type="search"
             name="q"
             defaultValue={q}
             placeholder="Search name, phone, order ID…"
-            className="w-72 rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d]"
+            className="w-full rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d] sm:w-72"
           />
         </form>
       </div>

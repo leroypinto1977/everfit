@@ -73,6 +73,58 @@ export async function getVariantMix(from: Date, to: Date) {
   return rows.rows as unknown as { variant: string; orders: number; revenue: number }[];
 }
 
+export interface MonthRevenue {
+  month: string; // YYYY-MM
+  revenue: number; // paise
+  orders: number;
+  manualRevenue: number; // paise
+  manualOrders: number;
+}
+
+/** Revenue per calendar month for the last `months` months, gap-filled. */
+export async function getMonthlyRevenue(months = 12): Promise<MonthRevenue[]> {
+  const from = new Date();
+  from.setHours(0, 0, 0, 0);
+  from.setDate(1);
+  from.setMonth(from.getMonth() - (months - 1));
+
+  const rows = await db().execute(sql`
+    SELECT to_char(m, 'YYYY-MM') AS month,
+           coalesce(sum(o.amount), 0)::int AS revenue,
+           count(o.id)::int AS orders,
+           coalesce(sum(o.amount) filter (where o.source = 'manual'), 0)::int AS manual_revenue,
+           count(o.id) filter (where o.source = 'manual')::int AS manual_orders
+    FROM generate_series(date_trunc('month', ${from}::timestamptz), date_trunc('month', now()), interval '1 month') AS m
+    LEFT JOIN orders o
+      ON date_trunc('month', o.paid_at) = m
+     AND o.status IN ('paid','shipped','delivered','refunded')
+    GROUP BY m
+    ORDER BY m
+  `);
+
+  return (rows.rows as Record<string, unknown>[]).map((r) => ({
+    month: String(r.month),
+    revenue: Number(r.revenue),
+    orders: Number(r.orders),
+    manualRevenue: Number(r.manual_revenue),
+    manualOrders: Number(r.manual_orders),
+  }));
+}
+
+/** Revenue & order counts split by payment method (range bucketed by paid date). */
+export async function getPaymentMethodMix(from: Date, to: Date) {
+  const rows = await db().execute(sql`
+    SELECT coalesce(payment_method, case when source = 'manual' then 'unspecified' else 'online' end) AS method,
+           count(*)::int AS orders,
+           sum(amount)::int AS revenue
+    FROM orders
+    WHERE status IN ('paid','shipped','delivered','refunded')
+      AND paid_at >= ${from} AND paid_at < ${to}
+    GROUP BY 1 ORDER BY 3 DESC
+  `);
+  return rows.rows as unknown as { method: string; orders: number; revenue: number }[];
+}
+
 /** Flat rows for the accounting CSV export. */
 export async function getOrdersForExport(from: Date, to: Date) {
   const rows = await db().execute(sql`

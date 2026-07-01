@@ -25,7 +25,7 @@ const reviews = [
 
 export default function Testimonials() {
   return (
-    <section id="reviews" className="mx-auto max-w-7xl px-6 py-32">
+    <section id="reviews" className="mx-auto max-w-7xl px-6 py-20 sm:py-32">
       <Reveal>
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Reviews</p>
         <h2 className="font-display text-4xl font-bold tracking-tight text-brand sm:text-6xl">
@@ -39,7 +39,7 @@ export default function Testimonials() {
             <figure className="flex h-full flex-col justify-between rounded-3xl border border-line bg-card p-8 shadow-[0_2px_20px_rgba(43,51,125,0.05)] transition-colors duration-300 hover:border-brand/30">
               <div>
                 <div className="mb-5 text-accent" aria-label="5 out of 5 stars">★★★★★</div>
-                <blockquote className="text-lg leading-relaxed">&ldquo;{r.quote}&rdquo;</blockquote>
+                <blockquote className="text-base leading-relaxed sm:text-lg">&ldquo;{r.quote}&rdquo;</blockquote>
               </div>
               <figcaption className="mt-8">
                 <p className="font-display font-bold text-brand">{r.name}</p>

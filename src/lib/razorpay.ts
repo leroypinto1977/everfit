@@ -14,6 +14,22 @@ export function razorpay() {
   return client;
 }
 
+/**
+ * Best-effort lookup of how a payment was made (upi / card / netbanking / …).
+ * Used by the browser verify path so the method is captured immediately; never
+ * throws — on any failure the webhook backfills it later.
+ */
+export async function fetchPaymentMethod(paymentId: string): Promise<string | undefined> {
+  try {
+    const payment = await razorpay().payments.fetch(paymentId);
+    const method = (payment as { method?: string }).method;
+    return method || undefined;
+  } catch (err) {
+    console.error("Could not fetch payment method", err);
+    return undefined;
+  }
+}
+
 /** Full refund of a captured payment. Returns the Razorpay refund entity. */
 export async function refundPayment(paymentId: string, opts?: { amount?: number; notes?: string }) {
   return razorpay().payments.refund(paymentId, {

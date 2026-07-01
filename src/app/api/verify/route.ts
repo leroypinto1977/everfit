@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { markPaid, markFailed } from "@/lib/orders";
+import { fetchPaymentMethod } from "@/lib/razorpay";
 import { sendLowStockAlert, sendOrderNotifications } from "@/lib/notify";
 
 /**
@@ -31,7 +32,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const { order, transitioned, lowStock } = await markPaid(razorpay_order_id, razorpay_payment_id);
+  const method = await fetchPaymentMethod(razorpay_payment_id);
+  const { order, transitioned, lowStock } = await markPaid(razorpay_order_id, razorpay_payment_id, method);
   if (order && transitioned) {
     await sendOrderNotifications(order);
     await sendLowStockAlert(lowStock);

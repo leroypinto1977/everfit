@@ -25,7 +25,7 @@ export default function Hero() {
   return (
     <section ref={ref} className="relative flex min-h-screen items-center overflow-hidden pt-24">
       {/* giant watermark infinity, drifts with scroll */}
-      <motion.div style={{ x: markX }} className="pointer-events-none absolute -right-44 top-1/4 w-[760px] text-brand opacity-[0.06]">
+      <motion.div style={{ x: markX }} className="pointer-events-none absolute -right-44 top-1/4 hidden w-[760px] text-brand opacity-[0.06] sm:block">
         <InfinityMark className="w-full" draw />
       </motion.div>
 
@@ -33,7 +33,7 @@ export default function Hero() {
       <div className="animate-breathe absolute -left-40 top-1/4 h-[480px] w-[480px] rounded-full bg-brand/10 blur-[140px]" />
       <div className="absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-accent/15 blur-[120px]" />
 
-      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1.15fr_1fr]">
+      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-8 px-6 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
         <motion.div style={{ opacity: textOpacity, y: textY }}>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -42,13 +42,13 @@ export default function Hero() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-brand"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-            The Infinity Band · Be the woman
+            Women-centred fitness · Be the woman
           </motion.p>
 
-          <h1 className="font-display text-5xl font-bold leading-[1.02] tracking-tight text-foreground sm:text-7xl lg:text-8xl">
-            <SplitText text="Designed for her." delay={0.3} className="text-brand" />
+          <h1 className="font-display text-4xl font-bold leading-[1.02] tracking-tight text-foreground sm:text-7xl lg:text-8xl">
+            <SplitText text="Be the woman." delay={0.3} className="text-brand" />
             <br />
-            <SplitText text="Built for life." delay={0.62} />
+            <SplitText text="Strong is infinite." delay={0.62} />
           </h1>
 
           <motion.p
@@ -57,9 +57,9 @@ export default function Hero() {
             transition={{ delay: 1.2, duration: 0.7 }}
             className="mt-7 max-w-md text-lg leading-relaxed text-muted"
           >
-            Weighted bands for your wrists and ankles — an iron-sand core in a
-            soft silicone shell. Turn every walk, flow and lift into resistance
-            training. Strong is infinite.
+            EVHERFIT is fitness for life, not just a phase — live programs,
+            personal coaching and gear built for women&apos;s lifelong strength,
+            vitality and longevity.
           </motion.p>
 
           <motion.div
@@ -69,17 +69,17 @@ export default function Hero() {
             className="mt-10 flex flex-wrap items-center gap-5"
           >
             <Magnetic>
-              <Link
-                href="/checkout"
+              <a
+                href="#programs"
                 className="rounded-full bg-brand px-8 py-4 font-display text-base font-bold text-white transition hover:brightness-95"
               >
-                Get the pair — from ₹1,499
-              </Link>
+                Explore our programs
+              </a>
             </Magnetic>
-            <a href="#showcase" className="group text-sm text-muted transition-colors hover:text-brand">
-              See the band
+            <Link href="/product" className="group text-sm text-muted transition-colors hover:text-brand">
+              Shop the band
               <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">→</span>
-            </a>
+            </Link>
           </motion.div>
         </motion.div>
 

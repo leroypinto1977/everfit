@@ -67,7 +67,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
 
 export default function Features() {
   return (
-    <section id="features" className="relative mx-auto max-w-7xl px-6 py-32">
+    <section id="features" className="relative mx-auto max-w-7xl px-6 py-20 sm:py-32">
       <Reveal>
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Why Infinity</p>
         <h2 className="font-display text-4xl font-bold tracking-tight text-brand sm:text-6xl">
