@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import { recordManualSaleAction, type ManualSaleState } from "./actions";
@@ -36,13 +36,16 @@ export default function ManualSaleForm({ variants }: { variants: V[] }) {
   const [state, action] = useActionState<ManualSaleState, FormData>(recordManualSaleAction, {});
   const [variantKey, setVariantKey] = useState(variants[0]?.key ?? "");
   const [qty, setQty] = useState(1);
-  const [amount, setAmount] = useState("");
+  const [amount, setAmount] = useState(() =>
+    variants[0] ? (variants[0].price / 100).toString() : ""
+  );
 
-  // Suggest the amount from list price × qty whenever product/qty changes.
-  useEffect(() => {
-    const v = variants.find((x) => x.key === variantKey);
-    if (v) setAmount(((v.price * qty) / 100).toString());
-  }, [variantKey, qty, variants]);
+  // Suggest the amount from list price × qty; called from the change handlers
+  // so a manually edited amount is only overwritten by a product/qty change.
+  function suggestAmount(key: string, q: number) {
+    const v = variants.find((x) => x.key === key);
+    if (v) setAmount(((v.price * q) / 100).toString());
+  }
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -61,7 +64,10 @@ export default function ManualSaleForm({ variants }: { variants: V[] }) {
             id="variantKey"
             name="variantKey"
             value={variantKey}
-            onChange={(e) => setVariantKey(e.target.value)}
+            onChange={(e) => {
+              setVariantKey(e.target.value);
+              suggestAmount(e.target.value, qty);
+            }}
             className={field}
           >
             {variants.map((v) => (
@@ -82,7 +88,11 @@ export default function ManualSaleForm({ variants }: { variants: V[] }) {
             type="number"
             min={1}
             value={qty}
-            onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
+            onChange={(e) => {
+              const q = Math.max(1, parseInt(e.target.value, 10) || 1);
+              setQty(q);
+              suggestAmount(variantKey, q);
+            }}
             className={field}
           />
         </div>

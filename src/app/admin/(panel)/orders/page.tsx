@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listOrders, type OrderStatus } from "@/lib/orders";
+import AutoRefresh from "@/components/admin/AutoRefresh";
 import OrdersTable from "./OrdersTable";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,7 @@ export default async function OrdersPage({
 
   return (
     <div className="space-y-6">
+      <AutoRefresh />
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold italic">Orders</h1>

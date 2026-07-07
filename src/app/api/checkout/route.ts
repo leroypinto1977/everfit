@@ -11,6 +11,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Fail fast (before touching the DB) when payments aren't configured, so the
+  // client gets a clear message instead of a keyId-less Razorpay modal error.
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+    return NextResponse.json(
+      { error: "Online payments aren't available right now — please try again shortly." },
+      { status: 503 }
+    );
+  }
+
   // Price and availability come from the DB-backed catalog — the client only sends a key.
   const variant = await getPurchasableVariant(variantKey);
   if (!variant) {

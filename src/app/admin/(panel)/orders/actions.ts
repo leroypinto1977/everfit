@@ -11,7 +11,14 @@ import {
   markShipped,
 } from "@/lib/orders";
 import { refundPayment } from "@/lib/razorpay";
-import { sendDeliveredEmail, sendRefundEmail, sendShippedEmail } from "@/lib/notify";
+import {
+  emailConfigured,
+  sendConfirmationEmail,
+  sendDeliveredEmail,
+  sendPaymentFailedEmail,
+  sendRefundEmail,
+  sendShippedEmail,
+} from "@/lib/notify";
 
 function refresh(id: string) {
   revalidatePath(`/admin/orders/${id}`);
@@ -19,7 +26,13 @@ function refresh(id: string) {
   revalidatePath("/admin");
 }
 
-export async function markShippedAction(formData: FormData) {
+/** Transition result for useActionState forms: an error, or undefined on success. */
+export type ActionResult = { error?: string } | undefined;
+
+export async function markShippedAction(
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const user = await requireAdmin();
   const id = String(formData.get("id"));
   const order = await markShipped(id, {
@@ -27,8 +40,12 @@ export async function markShippedAction(formData: FormData) {
     tracking: String(formData.get("tracking") ?? "").trim() || undefined,
     actor: user.email,
   });
-  if (order) await sendShippedEmail(order);
   refresh(id);
+  if (!order) {
+    return { error: "This order is no longer awaiting shipment — its status just changed." };
+  }
+  await sendShippedEmail(order);
+  return undefined;
 }
 
 /**
@@ -52,19 +69,33 @@ export async function bulkShipAction(formData: FormData) {
   revalidatePath("/admin");
 }
 
-export async function markDeliveredAction(formData: FormData) {
+export async function markDeliveredAction(
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const user = await requireAdmin();
   const id = String(formData.get("id"));
   const order = await markDelivered(id, user.email);
-  if (order) await sendDeliveredEmail(order);
   refresh(id);
+  if (!order) {
+    return { error: "Only shipped orders can be marked delivered — this one's status just changed." };
+  }
+  await sendDeliveredEmail(order);
+  return undefined;
 }
 
-export async function cancelOrderAction(formData: FormData) {
+export async function cancelOrderAction(
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const user = await requireAdmin();
   const id = String(formData.get("id"));
-  await cancelOrder(id, user.email);
+  const order = await cancelOrder(id, user.email);
   refresh(id);
+  if (!order) {
+    return { error: "This order can't be cancelled — it already received a payment." };
+  }
+  return undefined;
 }
 
 /** Owner-only: full refund through Razorpay, then flip the order. */
@@ -93,6 +124,89 @@ export async function refundOrderAction(
     user.email
   );
   if (updated) await sendRefundEmail(updated, Number(refund.amount ?? order.amount));
+  refresh(id);
+  return undefined;
+}
+
+/** Which lifecycle emails may be (re-)sent manually at each order status. */
+const STAGE_EMAILS = {
+  confirmation: {
+    statuses: ["paid", "shipped", "delivered"],
+    send: sendConfirmationEmail,
+    note: "Order-confirmation email sent to the customer",
+    invalid: "The confirmation email applies once the order is paid.",
+  },
+  shipped: {
+    statuses: ["shipped", "delivered"],
+    send: sendShippedEmail,
+    note: "Shipped email sent to the customer",
+    invalid: "The shipped email applies once the order is marked shipped.",
+  },
+  delivered: {
+    statuses: ["delivered"],
+    send: sendDeliveredEmail,
+    note: "Delivered email sent to the customer",
+    invalid: "The delivered email applies once the order is marked delivered.",
+  },
+} as const;
+
+export type EmailSendResult = { ok?: string; error?: string } | undefined;
+
+/**
+ * Manually (re-)send one of the lifecycle emails. Every transition already
+ * emails automatically — this covers "the customer can't find it" and
+ * "we corrected the tracking number, send it again".
+ */
+export async function sendStageEmailAction(
+  _prev: EmailSendResult,
+  formData: FormData
+): Promise<EmailSendResult> {
+  const user = await requireAdmin();
+  const id = String(formData.get("id"));
+  const stage = STAGE_EMAILS[String(formData.get("stage")) as keyof typeof STAGE_EMAILS];
+  if (!stage) return { error: "Unknown email type." };
+
+  if (!emailConfigured()) {
+    return { error: "Email isn't configured (BREVO_API_KEY is missing), so nothing can be sent." };
+  }
+  const order = await getOrder(id);
+  if (!order) return { error: "Order not found." };
+  if (!order.customer.email) return { error: "This order has no customer email on file." };
+  if (!(stage.statuses as readonly string[]).includes(order.status)) {
+    return { error: stage.invalid };
+  }
+
+  await stage.send(order);
+  await addOrderNote(id, stage.note, user.email);
+  refresh(id);
+  return { ok: `Sent to ${order.customer.email}.` };
+}
+
+/**
+ * Re-send the "finish your order" nudge for an unpaid checkout. The webhook
+ * sends one automatically on payment.failed; this lets the team follow up
+ * manually a day later from the order page.
+ */
+export async function sendRecoveryEmailAction(
+  _prev: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const user = await requireAdmin();
+  const id = String(formData.get("id"));
+
+  if (!emailConfigured()) {
+    return { error: "Email isn't configured (BREVO_API_KEY is missing), so no nudge can be sent." };
+  }
+  const order = await getOrder(id);
+  if (!order || !["created", "failed"].includes(order.status)) {
+    return { error: "Recovery nudges only apply to unpaid checkouts." };
+  }
+  if (!order.customer.email) {
+    return { error: "This order has no customer email on file." };
+  }
+
+  await sendPaymentFailedEmail(order);
+  await addOrderNote(id, "Recovery email re-sent to the customer", user.email);
   refresh(id);
   return undefined;
 }

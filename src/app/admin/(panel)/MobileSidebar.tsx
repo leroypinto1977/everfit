@@ -7,13 +7,16 @@ import { MenuIcon, CloseIcon } from "@/components/admin/icons";
 import Sidebar from "./Sidebar";
 
 /** Hamburger + off-canvas drawer for the admin sidebar on < lg screens. */
-export default function MobileSidebar() {
+export default function MobileSidebar({ role }: { role?: string }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
-    setOpen(false); // close on navigation
-  }, [pathname]);
+  // close on navigation — state adjustment during render, not an effect
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
+    setOpen(false);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -62,7 +65,7 @@ export default function MobileSidebar() {
               >
                 <CloseIcon className="h-5 w-5" />
               </button>
-              <Sidebar onNavigate={() => setOpen(false)} />
+              <Sidebar role={role} onNavigate={() => setOpen(false)} />
             </motion.aside>
           </div>
         )}

@@ -53,9 +53,20 @@ export async function setVariantStock(variantId: string, newStock: number | null
     .where(eq(productVariants.id, variantId));
   const before = cur?.stock ?? null;
 
-  // Stop tracking — no numeric movement to log.
+  // Stop tracking — keep an audit row (delta 0) so the ledger explains why
+  // the running total disappears.
   if (newStock === null) {
-    await db().update(productVariants).set({ stock: null }).where(eq(productVariants.id, variantId));
+    if (before === null) return null; // already untracked, nothing changed
+    await db().transaction(async (tx) => {
+      await tx.update(productVariants).set({ stock: null }).where(eq(productVariants.id, variantId));
+      await tx.insert(inventoryMovements).values({
+        variantId,
+        delta: 0,
+        reason: "adjustment",
+        note: `Stopped tracking (was ${before})`,
+        actor,
+      });
+    });
     return null;
   }
 

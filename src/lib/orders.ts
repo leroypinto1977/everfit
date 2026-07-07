@@ -215,6 +215,21 @@ export async function listOrders(opts?: {
   return { orders: rows.map(toOrder), total: totals[0].n };
 }
 
+/**
+ * One-query dashboard counters: fulfilment backlog plus recent checkouts that
+ * never became revenue (payment failed, or abandoned before paying).
+ */
+export async function getOrderCounts() {
+  const [row] = await db()
+    .select({
+      toShip: sql<number>`count(*) filter (where ${orders.status} = 'paid')::int`,
+      failed7d: sql<number>`count(*) filter (where ${orders.status} = 'failed' and ${orders.createdAt} > now() - interval '7 days')::int`,
+      abandoned7d: sql<number>`count(*) filter (where ${orders.status} = 'created' and ${orders.createdAt} > now() - interval '7 days' and ${orders.createdAt} < now() - interval '1 hour')::int`,
+    })
+    .from(orders);
+  return row;
+}
+
 export async function getOrderEvents(orderId: string): Promise<OrderEvent[]> {
   const rows = await db()
     .select()
@@ -240,7 +255,8 @@ export const LOW_STOCK_THRESHOLD = 5;
 
 /**
  * Adjust tracked stock, log a ledger movement, and return the variant's new
- * level (null = untracked, no change made).
+ * level (null = untracked, no change made). Runs in a transaction so the
+ * stock total and its ledger entry can never drift apart.
  */
 async function adjustStock(
   variantKey: string | null | undefined,
@@ -249,23 +265,25 @@ async function adjustStock(
   orderId?: string
 ) {
   if (!variantKey) return null;
-  const rows = await db()
-    .update(productVariants)
-    .set({ stock: sql`${productVariants.stock} + ${delta}` })
-    .where(and(eq(productVariants.key, variantKey), sql`${productVariants.stock} IS NOT NULL`))
-    .returning({
-      id: productVariants.id,
-      weight: productVariants.weight,
-      sku: productVariants.sku,
-      stock: productVariants.stock,
-    });
-  const v = rows[0];
-  if (v) {
-    await db()
-      .insert(inventoryMovements)
-      .values({ variantId: v.id, delta, reason, orderId: orderId ?? null });
-  }
-  return v ?? null;
+  return db().transaction(async (tx) => {
+    const rows = await tx
+      .update(productVariants)
+      .set({ stock: sql`${productVariants.stock} + ${delta}` })
+      .where(and(eq(productVariants.key, variantKey), sql`${productVariants.stock} IS NOT NULL`))
+      .returning({
+        id: productVariants.id,
+        weight: productVariants.weight,
+        sku: productVariants.sku,
+        stock: productVariants.stock,
+      });
+    const v = rows[0];
+    if (v) {
+      await tx
+        .insert(inventoryMovements)
+        .values({ variantId: v.id, delta, reason, orderId: orderId ?? null });
+    }
+    return v ?? null;
+  });
 }
 
 /* ---------- transitions ---------- */
@@ -403,6 +421,24 @@ export async function markRefundProcessed(refundId: string) {
     .where(eq(refunds.id, refundId))
     .returning();
   if (rows[0]) await logEvent(rows[0].orderId, "refund_processed", "system");
+  return rows[0] ?? null;
+}
+
+/** Razorpay webhook signal that a refund bounced — flags it for manual follow-up. */
+export async function markRefundFailed(refundId: string) {
+  const rows = await db()
+    .update(refunds)
+    .set({ status: "failed" })
+    .where(eq(refunds.id, refundId))
+    .returning();
+  if (rows[0]) {
+    await logEvent(
+      rows[0].orderId,
+      "refund_failed",
+      "system",
+      "Razorpay could not complete the refund — check the Razorpay dashboard and retry."
+    );
+  }
   return rows[0] ?? null;
 }
 

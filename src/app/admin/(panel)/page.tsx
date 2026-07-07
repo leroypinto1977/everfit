@@ -1,48 +1,66 @@
 import Link from "next/link";
-import { listOrders } from "@/lib/orders";
+import { getOrderCounts, listOrders } from "@/lib/orders";
+import { getDailyRevenue, getRevenueStats } from "@/lib/revenue";
 import { listVariantsAdmin } from "@/lib/catalog";
+import AutoRefresh from "@/components/admin/AutoRefresh";
 import KpiCard from "@/components/admin/KpiCard";
 import RevenueChart, { type DayPoint } from "@/components/admin/RevenueChart";
 import StatusBadge from "@/components/admin/StatusBadge";
 
 export const dynamic = "force-dynamic";
 
-const fulfilled = new Set(["paid", "shipped", "delivered"]);
-
 export default async function AdminDashboard() {
-  const [{ orders }, variants] = await Promise.all([
-    listOrders({ limit: 500 }),
+  const now = new Date();
+  const tomorrow = new Date(now);
+  tomorrow.setHours(0, 0, 0, 0);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const days30 = new Date(tomorrow);
+  days30.setDate(days30.getDate() - 30);
+  const days60 = new Date(tomorrow);
+  days60.setDate(days60.getDate() - 60);
+  const days14 = new Date(tomorrow);
+  days14.setDate(days14.getDate() - 14);
+
+  // aggregates come from SQL — the dashboard no longer pages 500 orders into memory
+  const [stats, prevStats, daily, counts, { orders: recent }, variants] = await Promise.all([
+    getRevenueStats(days30, tomorrow),
+    getRevenueStats(days60, days30),
+    getDailyRevenue(days14, tomorrow),
+    getOrderCounts(),
+    listOrders({ limit: 6 }),
     listVariantsAdmin(),
   ]);
-  const lowStock = variants.filter((v) => v.active && v.stock !== null && v.stock <= 5);
-  const paidOrders = orders.filter((o) => fulfilled.has(o.status));
-  const revenue = paidOrders.reduce((sum, o) => sum + o.amount, 0) / 100;
-  const toShip = orders.filter((o) => o.status === "paid").length;
-  const aov = paidOrders.length ? Math.round(revenue / paidOrders.length) : 0;
 
-  // bucket paid orders into the last 14 days
+  const lowStock = variants.filter((v) => v.active && v.stock !== null && v.stock <= 5);
+
+  // % change vs the previous 30 days (only when there's a base to compare against)
+  const delta =
+    prevStats.grossRevenue > 0
+      ? Math.round(((stats.grossRevenue - prevStats.grossRevenue) / prevStats.grossRevenue) * 100)
+      : null;
+  const deltaHint =
+    delta === null ? "last 30 days" : `${delta >= 0 ? "+" : ""}${delta}% vs previous 30 days`;
+
+  // continuous 14-day series for the chart
+  const byDay = new Map(daily.map((d) => [new Date(d.day).toDateString(), d]));
   const days: DayPoint[] = [];
-  for (let i = 13; i >= 0; i--) {
-    const day = new Date();
-    day.setHours(0, 0, 0, 0);
-    day.setDate(day.getDate() - i);
-    const next = new Date(day);
-    next.setDate(day.getDate() + 1);
-    const inDay = paidOrders.filter((o) => {
-      const t = new Date(o.paidAt ?? o.createdAt).getTime();
-      return t >= day.getTime() && t < next.getTime();
-    });
+  for (let i = 0; i < 14; i++) {
+    const day = new Date(days14);
+    day.setDate(days14.getDate() + i);
+    const hit = byDay.get(day.toDateString());
     days.push({
       label: day.toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
-      revenue: inDay.reduce((s, o) => s + o.amount, 0) / 100,
-      orders: inDay.length,
+      revenue: (hit?.revenue ?? 0) / 100,
+      orders: hit?.orders ?? 0,
     });
   }
 
-  const recent = orders.slice(0, 6);
+  const attention = counts.failed7d + counts.abandoned7d;
 
   return (
     <div className="space-y-6">
+      <AutoRefresh />
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold italic">Dashboard</h1>
@@ -57,11 +75,40 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard index={0} label="Total revenue" value={`₹${revenue.toLocaleString("en-IN")}`} hint="paid + shipped + delivered" />
-        <KpiCard index={1} label="Orders" value={String(paidOrders.length)} hint="successful payments" />
-        <KpiCard index={2} label="To ship" value={String(toShip)} hint="paid, awaiting dispatch" />
-        <KpiCard index={3} label="Avg. order value" value={`₹${aov.toLocaleString("en-IN")}`} />
+        <KpiCard
+          index={0}
+          label="Revenue (30 days)"
+          value={`₹${(stats.grossRevenue / 100).toLocaleString("en-IN")}`}
+          hint={deltaHint}
+        />
+        <KpiCard index={1} label="Orders (30 days)" value={String(stats.paidOrders)} hint="successful payments" />
+        <KpiCard index={2} label="To ship" value={String(counts.toShip)} hint="paid, awaiting dispatch" />
+        <KpiCard
+          index={3}
+          label="Avg. order value"
+          value={`₹${Math.round(stats.avgOrderValue / 100).toLocaleString("en-IN")}`}
+          hint="last 30 days"
+        />
       </div>
+
+      {attention > 0 && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-800">
+          💸 {counts.failed7d > 0 && (
+            <>
+              <Link href="/admin/orders?status=failed" className="font-semibold underline">
+                {counts.failed7d} failed payment{counts.failed7d === 1 ? "" : "s"}
+              </Link>
+            </>
+          )}
+          {counts.failed7d > 0 && counts.abandoned7d > 0 && " and "}
+          {counts.abandoned7d > 0 && (
+            <Link href="/admin/orders?status=created" className="font-semibold underline">
+              {counts.abandoned7d} abandoned checkout{counts.abandoned7d === 1 ? "" : "s"}
+            </Link>
+          )}{" "}
+          in the last 7 days — open one to send the customer a recovery email.
+        </div>
+      )}
 
       {lowStock.length > 0 && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-800">

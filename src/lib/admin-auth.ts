@@ -1,5 +1,5 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
-import { and, count, eq, gt } from "drizzle-orm";
+import { and, count, eq, gt, lt } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
@@ -68,13 +68,23 @@ export async function createSession(userId: string) {
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
   await db().insert(adminSessions).values({ tokenHash: sha256(token), userId, expiresAt });
 
+  // opportunistic hygiene: sign-ins are rare, so piggyback expired-row cleanup
+  // here instead of running a scheduled job
+  const now = new Date();
+  await Promise.allSettled([
+    db().delete(adminSessions).where(lt(adminSessions.expiresAt, now)),
+    db().delete(passwordResets).where(lt(passwordResets.expiresAt, now)),
+  ]);
+
   const store = await cookies();
   store.set(COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     maxAge: SESSION_DAYS * 24 * 60 * 60,
-    path: "/admin",
+    // "/" (not "/admin") so the cookie also reaches /api/admin/* — the CSV
+    // export endpoints authenticate with the same session
+    path: "/",
   });
 }
 

@@ -2,10 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrder, getOrderEvents, getOrderRefunds } from "@/lib/orders";
 import { getAdminUser } from "@/lib/admin-auth";
-import { COURIERS, courierName, trackingUrl } from "@/lib/couriers";
+import { courierName, trackingUrl } from "@/lib/couriers";
+import AutoRefresh from "@/components/admin/AutoRefresh";
 import StatusBadge from "@/components/admin/StatusBadge";
-import { InvoiceIcon } from "@/components/admin/icons";
-import { addNoteAction, cancelOrderAction, markDeliveredAction, markShippedAction } from "../actions";
+import { InvoiceIcon, PrinterIcon } from "@/components/admin/icons";
+import { addNoteAction } from "../actions";
+import { CancelForm, DeliverForm, ShipForm } from "./FulfilmentForms";
+import EmailButtons from "./EmailButtons";
 import RefundForm from "./RefundForm";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +22,7 @@ const eventLabels: Record<string, string> = {
   failed: "Payment failed",
   refund_initiated: "Refund initiated",
   refund_processed: "Refund processed by Razorpay",
+  refund_failed: "Refund failed at Razorpay",
   note: "Note",
 };
 
@@ -41,6 +45,7 @@ export default async function OrderDetail({
 
   return (
     <div className="space-y-6">
+      <AutoRefresh />
       <div>
         <Link href="/admin/orders" className="text-sm text-[#6b7194] hover:text-[#2b337d]">
           ← All orders
@@ -52,6 +57,15 @@ export default async function OrderDetail({
             <p className="mt-1 font-mono text-sm text-[#9aa0c3]">{order.id}</p>
           </div>
           <div className="flex items-center gap-3">
+            {["paid", "shipped", "delivered"].includes(order.status) && (
+              <Link
+                href={`/admin/orders/${order.id}/label`}
+                className="inline-flex items-center gap-2 rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm text-[#4a5072] hover:border-[#2b337d]/40"
+              >
+                <PrinterIcon className="h-4 w-4" />
+                Shipping label
+              </Link>
+            )}
             {order.invoiceNo && (
               <Link
                 href={`/admin/orders/${order.id}/invoice`}
@@ -174,11 +188,14 @@ export default async function OrderDetail({
               </div>
             )}
             {orderRefunds.map((r) => (
-              <div key={r.id} className="rounded-xl bg-purple-50 px-4 py-3">
-                <dt className="text-purple-900/70">
-                  Refund · {r.status === "processed" ? "processed" : "initiated"}
+              <div
+                key={r.id}
+                className={`rounded-xl px-4 py-3 ${r.status === "failed" ? "bg-red-50" : "bg-purple-50"}`}
+              >
+                <dt className={r.status === "failed" ? "text-red-700" : "text-purple-900/70"}>
+                  Refund · {r.status}
                 </dt>
-                <dd className="mt-1 font-medium text-purple-900">
+                <dd className={`mt-1 font-medium ${r.status === "failed" ? "text-red-700" : "text-purple-900"}`}>
                   ₹{(r.amount / 100).toLocaleString("en-IN")}
                   <span className="block font-mono text-xs font-normal">{r.id}</span>
                 </dd>
@@ -189,74 +206,13 @@ export default async function OrderDetail({
       </div>
 
       {/* fulfilment actions */}
-      {order.status === "paid" && (
-        <form
-          action={markShippedAction}
-          className="flex flex-wrap items-end gap-3 rounded-2xl border border-[#e3e5f0] bg-white p-6"
-        >
-          <input type="hidden" name="id" value={order.id} />
-          <div className="w-44">
-            <label htmlFor="courier" className="mb-2 block text-sm text-[#6b7194]">
-              Courier
-            </label>
-            <select
-              id="courier"
-              name="courier"
-              className="w-full rounded-xl border border-[#dcdfee] bg-white px-3 py-2.5 text-sm outline-none focus:border-[#2b337d]"
-            >
-              <option value="">— Select —</option>
-              {COURIERS.map((co) => (
-                <option key={co.key} value={co.key}>
-                  {co.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="min-w-64 flex-1">
-            <label htmlFor="tracking" className="mb-2 block text-sm text-[#6b7194]">
-              Tracking number (optional)
-            </label>
-            <input
-              id="tracking"
-              name="tracking"
-              placeholder="e.g. 1234567890"
-              className="w-full rounded-xl border border-[#dcdfee] px-4 py-2.5 text-sm outline-none focus:border-[#2b337d]"
-            />
-          </div>
-          <button
-            type="submit"
-            className="rounded-xl bg-[#2b337d] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#232a68]"
-          >
-            Mark as shipped
-          </button>
-          <p className="w-full text-xs text-[#9aa0c3]">The customer gets a shipping email with the tracking link.</p>
-        </form>
-      )}
+      {order.status === "paid" && <ShipForm orderId={order.id} />}
 
-      {order.status === "shipped" && (
-        <form action={markDeliveredAction} className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
-          <input type="hidden" name="id" value={order.id} />
-          <button
-            type="submit"
-            className="rounded-xl bg-[#2b337d] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#232a68]"
-          >
-            Mark as delivered
-          </button>
-        </form>
-      )}
+      {order.status === "shipped" && <DeliverForm orderId={order.id} />}
 
-      {["created", "failed"].includes(order.status) && (
-        <form action={cancelOrderAction} className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
-          <input type="hidden" name="id" value={order.id} />
-          <p className="text-sm text-[#6b7194]">This order never reached payment.</p>
-          <button
-            type="submit"
-            className="mt-3 rounded-xl border border-[#dcdfee] px-6 py-2.5 text-sm font-semibold text-[#4a5072] transition-colors hover:border-red-300 hover:text-red-600"
-          >
-            Cancel order
-          </button>
-        </form>
-      )}
+      {["created", "failed"].includes(order.status) && <CancelForm orderId={order.id} />}
+
+      {order.customer.email && <EmailButtons orderId={order.id} status={order.status} />}
 
       {user?.role === "owner" &&
         ["paid", "shipped", "delivered"].includes(order.status) &&

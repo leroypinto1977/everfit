@@ -43,9 +43,13 @@ export default function Navbar() {
 
   const lenis = useLenis(refresh, [refresh]);
   useEffect(() => {
-    refresh();
+    // initial sync deferred to a frame so the effect body stays setState-free
+    const raf = requestAnimationFrame(refresh);
     window.addEventListener("scroll", refresh, { passive: true });
-    return () => window.removeEventListener("scroll", refresh);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", refresh);
+    };
   }, [refresh]);
 
   const active =
@@ -95,9 +99,12 @@ export default function Navbar() {
 
   // --- mobile drawer ---
   const [mobileOpen, setMobileOpen] = useState(false);
-  useEffect(() => {
-    setMobileOpen(false); // close on route change
-  }, [pathname]);
+  // close on route change — state adjustment during render, not an effect
+  const [lastPath, setLastPath] = useState(pathname);
+  if (pathname !== lastPath) {
+    setLastPath(pathname);
+    setMobileOpen(false);
+  }
 
   // Lock background scroll while the mobile drawer is open. Lenis owns the
   // scroll, so pause it (stop/start) and hide overflow as a belt-and-braces.

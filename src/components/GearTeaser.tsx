@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
+import { inr } from "@/lib/product";
 import ProductVisual from "./ProductVisual";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
@@ -9,7 +10,7 @@ import Magnetic from "./Magnetic";
 const points = ["Contoured for her", "Iron-sand core", "Wear anywhere"];
 
 /** Condensed band teaser — curiosity here, full detail + buy on /product. */
-export default function GearTeaser() {
+export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number }) {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-20 sm:py-32 lg:grid-cols-2 lg:gap-14">
@@ -66,7 +67,7 @@ export default function GearTeaser() {
                   <span>→</span>
                 </Link>
               </Magnetic>
-              <span className="text-sm text-muted">Pairs from ₹1,499 · free shipping</span>
+              <span className="text-sm text-muted">Pairs from {inr(fromPrice)} · free shipping</span>
             </div>
           </Reveal>
         </div>

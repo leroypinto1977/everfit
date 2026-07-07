@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { markPaid, markFailed, markRefundProcessed } from "@/lib/orders";
+import { markPaid, markFailed, markRefundFailed, markRefundProcessed } from "@/lib/orders";
 import { sendLowStockAlert, sendOrderNotifications, sendPaymentFailedEmail } from "@/lib/notify";
 
 /**
@@ -46,10 +46,13 @@ export async function POST(req: Request) {
     if (order) await sendPaymentFailedEmail(order);
   }
 
-  // optional event — enable refund.processed in the Razorpay webhook config
+  // optional events — enable refund.processed / refund.failed in the Razorpay webhook config
   const refund = event.payload?.refund?.entity;
   if (event.event === "refund.processed" && refund) {
     await markRefundProcessed(refund.id);
+  }
+  if (event.event === "refund.failed" && refund) {
+    await markRefundFailed(refund.id);
   }
 
   return NextResponse.json({ received: true });

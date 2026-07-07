@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
 import { COURIERS } from "@/lib/couriers";
 import { markShippedAction } from "./actions";
 
@@ -11,6 +11,7 @@ import { markShippedAction } from "./actions";
  */
 export default function QuickShip({ orderId }: { orderId: string }) {
   const [open, setOpen] = useState(false);
+  const [state, action, pending] = useActionState(markShippedAction, undefined);
 
   if (!open) {
     return (
@@ -25,31 +26,35 @@ export default function QuickShip({ orderId }: { orderId: string }) {
   }
 
   return (
-    <form action={markShippedAction} className="flex items-center gap-1.5">
-      <input type="hidden" name="id" value={orderId} />
-      <select
-        name="courier"
-        defaultValue=""
-        className="rounded-lg border border-[#dcdfee] bg-white px-2 py-1.5 text-xs outline-none focus:border-[#2b337d]"
-      >
-        <option value="">Courier</option>
-        {COURIERS.map((c) => (
-          <option key={c.key} value={c.key}>
-            {c.name}
-          </option>
-        ))}
-      </select>
-      <input
-        name="tracking"
-        placeholder="Tracking #"
-        className="w-28 rounded-lg border border-[#dcdfee] px-2 py-1.5 text-xs outline-none focus:border-[#2b337d]"
-      />
-      <button
-        type="submit"
-        className="rounded-lg bg-[#2b337d] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#232a68]"
-      >
-        Go
-      </button>
+    <form action={action} className="flex flex-col items-end gap-1.5">
+      <div className="flex items-center gap-1.5">
+        <input type="hidden" name="id" value={orderId} />
+        <select
+          name="courier"
+          defaultValue=""
+          className="rounded-lg border border-[#dcdfee] bg-white px-2 py-1.5 text-xs outline-none focus:border-[#2b337d]"
+        >
+          <option value="">Courier</option>
+          {COURIERS.map((c) => (
+            <option key={c.key} value={c.key}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+        <input
+          name="tracking"
+          placeholder="Tracking #"
+          className="w-28 rounded-lg border border-[#dcdfee] px-2 py-1.5 text-xs outline-none focus:border-[#2b337d]"
+        />
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded-lg bg-[#2b337d] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#232a68] disabled:opacity-60"
+        >
+          {pending ? "…" : "Go"}
+        </button>
+      </div>
+      {state?.error && <p className="text-xs text-red-600">{state.error}</p>}
     </form>
   );
 }

@@ -19,13 +19,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="admin-ui flex h-screen overflow-hidden bg-[#f3f4fa] text-[#1c2030]">
       {/* desktop sidebar — hidden on mobile, where it becomes a drawer */}
       <aside className="hidden w-64 shrink-0 flex-col bg-white lg:flex">
-        <Sidebar />
+        <Sidebar role={user.role} />
       </aside>
 
       {/* content column — top navbar + scrollable page */}
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-3 border-b border-[#e3e5f0] bg-white px-4 sm:px-8">
-          <MobileSidebar />
+          <MobileSidebar role={user.role} />
           {/* left spacer keeps the right cluster aligned */}
           <div className="flex-1" />
 
