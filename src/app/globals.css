@@ -110,13 +110,21 @@ body {
 }
 
 /* ---- infinity logo draw-on ---- */
-@keyframes draw-loop {
-  from { stroke-dashoffset: 600; }
-  to { stroke-dashoffset: 0; }
+/* The mark is a filled shape: ink the outline first (stroke), then fade the
+   fill in. pathLength=1 on the <path> normalizes the dash maths across sizes. */
+@keyframes infinity-draw-on {
+  0%   { stroke-dashoffset: 1; fill-opacity: 0; }
+  55%  { stroke-dashoffset: 0; fill-opacity: 0; }
+  100% { stroke-dashoffset: 0; fill-opacity: 1; }
 }
 .infinity-draw {
-  stroke-dasharray: 600;
-  animation: draw-loop 2.2s ease-out forwards;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  fill-opacity: 0;
+  animation: infinity-draw-on 2.2s ease-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -126,5 +134,10 @@ body {
   .text-shine,
   .infinity-draw {
     animation: none;
+  }
+  /* No animation → skip straight to the fully-inked, filled state. */
+  .infinity-draw {
+    fill-opacity: 1;
+    stroke-dashoffset: 0;
   }
 }
