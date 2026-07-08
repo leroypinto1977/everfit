@@ -2,7 +2,6 @@
 
 import { motion } from "motion/react";
 import Reveal from "./Reveal";
-import { InfinityMark } from "./Logo";
 
 const stats = [
   { value: "7+", label: "Years coaching" },
@@ -10,16 +9,12 @@ const stats = [
   { value: "2", label: "Flagship programs" },
 ];
 
-/**
- * "Meet Manjula" — the trust bridge into the programs.
- * The portrait is a branded placeholder frame for now: drop an <img> into
- * the marked block once a photo of Manjula is available.
- */
+/** "Meet Manjula" — the trust bridge into the programs. */
 export default function Coach() {
   return (
     <section className="border-y border-line bg-brand-soft/40">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-20 sm:py-28 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
-        {/* portrait frame (placeholder) */}
+        {/* portrait */}
         <Reveal>
           <motion.div
             initial={{ opacity: 0, scale: 0.94 }}
@@ -28,14 +23,14 @@ export default function Coach() {
             transition={{ duration: 0.8, ease: [0.21, 0.65, 0.36, 1] }}
             className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand to-brand-deep shadow-[0_24px_70px_rgba(43,51,125,0.3)]"
           >
-            {/* TODO: replace this branded placeholder with Manjula's photo:
-                <Image src="/manjula.jpg" alt="Manjula Narayanan" fill className="object-cover" /> */}
-            <div className="absolute inset-0 grid place-items-center">
-              <InfinityMark className="w-2/3 text-white/10" draw />
-            </div>
-            <div className="absolute inset-x-0 bottom-0 p-7">
-              <p className="font-display text-5xl font-bold leading-none text-white/90">MN</p>
-              <p className="mt-2 text-sm uppercase tracking-[0.25em] text-white/70">Manjula Narayanan</p>
+            <img
+              src="/manjula.jpg"
+              alt="Manjula Narayanan, EVHERFIT women's fitness coach"
+              className="absolute inset-0 h-full w-full object-cover object-[center_25%]"
+            />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-deep/85 via-brand-deep/30 to-transparent p-7">
+              <p className="font-display text-2xl font-bold leading-none text-white">Manjula Narayanan</p>
+              <p className="mt-2 text-xs uppercase tracking-[0.25em] text-white/75">Women&apos;s fitness coach</p>
             </div>
           </motion.div>
         </Reveal>

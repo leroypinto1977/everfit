@@ -5,19 +5,19 @@ import Reveal from "./Reveal";
 const reviews = [
   {
     quote:
-      "I wear the 0.5s on every morning walk now. Same route, same time — my watch says a third more burn and my arms finally feel worked.",
+      "I keep the blue tube by the door and do 15 minutes before work. Rows, presses, curls — my arms finally feel worked without a single dumbbell.",
     name: "Ananya R.",
-    tag: "Morning walker, Bengaluru",
+    tag: "Morning routine, Bengaluru",
   },
   {
     quote:
-      "Wore ankle weights for years that bounced and bruised. These genuinely don't move — I forget they're on until the next day's soreness reminds me.",
+      "The foam handles are so comfy and clip on in seconds. I started on 1.5 kg and just moved up to 2 kg — having both has kept me progressing.",
     name: "Priya S.",
     tag: "Pilates, Mumbai",
   },
   {
     quote:
-      "Threw them in the wash after a sweaty month of use. Came out like new. The pink stitching still makes me smile mid-burpee.",
+      "They coil into my carry-on, so my routine travels with me. Full-body workout in a hotel room, no excuses — that's what sold me on the bundle.",
     name: "Meera K.",
     tag: "HIIT, Pune",
   },

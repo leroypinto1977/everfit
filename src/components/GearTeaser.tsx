@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { inr } from "@/lib/product";
-import ProductVisual from "./ProductVisual";
+import { inr, HERO_IMAGE } from "@/lib/product";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
 
-const points = ["Contoured for her", "Iron-sand core", "Wear anywhere"];
+const points = ["Clip-on foam handles", "Colour-coded resistance", "Train anywhere"];
 
 /** Condensed band teaser — curiosity here, full detail + buy on /product. */
 export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number }) {
@@ -25,7 +24,11 @@ export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number
               transition={{ duration: 0.9, ease: [0.21, 0.65, 0.36, 1] }}
               className="animate-float-slow"
             >
-              <ProductVisual view="loop" className="w-full" />
+              <img
+                src={HERO_IMAGE}
+                alt="EVHERFIT Infinity Band resistance tube set"
+                className="w-full rounded-3xl border border-line object-cover shadow-[0_12px_40px_rgba(43,51,125,0.14)]"
+              />
             </motion.div>
           </div>
         </Reveal>
@@ -37,9 +40,9 @@ export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number
               The Infinity Band.
             </h2>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">
-              Weighted resistance bands designed for her — an iron-sand core in a
-              soft silicone shell. Strap in and turn every walk, flow and lift into
-              strength training. Strong is infinite.
+              Resistance tubes designed for her — durable latex tubing with padded
+              foam-grip handles. Clip in and turn presses, rows, curls and squats
+              into a full-body workout. Strong is infinite.
             </p>
           </Reveal>
 
@@ -67,7 +70,7 @@ export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number
                   <span>→</span>
                 </Link>
               </Magnetic>
-              <span className="text-sm text-muted">Pairs from {inr(fromPrice)} · free shipping</span>
+              <span className="text-sm text-muted">Sets from {inr(fromPrice)} · free shipping</span>
             </div>
           </Reveal>
         </div>

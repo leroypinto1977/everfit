@@ -1,37 +1,36 @@
 "use client";
 
-import ProductVisual, { type ProductView } from "./ProductVisual";
 import Reveal from "./Reveal";
 
-const panels: { view: ProductView; kicker: string; title: string; body: string }[] = [
+const panels: { img: string; kicker: string; title: string; body: string }[] = [
   {
-    view: "loop",
-    kicker: "Wraps right",
-    title: "Curves of power.",
-    body: "The band wraps your wrist or ankle like it was poured there — contoured silicone, zero bounce, comfortable through a full hour of movement.",
+    img: "/products/tube-blue-1.jpg",
+    kicker: "Clip-on handles",
+    title: "Grip. Clip. Go.",
+    body: "Padded foam handles clip to the tube with metal carabiners — attach, detach and swap in seconds. No hardware, no fuss, a solid grip through every rep.",
   },
   {
-    view: "core",
-    kicker: "Iron-sand core",
-    title: "Soft outside. Iron inside.",
-    body: "Fine iron sand in segmented pods spreads the load evenly around the joint — none of the dig and clunk of solid metal weights.",
+    img: "/products/bundle-3.jpg",
+    kicker: "Colour-coded resistance",
+    title: "Know your level at a glance.",
+    body: "Blue is 1.5 kg, red is 2 kg. Pick the tube that matches your session — or clip both together when you want to push past your usual load.",
   },
   {
-    view: "strap",
-    kicker: "Dual-lock strap",
-    title: "Locks in. Lets go never.",
-    body: "A wide hook-and-loop strap pulls through a steel D-ring and folds back on itself. It holds through burpees, box jumps and everything between.",
+    img: "/products/tube-red-1.jpg",
+    kicker: "Train anywhere",
+    title: "Your gym, in a bag.",
+    body: "Light, packable latex tubing coils down small enough to drop in a tote. Home, park, hotel room — your full-body workout comes with you.",
   },
   {
-    view: "pair",
-    kicker: "Sold as a pair",
-    title: "Balance, by design.",
-    body: "Two bands in every box — one for each side, so your body trains symmetrically. Stack both on one ankle when you want more.",
+    img: "/products/bundle-1.jpg",
+    kicker: "The complete set",
+    title: "Both tubes. Full range.",
+    body: "The bundle pairs the 1.5 kg and 2 kg tubes so you can progress from toning to strength — and stack them for the days you want more.",
   },
 ];
 
 /**
- * The band, view by view. Plain stacked rows (image + copy), alternating sides
+ * The set, view by view. Plain stacked rows (photo + copy), alternating sides
  * on desktop — scrolls naturally, no scroll-jacking / pinned sections.
  */
 export default function Showcase() {
@@ -41,11 +40,15 @@ export default function Showcase() {
         {panels.map((panel, i) => {
           const flip = i % 2 === 1;
           return (
-            <Reveal key={panel.view}>
+            <Reveal key={panel.img}>
               <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-                <div className={`relative mx-auto w-60 sm:w-80 ${flip ? "lg:order-2" : ""}`}>
+                <div className={`relative mx-auto w-64 sm:w-80 ${flip ? "lg:order-2" : ""}`}>
                   <div className="absolute inset-8 -z-10 rounded-full bg-brand-soft blur-[60px]" />
-                  <ProductVisual view={panel.view} className="w-full" />
+                  <img
+                    src={panel.img}
+                    alt={panel.title}
+                    className="w-full rounded-3xl border border-line object-cover shadow-[0_8px_30px_rgba(43,51,125,0.10)]"
+                  />
                 </div>
                 <div className={flip ? "lg:order-1" : ""}>
                   <p className="mb-3 text-xs uppercase tracking-[0.3em] text-accent">{panel.kicker}</p>

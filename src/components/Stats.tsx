@@ -26,9 +26,9 @@ function Counter({ to, suffix = "", duration = 1.6 }: { to: number; suffix?: str
 }
 
 const stats = [
-  { value: 2, suffix: " bands", label: "In every box" },
-  { value: 3, suffix: " weights", label: "0.5 to 2 kg per band" },
-  { value: 120, suffix: "+ washes", label: "Tested, zero leaks" },
+  { value: 2, suffix: " handles", label: "Foam grips per tube" },
+  { value: 2, suffix: " levels", label: "1.5 kg & 2 kg resistance" },
+  { value: 30, suffix: "+ moves", label: "Full-body exercises" },
   { value: 1, suffix: "-year", label: "Warranty included" },
 ];
 

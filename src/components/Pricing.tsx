@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { VARIANTS, inr, type Variant } from "@/lib/product";
+import { VARIANTS, inr, variantImages, type Variant } from "@/lib/product";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
 
@@ -9,13 +9,13 @@ export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] 
   return (
     <section id="pricing" className="mx-auto max-w-7xl px-6 py-20 sm:py-32">
       <Reveal>
-        <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Pick your weight</p>
+        <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Pick your resistance</p>
         <h2 className="font-display text-4xl font-bold tracking-tight text-brand sm:text-6xl">
           Start light. <span className="text-foreground/60">Grow infinite.</span>
         </h2>
         <p className="mt-5 max-w-xl text-lg text-muted">
-          Every option is a pair — one band for each wrist or ankle. Free shipping
-          across India, 7-day returns.
+          Every set is a tube with two foam-grip handles. Free shipping across
+          India, 7-day returns.
         </p>
       </Reveal>
 
@@ -31,9 +31,16 @@ export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] 
             >
               {v.popular && (
                 <span className="absolute -top-3.5 left-8 rounded-full bg-accent px-4 py-1 text-xs font-bold uppercase tracking-wider text-white">
-                  Most popular
+                  Best value
                 </span>
               )}
+              <div className={`mb-5 overflow-hidden rounded-2xl ${v.popular ? "bg-white/10" : "bg-brand-soft"}`}>
+                <img
+                  src={variantImages(v.key)[0]}
+                  alt={`${v.label} — ${v.weight}`}
+                  className="aspect-[4/3] w-full object-cover"
+                />
+              </div>
               <p className={`font-display text-lg font-bold ${v.popular ? "text-accent-soft" : "text-accent"}`}>
                 {v.label}
               </p>

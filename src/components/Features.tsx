@@ -7,28 +7,28 @@ import Reveal from "./Reveal";
 const features = [
   {
     icon: "🌸",
-    title: "Contoured for her",
-    body: "Shaped to women's wrists and ankles — no bounce, no chafe, no slipping mid-flow.",
+    title: "Made for her",
+    body: "Comfortable foam grips and manageable resistance levels — built around how women actually train.",
   },
   {
-    icon: "⚖️",
-    title: "Even iron-sand core",
-    body: "Fine iron sand in segmented pods hugs the joint and spreads weight evenly — no pressure points.",
+    icon: "🎨",
+    title: "Colour-coded resistance",
+    body: "Blue is 1.5 kg, red is 2 kg. Pick your level at a glance — or clip both tubes together for more.",
   },
   {
     icon: "🚶‍♀️",
-    title: "Wear-anywhere resistance",
-    body: "Walks, yoga, pilates, barre, HIIT, physio. Strap in and your usual movement works harder.",
+    title: "Full-body workout",
+    body: "Presses, rows, curls, squats, glute work and more. Toning, strength, HIIT, pilates and mobility.",
   },
   {
     icon: "🔒",
-    title: "Dual-lock fit",
-    body: "Wide hook-and-loop strap through a steel D-ring. Stays put through burpees and box jumps.",
+    title: "Clip-on handles",
+    body: "Padded foam handles attach to the tube with metal carabiners — swap tubes in seconds, no tools.",
   },
   {
-    icon: "💧",
-    title: "Sweatproof & washable",
-    body: "Soft-touch silicone shell wipes clean, and the whole band is machine washable.",
+    icon: "🎒",
+    title: "Train anywhere",
+    body: "Light, packable latex tubing coils down small. Home, gym, park or travel — it comes with you.",
   },
   {
     icon: "🛡️",

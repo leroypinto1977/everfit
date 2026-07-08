@@ -5,9 +5,20 @@ import Link from "next/link";
 import { VARIANTS, inr, type Variant } from "@/lib/product";
 import Magnetic from "./Magnetic";
 
-export default function ProductBuyPanel({ variants = VARIANTS }: { variants?: Variant[] }) {
+export default function ProductBuyPanel({
+  variants = VARIANTS,
+  selected,
+  onSelect,
+}: {
+  variants?: Variant[];
+  /** Controlled selected key. When omitted the panel manages its own state. */
+  selected?: string;
+  onSelect?: (key: string) => void;
+}) {
   const fallback = variants.find((v) => v.popular && !v.soldOut) ?? variants.find((v) => !v.soldOut) ?? variants[0];
-  const [variantKey, setVariantKey] = useState(fallback.key);
+  const [internal, setInternal] = useState(fallback.key);
+  const variantKey = selected ?? internal;
+  const setVariantKey = onSelect ?? setInternal;
   const variant = variants.find((v) => v.key === variantKey) ?? fallback;
 
   return (
@@ -19,9 +30,9 @@ export default function ProductBuyPanel({ variants = VARIANTS }: { variants?: Va
           Save {inr(variant.mrp - variant.price)}
         </span>
       </div>
-      <p className="mt-1 text-sm text-muted">Price for the pair · Free shipping · Inclusive of all taxes</p>
+      <p className="mt-1 text-sm text-muted">Price for the set · Free shipping · Inclusive of all taxes</p>
 
-      <p className="mt-7 text-sm font-semibold uppercase tracking-[0.15em] text-muted">Weight per band</p>
+      <p className="mt-7 text-sm font-semibold uppercase tracking-[0.15em] text-muted">Choose your resistance</p>
       <div className="mt-3 grid grid-cols-3 gap-3">
         {variants.map((v) => (
           <button
@@ -37,7 +48,7 @@ export default function ProductBuyPanel({ variants = VARIANTS }: { variants?: Va
           >
             {v.popular && !v.soldOut && (
               <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-accent px-2.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-wider text-white">
-                Popular
+                Best value
               </span>
             )}
             {v.soldOut && (

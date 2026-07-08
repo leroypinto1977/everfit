@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "motion/react";
-import ProductVisual from "./ProductVisual";
+import { HERO_IMAGE } from "@/lib/product";
 import SplitText from "./SplitText";
 import Magnetic from "./Magnetic";
 import { InfinityMark } from "./Logo";
@@ -93,7 +93,11 @@ export default function Hero() {
         >
           <div className="animate-breathe absolute inset-8 -z-10 rounded-full bg-brand/15 blur-[70px]" />
           <div className="animate-float-slow">
-            <ProductVisual view="loop" className="w-full" />
+            <img
+              src={HERO_IMAGE}
+              alt="EVHERFIT Infinity Band resistance tube set"
+              className="w-full rounded-[2rem] border border-line object-cover shadow-[0_20px_60px_rgba(43,51,125,0.18)]"
+            />
           </div>
         </motion.div>
       </div>

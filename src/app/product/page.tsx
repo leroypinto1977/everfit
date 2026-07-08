@@ -1,60 +1,60 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/Footer";
-import ProductGallery from "@/components/ProductGallery";
-import ProductBuyPanel from "@/components/ProductBuyPanel";
+import ProductDetail from "@/components/ProductDetail";
 import Features from "@/components/Features";
 import Showcase from "@/components/Showcase";
 import Stats from "@/components/Stats";
 import Pricing from "@/components/Pricing";
 import Reveal from "@/components/Reveal";
 import { getCatalog } from "@/lib/catalog";
+import { PRODUCT_NAME } from "@/lib/product";
 
 export const metadata: Metadata = {
-  title: "EVHERFIT Infinity Band — weighted resistance bands for her",
+  title: "EVHERFIT Infinity Band — resistance tube set for her",
   description:
-    "Iron-sand core, silicone shell, sold as a pair. Wearable weights for walks, yoga, pilates and strength — 0.5 kg to 2 kg per band.",
+    "Resistance tube set with foam-grip handles — colour-coded resistance for toning, strength, HIIT and mobility. Choose 1.5 kg, 2 kg, or the bundle of both.",
 };
 
 const highlights = [
-  "Contoured for women's wrists & ankles — zero bounce",
-  "Fine iron-sand fill spreads weight evenly, no pressure points",
-  "Dual-lock: wide hook-and-loop strap through a steel D-ring",
-  "Sweatproof silicone shell, fully machine washable",
+  "Foam-grip handles that clip on with metal carabiners — set up in seconds",
+  "Colour-coded resistance: pick your level, or stack both tubes for more",
+  "Light, packable latex tubing — train at home, outdoors or travelling",
+  "Full-body: presses, rows, curls, squats, glute work and beyond",
 ];
 
 const specs = [
-  ["Weights available", "0.5 kg / 1 kg / 2 kg per band (sold as a pair)"],
-  ["Shell", "Soft-touch, skin-safe silicone"],
-  ["Fill", "Fine iron sand in 5 segmented pods"],
-  ["Closure", "Hook-and-loop strap with steel D-ring"],
-  ["Fits", "Wrist 13–20 cm · Ankle 19–28 cm"],
-  ["Care", "Machine washable (30°C, gentle) — tested over 120 cycles"],
-  ["Colourway", "Infinite Indigo with Palette W stitching"],
+  ["Resistance levels", "1.5 kg / 2 kg per tube (or both in the bundle)"],
+  ["In a set", "1 resistance tube + 2 foam-grip handles"],
+  ["Handles", "Padded foam grips on nylon straps with metal carabiner clips"],
+  ["Tube", "Durable latex resistance tubing"],
+  ["Best for", "Toning, strength, HIIT, pilates, mobility & rehab"],
+  ["Train anywhere", "Home, gym, park or travel — packs into a bag"],
+  ["Colourway", "Palette-coded — blue (1.5 kg) & red (2 kg)"],
   ["Warranty", "1 year against manufacturing defects"],
 ];
 
 const faqs = [
   {
-    q: "Which weight should I start with?",
-    a: "If weighted training is new to you, start with 0.5 kg for walks and mat work. The 1 kg pair is our most popular for yoga, power walks and HIIT. Pick 2 kg if you already train with resistance and want more.",
+    q: "Which resistance should I start with?",
+    a: "New to resistance training? Start with 1.5 kg (blue) for toning, pilates and mobility. Choose 2 kg (red) if you already train and want more load. The bundle gives you both — and you can clip the tubes together for even more resistance.",
   },
   {
-    q: "Wrist or ankle — where do I wear them?",
-    a: "Both. The strap adjusts from a 13 cm wrist to a 28 cm ankle. Wrists turn arm movement into upper-body work; ankles add load to steps, kicks and leg raises.",
+    q: "How do the handles attach?",
+    a: "Each tube clips to two padded foam handles with metal carabiners, so you can attach, detach and swap tubes in seconds — no tools needed.",
   },
   {
-    q: "Can I wash them?",
-    a: "Yes — the whole band goes in the machine at 30°C on gentle. The silicone shell and sealed pods are tested over 120 wash cycles with zero leaks.",
+    q: "Where can I use them?",
+    a: "Anywhere. The tubes are light and packable, so you can train at home, in the park, at the gym or on the road. Great for presses, rows, curls, squats and glute work.",
   },
   {
-    q: "What if they don't fit or I change my mind?",
+    q: "What if I change my mind?",
     a: "You have 7 days from delivery for a no-questions return, and a 1-year warranty against manufacturing defects. See our returns policy for details.",
   },
 ];
 
 export default async function ProductPage() {
-  const { variants } = await getCatalog();
+  const { name, variants } = await getCatalog();
 
   return (
     <main>
@@ -66,37 +66,7 @@ export default async function ProductPage() {
           </p>
         </Reveal>
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-14">
-          <Reveal>
-            <ProductGallery />
-          </Reveal>
-
-          <Reveal delay={0.15}>
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-accent">Be the woman</p>
-              <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-brand sm:text-5xl">
-                EVHERFIT Infinity Band
-              </h1>
-              <p className="mt-2 flex items-center gap-2 text-sm text-muted">
-                <span className="text-accent" aria-label="4.9 out of 5 stars">★★★★★</span>
-                4.9 · 214 reviews
-              </p>
-
-              <ul className="mt-6 space-y-2.5">
-                {highlights.map((h) => (
-                  <li key={h} className="flex gap-3 text-[0.95rem] leading-relaxed text-foreground/80">
-                    <span className="mt-0.5 text-accent">✓</span>
-                    {h}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="mt-8">
-                <ProductBuyPanel variants={variants} />
-              </div>
-            </div>
-          </Reveal>
-        </div>
+        <ProductDetail variants={variants} name={name || PRODUCT_NAME} highlights={highlights} />
       </div>
 
       <Features />
@@ -128,10 +98,10 @@ export default async function ProductPage() {
               <h2 className="font-display text-3xl font-bold tracking-tight text-brand">In the box</h2>
               <ul className="mt-8 space-y-4 rounded-3xl border border-line bg-card p-8">
                 {[
-                  "2 × EVHERFIT Infinity Bands (your chosen weight)",
-                  "Carry pouch in brand indigo",
-                  "Quick-start movement guide (12 exercises)",
-                  "Warranty card",
+                  "Resistance tube(s) for your chosen offer",
+                  "2 foam-grip handles per tube",
+                  "Clip-on metal carabiners for quick swaps",
+                  "Quick-start movement guide",
                 ].map((item) => (
                   <li key={item} className="flex gap-3 leading-relaxed text-foreground/80">
                     <span className="text-accent">∞</span>

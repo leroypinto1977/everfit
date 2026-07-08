@@ -5,9 +5,8 @@ import Link from "next/link";
 import Script from "next/script";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
-import ProductVisual from "@/components/ProductVisual";
 import { InfinityMark } from "@/components/Logo";
-import { inr, type Variant } from "@/lib/product";
+import { inr, variantImages, type Variant } from "@/lib/product";
 
 declare global {
   interface Window {
@@ -211,10 +210,14 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
           className="h-fit rounded-3xl border border-line bg-card p-8 shadow-[0_2px_20px_rgba(43,51,125,0.06)]"
         >
           <div className="mx-auto w-44">
-            <ProductVisual view="loop" className="w-full" />
+            <img
+              src={variantImages(variant.key)[0]}
+              alt={`EVHERFIT Infinity Band — ${variant.weight}`}
+              className="w-full rounded-2xl border border-line object-cover"
+            />
           </div>
           <h2 className="mt-4 font-display text-xl font-bold text-brand">EVHERFIT Infinity Band</h2>
-          <p className="mt-1 text-sm text-muted">Be the woman · Sold as a pair</p>
+          <p className="mt-1 text-sm text-muted">Be the woman · Resistance tube set</p>
 
           {/* weight picker */}
           <div className="mt-5 grid grid-cols-3 gap-2">
@@ -273,7 +276,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
 
           <dl className="mt-6 space-y-3 border-t border-line pt-6 text-sm">
             <div className="flex justify-between">
-              <dt className="text-muted">Price (pair)</dt>
+              <dt className="text-muted">Price (set)</dt>
               <dd className="line-through opacity-50">{inr(variant.mrp)}</dd>
             </div>
             <div className="flex justify-between">
