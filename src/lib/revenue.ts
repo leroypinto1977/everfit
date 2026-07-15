@@ -2,6 +2,10 @@ import { and, gte, lt, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { orders, refunds } from "@/db/schema";
 import { REPORT_TZ, istMonthStart } from "./report-time";
+import { GST_RATE, gstSplit, STORE_STATE } from "./tax";
+
+// Re-exported so existing callers can keep importing GST helpers from here.
+export { GST_RATE, gstSplit } from "./tax";
 
 /**
  * Revenue reporting. "Revenue" means orders that reached payment (paid /
@@ -13,15 +17,6 @@ import { REPORT_TZ, istMonthStart } from "./report-time";
  * this a late-night IST sale falls into the previous UTC day/month. Callers pass
  * IST-aligned range boundaries (see src/lib/report-time.ts). All amounts in paise.
  */
-
-/** GST is charged on the price the customer pays (invoice: "inclusive of all taxes"). */
-export const GST_RATE = Number(process.env.GST_RATE ?? 0.18);
-
-/** Split a GST-inclusive amount (paise) into its taxable base and GST component. */
-export function gstSplit(inclusivePaise: number) {
-  const taxable = Math.round(inclusivePaise / (1 + GST_RATE));
-  return { taxable, gst: inclusivePaise - taxable, rate: GST_RATE };
-}
 
 export interface RevenueStats {
   grossRevenue: number;
@@ -200,6 +195,44 @@ export async function getTopCustomers(from: Date, to: Date, limit = 8): Promise<
     LIMIT ${limit}
   `);
   return rows.rows as unknown as TopCustomer[];
+}
+
+export interface TaxSummary {
+  storeState: string; // "" when unset
+  intraGross: number; // paise, sales within the seller's state (CGST+SGST)
+  interGross: number; // paise, sales to other states (IGST)
+  unknownGross: number; // paise, orders with no state captured
+}
+
+/**
+ * Gross paid revenue split by place of supply, for the GST filing view. Only
+ * meaningful when STORE_STATE is set; otherwise everything is "unknown".
+ */
+export async function getTaxSummary(from: Date, to: Date): Promise<TaxSummary> {
+  const normStore = STORE_STATE.toLowerCase().replace(/[^a-z]/g, "");
+  const rows = await db().execute(sql`
+    SELECT
+      coalesce(sum(amount) filter (
+        where ${normStore} <> '' and lower(regexp_replace(coalesce(state,''), '[^a-zA-Z]', '', 'g')) = ${normStore}
+      ), 0)::int AS intra,
+      coalesce(sum(amount) filter (
+        where ${normStore} <> '' and coalesce(state,'') <> ''
+          and lower(regexp_replace(state, '[^a-zA-Z]', '', 'g')) <> ${normStore}
+      ), 0)::int AS inter,
+      coalesce(sum(amount) filter (
+        where ${normStore} = '' or coalesce(state,'') = ''
+      ), 0)::int AS unknown
+    FROM orders
+    WHERE status IN ('paid','shipped','delivered','refunded')
+      AND paid_at >= ${from} AND paid_at < ${to}
+  `);
+  const r = rows.rows[0] as Record<string, unknown>;
+  return {
+    storeState: STORE_STATE,
+    intraGross: Number(r.intra),
+    interGross: Number(r.inter),
+    unknownGross: Number(r.unknown),
+  };
 }
 
 /** Flat rows for the accounting CSV export (with GST split). */

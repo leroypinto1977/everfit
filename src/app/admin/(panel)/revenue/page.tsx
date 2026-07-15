@@ -4,6 +4,7 @@ import {
   getMonthlyRevenue,
   getPaymentMethodMix,
   getRevenueStats,
+  getTaxSummary,
   getTopCustomers,
   getVariantMix,
   gstSplit,
@@ -57,13 +58,14 @@ export default async function RevenuePage({
   const to = istParseInput(sp.to) ?? istDayStart(); // inclusive in the UI
   const toExclusive = istAddDays(to, 1);
 
-  const [stats, daily, mix, monthly, methodMix, topCustomers] = await Promise.all([
+  const [stats, daily, mix, monthly, methodMix, topCustomers, taxSummary] = await Promise.all([
     getRevenueStats(from, toExclusive),
     getDailyRevenue(from, toExclusive),
     getVariantMix(from, toExclusive),
     getMonthlyRevenue(12),
     getPaymentMethodMix(from, toExclusive),
     getTopCustomers(from, toExclusive),
+    getTaxSummary(from, toExclusive),
   ]);
 
   // month-on-month with % change vs the previous month (on NET), newest first
@@ -93,6 +95,12 @@ export default async function RevenuePage({
   }
 
   const tax = gstSplit(stats.netRevenue);
+  // Place-of-supply split for GST filing (on gross sales), only when the store's
+  // own state is configured. CGST/SGST are half each of intra-state GST.
+  const intraGst = gstSplit(taxSummary.intraGross).gst;
+  const cgst = Math.round(intraGst / 2);
+  const sgst = intraGst - cgst;
+  const igst = gstSplit(taxSummary.interGross).gst;
   const exportUrl = `/api/admin/export?from=${istInput(from)}&to=${istInput(to)}`;
 
   return (
@@ -329,8 +337,36 @@ export default async function RevenuePage({
               <dd className="font-display text-lg font-bold text-[#2b337d]">{inr(stats.netRevenue)}</dd>
             </div>
           </dl>
+
+          {taxSummary.storeState ? (
+            <div className="mt-5 border-t border-[#eef0f7] pt-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[#9aa0c3]">
+                By place of supply · gross sales
+              </p>
+              <dl className="mt-2 divide-y divide-[#eef0f7] text-sm">
+                <div className="flex items-center justify-between py-2">
+                  <dt className="text-[#6b7194]">CGST + SGST (within {taxSummary.storeState})</dt>
+                  <dd>{inr(cgst + sgst)}</dd>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <dt className="text-[#6b7194]">IGST (other states)</dt>
+                  <dd>{inr(igst)}</dd>
+                </div>
+                {taxSummary.unknownGross > 0 && (
+                  <div className="flex items-center justify-between py-2">
+                    <dt className="text-[#6b7194]">Unclassified (no state)</dt>
+                    <dd>{inr(gstSplit(taxSummary.unknownGross).gst)}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
+          ) : (
+            <p className="mt-3 text-xs text-[#9aa0c3]">
+              Set <code className="font-mono">STORE_STATE</code> to split CGST/SGST vs IGST for filing.
+            </p>
+          )}
           <p className="mt-3 text-xs text-[#9aa0c3]">
-            Indicative only — set your actual rate with <code className="font-mono">GST_RATE</code>. Confirm filings with your accountant.
+            Indicative only — set your rate with <code className="font-mono">GST_RATE</code>. Confirm filings with your accountant.
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getOrder } from "@/lib/orders";
 import { inr } from "@/lib/product";
-import { gstSplit } from "@/lib/revenue";
+import { gstBreakdown, HSN_CODE, STORE_GSTIN } from "@/lib/tax";
 import PrintButton from "./PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const c = order.customer;
   const invoiceId = `EVH-${String(order.invoiceNo).padStart(4, "0")}`;
   const date = new Date(order.paidAt ?? order.createdAt);
-  const tax = gstSplit(order.amount); // amount is GST-inclusive
+  const tax = gstBreakdown(order.amount, c.state); // amount is GST-inclusive
+  const halfRate = (tax.rate * 100) / 2;
 
   return (
     <main className="mx-auto max-w-2xl px-8 py-12 text-[#1c2030]">
@@ -38,6 +39,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <p className="mt-1 text-xs text-[#6b7194]">
             {process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, "") ?? "evherfit.com"}
           </p>
+          {STORE_GSTIN && <p className="mt-1 text-xs text-[#6b7194]">GSTIN: {STORE_GSTIN}</p>}
         </div>
         <div className="text-right text-sm">
           <p className="font-display text-lg font-bold">Tax invoice</p>
@@ -80,7 +82,10 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         </thead>
         <tbody>
           <tr className="border-b border-[#eef0f7]">
-            <td className="py-4">{order.item ?? "EVHERFIT Infinity Band"}</td>
+            <td className="py-4">
+              {order.item ?? "EVHERFIT Infinity Band"}
+              {HSN_CODE && <span className="block text-xs text-[#9aa0c3]">HSN {HSN_CODE}</span>}
+            </td>
             <td className="py-4 text-center">{order.qty}</td>
             <td className="py-4 text-right">{inr(order.amount + order.discount)}</td>
           </tr>
@@ -100,12 +105,36 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
             </td>
             <td className="py-2 text-right">{inr(tax.taxable)}</td>
           </tr>
-          <tr>
-            <td colSpan={2} className="py-2 text-right text-[#6b7194]">
-              GST @ {(tax.rate * 100).toFixed(0)}%
-            </td>
-            <td className="py-2 text-right">{inr(tax.gst)}</td>
-          </tr>
+          {tax.interState === false ? (
+            <>
+              <tr>
+                <td colSpan={2} className="py-2 text-right text-[#6b7194]">
+                  CGST @ {halfRate}%
+                </td>
+                <td className="py-2 text-right">{inr(tax.cgst)}</td>
+              </tr>
+              <tr>
+                <td colSpan={2} className="py-2 text-right text-[#6b7194]">
+                  SGST @ {halfRate}%
+                </td>
+                <td className="py-2 text-right">{inr(tax.sgst)}</td>
+              </tr>
+            </>
+          ) : tax.interState === true ? (
+            <tr>
+              <td colSpan={2} className="py-2 text-right text-[#6b7194]">
+                IGST @ {(tax.rate * 100).toFixed(0)}%
+              </td>
+              <td className="py-2 text-right">{inr(tax.igst)}</td>
+            </tr>
+          ) : (
+            <tr>
+              <td colSpan={2} className="py-2 text-right text-[#6b7194]">
+                GST @ {(tax.rate * 100).toFixed(0)}%
+              </td>
+              <td className="py-2 text-right">{inr(tax.gst)}</td>
+            </tr>
+          )}
           <tr>
             <td colSpan={2} className="py-2 text-right text-[#6b7194]">
               Shipping
@@ -121,7 +150,10 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         </tfoot>
       </table>
 
-      <p className="mt-2 text-xs text-[#9aa0c3]">Price inclusive of GST.</p>
+      <div className="mt-2 flex flex-wrap justify-between gap-2 text-xs text-[#9aa0c3]">
+        <span>Price inclusive of GST.</span>
+        {c.state && <span>Place of supply: {c.state}</span>}
+      </div>
 
       <footer className="mt-14 border-t border-[#e3e5f0] pt-6 text-center text-xs text-[#9aa0c3]">
         Thank you for your order — be the woman. · Questions? Reply to your order email.
