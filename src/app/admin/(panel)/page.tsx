@@ -1,26 +1,22 @@
 import Link from "next/link";
 import { getOrderCounts, listOrders } from "@/lib/orders";
 import { getDailyRevenue, getRevenueStats } from "@/lib/revenue";
+import { istAddDays, istDayStart, istInput, REPORT_TZ } from "@/lib/report-time";
 import { listVariantsAdmin } from "@/lib/catalog";
 import AutoRefresh from "@/components/admin/AutoRefresh";
 import KpiCard from "@/components/admin/KpiCard";
 import RevenueChart, { type DayPoint } from "@/components/admin/RevenueChart";
 import StatusBadge from "@/components/admin/StatusBadge";
+import { inr } from "@/lib/product";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
-  const now = new Date();
-  const tomorrow = new Date(now);
-  tomorrow.setHours(0, 0, 0, 0);
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  const days30 = new Date(tomorrow);
-  days30.setDate(days30.getDate() - 30);
-  const days60 = new Date(tomorrow);
-  days60.setDate(days60.getDate() - 60);
-  const days14 = new Date(tomorrow);
-  days14.setDate(days14.getDate() - 14);
+  // Windows are IST-aligned so "last 30 days" matches how the store's day rolls over.
+  const tomorrow = istAddDays(istDayStart(), 1); // exclusive end = start of tomorrow (IST)
+  const days30 = istAddDays(tomorrow, -30);
+  const days60 = istAddDays(tomorrow, -60);
+  const days14 = istAddDays(tomorrow, -14);
 
   // aggregates come from SQL — the dashboard no longer pages 500 orders into memory
   const [stats, prevStats, daily, counts, { orders: recent }, variants] = await Promise.all([
@@ -41,16 +37,17 @@ export default async function AdminDashboard() {
       : null;
   const deltaHint =
     delta === null ? "last 30 days" : `${delta >= 0 ? "+" : ""}${delta}% vs previous 30 days`;
+  const revenueHint =
+    stats.refundedAmount > 0 ? `net ${inr(stats.netRevenue)} · ${deltaHint}` : deltaHint;
 
-  // continuous 14-day series for the chart
-  const byDay = new Map(daily.map((d) => [new Date(d.day).toDateString(), d]));
+  // continuous 14-day IST series for the chart
+  const byDay = new Map(daily.map((d) => [d.day, d]));
   const days: DayPoint[] = [];
   for (let i = 0; i < 14; i++) {
-    const day = new Date(days14);
-    day.setDate(days14.getDate() + i);
-    const hit = byDay.get(day.toDateString());
+    const dayStart = istAddDays(days14, i);
+    const hit = byDay.get(istInput(dayStart));
     days.push({
-      label: day.toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
+      label: dayStart.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: REPORT_TZ }),
       revenue: (hit?.revenue ?? 0) / 100,
       orders: hit?.orders ?? 0,
     });
@@ -78,15 +75,15 @@ export default async function AdminDashboard() {
         <KpiCard
           index={0}
           label="Revenue (30 days)"
-          value={`₹${(stats.grossRevenue / 100).toLocaleString("en-IN")}`}
-          hint={deltaHint}
+          value={inr(stats.grossRevenue)}
+          hint={revenueHint}
         />
         <KpiCard index={1} label="Orders (30 days)" value={String(stats.paidOrders)} hint="successful payments" />
         <KpiCard index={2} label="To ship" value={String(counts.toShip)} hint="paid, awaiting dispatch" />
         <KpiCard
           index={3}
           label="Avg. order value"
-          value={`₹${Math.round(stats.avgOrderValue / 100).toLocaleString("en-IN")}`}
+          value={inr(stats.avgOrderValue)}
           hint="last 30 days"
         />
       </div>

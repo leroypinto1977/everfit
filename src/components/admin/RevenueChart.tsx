@@ -8,14 +8,20 @@ export interface DayPoint {
   orders: number;
 }
 
-/** 14-day revenue bar chart — bars grow in on mount, tooltip on hover. */
-export default function RevenueChart({ days }: { days: DayPoint[] }) {
+/** Daily revenue bar chart — bars grow in on mount, tooltip on hover. */
+export default function RevenueChart({
+  days,
+  title = "Revenue — last 14 days",
+}: {
+  days: DayPoint[];
+  title?: string;
+}) {
   const max = Math.max(...days.map((d) => d.revenue), 1);
 
   return (
     <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
       <div className="flex items-baseline justify-between">
-        <h2 className="font-semibold">Revenue — last 14 days</h2>
+        <h2 className="font-semibold">{title}</h2>
         <span className="text-xs text-[#9aa0c3]">paid orders only</span>
       </div>
 

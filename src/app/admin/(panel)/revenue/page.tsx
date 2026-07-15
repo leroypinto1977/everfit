@@ -4,26 +4,32 @@ import {
   getMonthlyRevenue,
   getPaymentMethodMix,
   getRevenueStats,
+  getTopCustomers,
   getVariantMix,
+  gstSplit,
 } from "@/lib/revenue";
+import {
+  REPORT_TZ,
+  istAddDays,
+  istDayStart,
+  istDaysAgo,
+  istInput,
+  istParseInput,
+} from "@/lib/report-time";
 import KpiCard from "@/components/admin/KpiCard";
 import RevenueChart, { type DayPoint } from "@/components/admin/RevenueChart";
 import { DownloadIcon } from "@/components/admin/icons";
+import { inr } from "@/lib/product";
 
 export const dynamic = "force-dynamic";
-
-function parseDate(value: string | undefined, fallback: Date) {
-  const d = value ? new Date(`${value}T00:00:00`) : fallback;
-  return isNaN(d.getTime()) ? fallback : d;
-}
-
-function toInput(d: Date) {
-  return d.toISOString().slice(0, 10);
-}
 
 function monthLabel(m: string) {
   const [y, mo] = m.split("-").map(Number);
   return new Date(y, mo - 1, 1).toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
+}
+
+function dayLabel(d: Date) {
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: REPORT_TZ });
 }
 
 const METHOD_LABEL: Record<string, string> = {
@@ -46,58 +52,55 @@ export default async function RevenuePage({
   await requireOwner(); // revenue analytics are owner-only
   const sp = await searchParams;
 
-  const defaultFrom = new Date();
-  defaultFrom.setDate(defaultFrom.getDate() - 29);
-  defaultFrom.setHours(0, 0, 0, 0);
-  const from = parseDate(sp.from, defaultFrom);
-  const to = parseDate(sp.to, new Date()); // inclusive in the UI
-  const toExclusive = new Date(to);
-  toExclusive.setDate(toExclusive.getDate() + 1);
-  toExclusive.setHours(0, 0, 0, 0);
+  // All boundaries are IST-midnight instants so buckets and filters agree.
+  const from = istParseInput(sp.from) ?? istDaysAgo(29);
+  const to = istParseInput(sp.to) ?? istDayStart(); // inclusive in the UI
+  const toExclusive = istAddDays(to, 1);
 
-  const [stats, daily, mix, monthly, methodMix] = await Promise.all([
+  const [stats, daily, mix, monthly, methodMix, topCustomers] = await Promise.all([
     getRevenueStats(from, toExclusive),
     getDailyRevenue(from, toExclusive),
     getVariantMix(from, toExclusive),
     getMonthlyRevenue(12),
     getPaymentMethodMix(from, toExclusive),
+    getTopCustomers(from, toExclusive),
   ]);
 
-  // month-on-month with % change vs the previous month, newest first
+  // month-on-month with % change vs the previous month (on NET), newest first
   const months = monthly
     .map((m, i) => {
-      const prev = i > 0 ? monthly[i - 1].revenue : null;
-      const change = prev && prev > 0 ? Math.round(((m.revenue - prev) / prev) * 100) : null;
+      const prev = i > 0 ? monthly[i - 1].net : null;
+      const change = prev && prev > 0 ? Math.round(((m.net - prev) / prev) * 100) : null;
       return { ...m, change };
     })
     .reverse();
 
-  // continuous day series for the chart (only for ranges the chart can fit)
+  // continuous IST-day series for the chart (only for ranges the chart can fit)
   const rangeDays = Math.round((toExclusive.getTime() - from.getTime()) / 86_400_000);
   let days: DayPoint[] | null = null;
   if (rangeDays <= 92) {
-    const byDay = new Map(daily.map((d) => [new Date(d.day).toDateString(), d]));
+    const byDay = new Map(daily.map((d) => [d.day, d]));
     days = [];
     for (let i = 0; i < rangeDays; i++) {
-      const day = new Date(from);
-      day.setDate(from.getDate() + i);
-      const hit = byDay.get(day.toDateString());
+      const dayStart = istAddDays(from, i);
+      const hit = byDay.get(istInput(dayStart));
       days.push({
-        label: day.toLocaleDateString("en-IN", { day: "numeric", month: "short" }),
+        label: dayLabel(dayStart),
         revenue: (hit?.revenue ?? 0) / 100,
         orders: hit?.orders ?? 0,
       });
     }
   }
 
-  const exportUrl = `/api/admin/export?from=${toInput(from)}&to=${toInput(to)}`;
+  const tax = gstSplit(stats.netRevenue);
+  const exportUrl = `/api/admin/export?from=${istInput(from)}&to=${istInput(to)}`;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-3xl font-bold italic">Revenue</h1>
-          <p className="mt-1 text-sm text-[#6b7194]">Bucketed by payment date · refunds counted when initiated</p>
+          <p className="mt-1 text-sm text-[#6b7194]">By payment date (IST) · refunds counted when initiated</p>
         </div>
         <a
           href={exportUrl}
@@ -117,7 +120,7 @@ export default async function RevenuePage({
             id="from"
             type="date"
             name="from"
-            defaultValue={toInput(from)}
+            defaultValue={istInput(from)}
             className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d]"
           />
         </div>
@@ -129,7 +132,7 @@ export default async function RevenuePage({
             id="to"
             type="date"
             name="to"
-            defaultValue={toInput(to)}
+            defaultValue={istInput(to)}
             className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d]"
           />
         </div>
@@ -142,27 +145,34 @@ export default async function RevenuePage({
       </form>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard index={0} label="Gross revenue" value={`₹${(stats.grossRevenue / 100).toLocaleString("en-IN")}`} hint={`${stats.paidOrders} paid orders`} />
-        <KpiCard index={1} label="Refunded" value={`₹${(stats.refundedAmount / 100).toLocaleString("en-IN")}`} hint={`${stats.refundCount} refunds`} />
-        <KpiCard index={2} label="Net revenue" value={`₹${(stats.netRevenue / 100).toLocaleString("en-IN")}`} hint="gross − refunds" />
-        <KpiCard index={3} label="Avg. order value" value={`₹${Math.round(stats.avgOrderValue / 100).toLocaleString("en-IN")}`} />
+        <KpiCard index={0} label="Gross revenue" value={inr(stats.grossRevenue)} hint={`${stats.paidOrders} paid orders`} />
+        <KpiCard
+          index={1}
+          label="Refunded"
+          value={inr(stats.refundedAmount)}
+          hint={`${stats.refundCount} refunds · ${(stats.refundRate * 100).toFixed(1)}% of gross`}
+        />
+        <KpiCard index={2} label="Net revenue" value={inr(stats.netRevenue)} hint="gross − refunds" />
+        <KpiCard index={3} label="Avg. order value" value={inr(stats.avgOrderValue)} />
       </div>
 
-      {days && <RevenueChart days={days} />}
+      {days && <RevenueChart days={days} title={`Revenue — ${rangeDays} days`} />}
 
       {/* month on month */}
       <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
         <div className="flex items-center justify-between px-6 py-4">
           <h2 className="font-semibold">Month on month</h2>
-          <span className="text-xs text-[#9aa0c3]">last 12 months · by payment date</span>
+          <span className="text-xs text-[#9aa0c3]">last 12 months · IST · net = gross − refunds</span>
         </div>
-        <table className="w-full min-w-[560px] text-left text-sm">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className="border-y border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
             <tr>
               <th className="px-6 py-3">Month</th>
-              <th className="px-6 py-3 text-right">Revenue</th>
+              <th className="px-6 py-3 text-right">Gross</th>
               <th className="px-6 py-3 text-right">Orders</th>
               <th className="px-6 py-3 text-right">Manual</th>
+              <th className="px-6 py-3 text-right">Refunds</th>
+              <th className="px-6 py-3 text-right">Net</th>
               <th className="px-6 py-3 text-right">vs prev</th>
             </tr>
           </thead>
@@ -170,13 +180,15 @@ export default async function RevenuePage({
             {months.map((m) => (
               <tr key={m.month} className="border-b border-[#eef0f7] last:border-0">
                 <td className="px-6 py-3 font-medium">{monthLabel(m.month)}</td>
-                <td className="px-6 py-3 text-right font-medium">
-                  ₹{(m.revenue / 100).toLocaleString("en-IN")}
-                </td>
+                <td className="px-6 py-3 text-right">{inr(m.revenue)}</td>
                 <td className="px-6 py-3 text-right text-[#6b7194]">{m.orders}</td>
                 <td className="px-6 py-3 text-right text-[#6b7194]">
-                  {m.manualOrders ? `₹${(m.manualRevenue / 100).toLocaleString("en-IN")}` : "—"}
+                  {m.manualOrders ? inr(m.manualRevenue) : "—"}
                 </td>
+                <td className="px-6 py-3 text-right text-[#6b7194]">
+                  {m.refunded ? `−${inr(m.refunded)}` : "—"}
+                </td>
+                <td className="px-6 py-3 text-right font-medium">{inr(m.net)}</td>
                 <td className="px-6 py-3 text-right">
                   {m.change === null ? (
                     <span className="text-[#9aa0c3]">—</span>
@@ -213,10 +225,21 @@ export default async function RevenuePage({
                 </tr>
               )}
               {mix.map((m) => (
-                <tr key={m.variant} className="border-t border-[#eef0f7]">
-                  <td className="py-3 font-medium">{m.variant} kg</td>
+                <tr key={m.key} className="border-t border-[#eef0f7]">
+                  <td className="py-3 font-medium">
+                    {m.weight ? (
+                      <>
+                        {m.weight}
+                        {m.label && <span className="text-[#9aa0c3]"> · {m.label}</span>}
+                      </>
+                    ) : (
+                      <>
+                        {m.key} <span className="text-[#c0863a]">· retired</span>
+                      </>
+                    )}
+                  </td>
                   <td className="py-3 text-right">{m.orders}</td>
-                  <td className="py-3 text-right">₹{(m.revenue / 100).toLocaleString("en-IN")}</td>
+                  <td className="py-3 text-right">{inr(m.revenue)}</td>
                 </tr>
               ))}
             </tbody>
@@ -248,11 +271,67 @@ export default async function RevenuePage({
                 <tr key={m.method} className="border-t border-[#eef0f7]">
                   <td className="py-3 font-medium">{METHOD_LABEL[m.method] ?? m.method}</td>
                   <td className="py-3 text-right">{m.orders}</td>
-                  <td className="py-3 text-right">₹{(m.revenue / 100).toLocaleString("en-IN")}</td>
+                  <td className="py-3 text-right">{inr(m.revenue)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
+          <h2 className="font-semibold">Top customers</h2>
+          <p className="mt-1 text-xs text-[#9aa0c3]">By spend in this range · paid orders only</p>
+          <table className="mt-4 w-full text-left text-sm">
+            <thead className="text-xs uppercase tracking-wider text-[#9aa0c3]">
+              <tr>
+                <th className="py-2">Customer</th>
+                <th className="py-2 text-right">Orders</th>
+                <th className="py-2 text-right">Spent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topCustomers.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="py-8 text-center text-[#9aa0c3]">
+                    No paid orders in this range.
+                  </td>
+                </tr>
+              )}
+              {topCustomers.map((c, i) => (
+                <tr key={`${c.name}-${i}`} className="border-t border-[#eef0f7]">
+                  <td className="py-3 font-medium">{c.name}</td>
+                  <td className="py-3 text-right">{c.orders}</td>
+                  <td className="py-3 text-right">{inr(c.spent)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
+          <h2 className="font-semibold">GST breakdown</h2>
+          <p className="mt-1 text-xs text-[#9aa0c3]">
+            Prices are GST-inclusive, so this back-computes the tax from net revenue at {(tax.rate * 100).toFixed(0)}%.
+          </p>
+          <dl className="mt-4 divide-y divide-[#eef0f7] text-sm">
+            <div className="flex items-center justify-between py-3">
+              <dt className="text-[#6b7194]">Taxable value</dt>
+              <dd className="font-medium">{inr(tax.taxable)}</dd>
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <dt className="text-[#6b7194]">GST @ {(tax.rate * 100).toFixed(0)}%</dt>
+              <dd className="font-medium">{inr(tax.gst)}</dd>
+            </div>
+            <div className="flex items-center justify-between py-3">
+              <dt className="font-semibold text-[#1c2030]">Net revenue (incl. GST)</dt>
+              <dd className="font-display text-lg font-bold text-[#2b337d]">{inr(stats.netRevenue)}</dd>
+            </div>
+          </dl>
+          <p className="mt-3 text-xs text-[#9aa0c3]">
+            Indicative only — set your actual rate with <code className="font-mono">GST_RATE</code>. Confirm filings with your accountant.
+          </p>
         </div>
       </div>
 

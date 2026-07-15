@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/lib/admin-auth";
 import { getOrdersForExport, toCsv } from "@/lib/revenue";
+import { istAddDays, istParseInput } from "@/lib/report-time";
 
 /** Owner-only CSV export of orders (by created date) for accounting. */
 export async function GET(req: Request) {
@@ -11,16 +12,17 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const fromStr = searchParams.get("from");
   const toStr = searchParams.get("to");
-  const from = new Date(`${fromStr}T00:00:00`);
-  const to = new Date(`${toStr}T00:00:00`);
-  if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+  // Interpret the dates as IST calendar days so the export matches the
+  // IST-bucketed revenue figures.
+  const from = istParseInput(fromStr);
+  const to = istParseInput(toStr);
+  if (!from || !to) {
     return NextResponse.json({ error: "from and to dates are required (YYYY-MM-DD)" }, { status: 400 });
   }
   if (from.getTime() > to.getTime()) {
     return NextResponse.json({ error: "from must be on or before to" }, { status: 400 });
   }
-  const toExclusive = new Date(to);
-  toExclusive.setDate(toExclusive.getDate() + 1);
+  const toExclusive = istAddDays(to, 1);
 
   try {
     const rows = await getOrdersForExport(from, toExclusive);

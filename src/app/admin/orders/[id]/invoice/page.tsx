@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getOrder } from "@/lib/orders";
 import { inr } from "@/lib/product";
+import { gstSplit } from "@/lib/revenue";
 import PrintButton from "./PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const c = order.customer;
   const invoiceId = `EVH-${String(order.invoiceNo).padStart(4, "0")}`;
   const date = new Date(order.paidAt ?? order.createdAt);
+  const tax = gstSplit(order.amount); // amount is GST-inclusive
 
   return (
     <main className="mx-auto max-w-2xl px-8 py-12 text-[#1c2030]">
@@ -94,6 +96,18 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           )}
           <tr>
             <td colSpan={2} className="py-2 text-right text-[#6b7194]">
+              Taxable value
+            </td>
+            <td className="py-2 text-right">{inr(tax.taxable)}</td>
+          </tr>
+          <tr>
+            <td colSpan={2} className="py-2 text-right text-[#6b7194]">
+              GST @ {(tax.rate * 100).toFixed(0)}%
+            </td>
+            <td className="py-2 text-right">{inr(tax.gst)}</td>
+          </tr>
+          <tr>
+            <td colSpan={2} className="py-2 text-right text-[#6b7194]">
               Shipping
             </td>
             <td className="py-2 text-right">Free</td>
@@ -107,7 +121,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         </tfoot>
       </table>
 
-      <p className="mt-2 text-xs text-[#9aa0c3]">Price inclusive of all applicable taxes.</p>
+      <p className="mt-2 text-xs text-[#9aa0c3]">Price inclusive of GST.</p>
 
       <footer className="mt-14 border-t border-[#e3e5f0] pt-6 text-center text-xs text-[#9aa0c3]">
         Thank you for your order — be the woman. · Questions? Reply to your order email.

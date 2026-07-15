@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { requireOwner } from "@/lib/admin-auth";
 import { recordManualSale } from "@/lib/orders";
 import { getPurchasableVariant } from "@/lib/catalog";
+import { istNoon } from "@/lib/report-time";
 
 export type ManualSaleState = { error?: string };
 
@@ -33,9 +34,15 @@ export async function recordManualSaleAction(
     amount = v.price * qty;
   }
 
+  // Stamp the sale at IST noon of the chosen day so it lands in the right IST
+  // calendar day/month regardless of where the server runs.
   const dateStr = String(formData.get("paidAt") ?? "").trim();
-  const paidAt = dateStr ? new Date(`${dateStr}T12:00:00`) : undefined;
-  if (paidAt && isNaN(paidAt.getTime())) return { error: "Invalid date." };
+  let paidAt: Date | undefined;
+  if (dateStr) {
+    const parsed = istNoon(dateStr);
+    if (!parsed) return { error: "Invalid date." };
+    paidAt = parsed;
+  }
 
   try {
     await recordManualSale({
