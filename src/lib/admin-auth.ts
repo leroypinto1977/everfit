@@ -1,9 +1,9 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
-import { and, count, eq, gt, lt } from "drizzle-orm";
+import { and, count, eq, gt, lt, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
-import { adminSessions, adminUsers, passwordResets } from "@/db/schema";
+import { adminSessions, adminUsers, loginAttempts, passwordResets } from "@/db/schema";
 
 /**
  * Per-user admin auth, self-hosted:
@@ -42,19 +42,32 @@ export function verifyPassword(password: string, stored: string) {
   return candidate.length === expected.length && timingSafeEqual(candidate, expected);
 }
 
-/* ---------- login rate limiting (per instance, good enough for a small team) ---------- */
+/* ---------- login rate limiting (DB-backed, shared across instances) ---------- */
 
-const attempts = new Map<string, { n: number; resetAt: number }>();
+const LOGIN_MAX_ATTEMPTS = 5;
+const LOGIN_WINDOW_SECONDS = 60;
 
-export function loginRateLimited(email: string) {
-  const now = Date.now();
-  const entry = attempts.get(email);
-  if (!entry || entry.resetAt < now) {
-    attempts.set(email, { n: 1, resetAt: now + 60_000 });
-    return false;
-  }
-  entry.n += 1;
-  return entry.n > 5;
+/**
+ * Count one attempt for `identifier` (an email, or "reset:<email>") and return
+ * true once it exceeds the limit within the rolling window. Atomic upsert so it
+ * holds across the multiple serverless instances Fluid Compute may run — the
+ * old in-memory Map only throttled a single instance.
+ */
+export async function loginRateLimited(identifier: string): Promise<boolean> {
+  const rows = await db().execute(sql`
+    INSERT INTO login_attempts (identifier, count, window_start)
+    VALUES (${identifier}, 1, now())
+    ON CONFLICT (identifier) DO UPDATE SET
+      count = CASE
+        WHEN login_attempts.window_start < now() - ${`${LOGIN_WINDOW_SECONDS} seconds`}::interval
+        THEN 1 ELSE login_attempts.count + 1 END,
+      window_start = CASE
+        WHEN login_attempts.window_start < now() - ${`${LOGIN_WINDOW_SECONDS} seconds`}::interval
+        THEN now() ELSE login_attempts.window_start END
+    RETURNING count
+  `);
+  const n = Number((rows.rows[0] as { count: number }).count);
+  return n > LOGIN_MAX_ATTEMPTS;
 }
 
 /* ---------- sessions ---------- */
@@ -74,6 +87,7 @@ export async function createSession(userId: string) {
   await Promise.allSettled([
     db().delete(adminSessions).where(lt(adminSessions.expiresAt, now)),
     db().delete(passwordResets).where(lt(passwordResets.expiresAt, now)),
+    db().delete(loginAttempts).where(lt(loginAttempts.windowStart, new Date(now.getTime() - 3_600_000))),
   ]);
 
   const store = await cookies();

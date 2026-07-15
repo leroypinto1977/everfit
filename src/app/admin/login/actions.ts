@@ -25,7 +25,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   const password = String(formData.get("password") ?? "");
   if (!email || !password) return { error: "Email and password are required." };
 
-  if (loginRateLimited(email)) {
+  if (await loginRateLimited(email)) {
     return { error: "Too many attempts — wait a minute and try again." };
   }
 
@@ -65,7 +65,7 @@ export async function setupOwner(_prev: FormState, formData: FormData): Promise<
 export async function requestPasswordReset(_prev: ResetState, formData: FormData): Promise<ResetState> {
   const email = String(formData.get("email") ?? "").toLowerCase().trim();
   if (!email) return { error: "Enter your email." };
-  if (loginRateLimited(`reset:${email}`)) {
+  if (await loginRateLimited(`reset:${email}`)) {
     return { error: "Too many requests — wait a minute and try again." };
   }
 

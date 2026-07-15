@@ -44,6 +44,17 @@ export const passwordResets = pgTable("password_resets", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/**
+ * Login throttling, shared across serverless instances (the old in-memory
+ * counter didn't survive Fluid Compute's multiple instances). One row per
+ * identifier (email, or "reset:<email>"); a rolling window is enforced in SQL.
+ */
+export const loginAttempts = pgTable("login_attempts", {
+  identifier: text("identifier").primaryKey(),
+  count: integer("count").notNull().default(0),
+  windowStart: timestamp("window_start", { withTimezone: true }).notNull().defaultNow(),
+});
+
 /* ---------- catalog ---------- */
 
 export const products = pgTable("products", {
