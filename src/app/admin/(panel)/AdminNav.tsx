@@ -11,6 +11,7 @@ import {
   InventoryIcon,
   CouponsIcon,
   RevenueIcon,
+  AnalyticsIcon,
   EmailsIcon,
   SettingsIcon,
   CardIcon,
@@ -32,6 +33,7 @@ const items: Item[] = [
   { href: "/admin/inventory", label: "Inventory", icon: InventoryIcon, ownerOnly: true },
   { href: "/admin/coupons", label: "Coupons", icon: CouponsIcon, ownerOnly: true },
   { href: "/admin/revenue", label: "Revenue", icon: RevenueIcon, ownerOnly: true },
+  { href: "/admin/analytics", label: "Analytics", icon: AnalyticsIcon, ownerOnly: true },
   { href: "/admin/emails", label: "Emails", icon: EmailsIcon, ownerOnly: true },
   { href: "/admin/settings", label: "Settings", icon: SettingsIcon },
 ];

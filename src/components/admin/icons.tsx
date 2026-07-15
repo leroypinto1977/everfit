@@ -199,6 +199,15 @@ export function CloseIcon(p: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function AnalyticsIcon(p: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...p}>
+      <path d="M3 3v18h18" />
+      <path d="M7 15l3-4 3 2 4-6" />
+    </Base>
+  );
+}
+
 export function InventoryIcon(p: SVGProps<SVGSVGElement>) {
   return (
     <Base {...p}>
