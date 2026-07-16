@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import InfoPage from "@/components/InfoPage";
 
-export const metadata: Metadata = { title: "Privacy policy — EVHERFIT" };
+export const metadata: Metadata = {
+  title: "Privacy policy",
+  description:
+    "How EVHERFIT collects, uses and protects your personal information when you shop with us.",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function PrivacyPage() {
   return (

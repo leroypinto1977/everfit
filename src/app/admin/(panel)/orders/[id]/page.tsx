@@ -23,6 +23,7 @@ const eventLabels: Record<string, string> = {
   refund_initiated: "Refund initiated",
   refund_processed: "Refund processed by Razorpay",
   refund_failed: "Refund failed at Razorpay",
+  email: "Email",
   note: "Note",
 };
 

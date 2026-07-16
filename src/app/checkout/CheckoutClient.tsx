@@ -1,12 +1,14 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Script from "next/script";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "motion/react";
 import { InfinityMark } from "@/components/Logo";
-import { inr, variantImages, type Variant } from "@/lib/product";
+import { inr, variantImages, PRODUCT_NAME, type Variant } from "@/lib/product";
+import { gaItem, stashPurchase, trackAddPaymentInfo, trackBeginCheckout } from "@/lib/analytics";
 
 declare global {
   interface Window {
@@ -46,6 +48,13 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
   // a discount is tied to a price, so drop it whenever the variant changes
   const discount = coupon && variant ? Math.min(coupon.discount, variant.price) : 0;
   const total = variant.price - discount;
+
+  const checkoutTracked = useRef(false);
+  useEffect(() => {
+    if (checkoutTracked.current) return;
+    checkoutTracked.current = true;
+    trackBeginCheckout(gaItem(variant, PRODUCT_NAME), total / 100, coupon?.code);
+  }, [variant, total, coupon]);
 
   async function applyCoupon() {
     if (!couponInput.trim()) return;
@@ -92,6 +101,10 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Something went wrong");
 
+      // data.amount is the server-computed charge in paise — the authoritative
+      // value for analytics, not the client's price math.
+      trackAddPaymentInfo(gaItem(variant, PRODUCT_NAME), data.amount / 100, coupon?.code);
+
       const rzp = new window.Razorpay({
         key: data.keyId,
         amount: data.amount,
@@ -112,6 +125,13 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
             body: JSON.stringify(response),
           });
           if (verify.ok) {
+            // /success flushes this exactly once as the GA4 purchase event
+            stashPurchase({
+              transactionId: response.razorpay_order_id,
+              value: data.amount / 100,
+              coupon: coupon?.code,
+              items: [gaItem(variant, PRODUCT_NAME)],
+            });
             router.push(`/success?order=${response.razorpay_order_id}`);
           } else {
             setError("Payment verification failed. If money was deducted it will be auto-refunded.");
@@ -210,10 +230,13 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
           className="h-fit rounded-3xl border border-line bg-card p-8 shadow-[0_2px_20px_rgba(43,51,125,0.06)]"
         >
           <div className="mx-auto w-44">
-            <img
+            <Image
               src={variantImages(variant.key)[0]}
               alt={`EVHERFIT Infinity Band — ${variant.weight}`}
-              className="w-full rounded-2xl border border-line object-cover"
+              width={1600}
+              height={1066}
+              sizes="176px"
+              className="h-auto w-full rounded-2xl border border-line object-cover"
             />
           </div>
           <h2 className="mt-4 font-display text-xl font-bold text-brand">EVHERFIT Infinity Band</h2>

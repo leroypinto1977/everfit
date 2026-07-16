@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import InfoPage from "@/components/InfoPage";
 
-export const metadata: Metadata = { title: "Shipping policy — EVHERFIT" };
+export const metadata: Metadata = {
+  title: "Shipping policy",
+  description:
+    "EVHERFIT shipping timelines, coverage across India and free-delivery details for every order.",
+  alternates: { canonical: "/shipping" },
+};
 
 export default function ShippingPage() {
   return (

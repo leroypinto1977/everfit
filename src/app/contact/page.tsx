@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import InfoPage from "@/components/InfoPage";
 
-export const metadata: Metadata = { title: "Contact us — EVHERFIT" };
+export const metadata: Metadata = {
+  title: "Contact us",
+  description:
+    "Get in touch with EVHERFIT — email or WhatsApp for order questions, returns and support. Replies within one working day, Mon–Sat.",
+  alternates: { canonical: "/contact" },
+};
 
 const channels = [
   {

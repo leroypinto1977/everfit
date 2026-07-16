@@ -23,7 +23,7 @@ export default function ProductBuyPanel({
 
   return (
     <div>
-      <div className="flex items-baseline gap-3">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="font-display text-4xl font-bold text-brand">{inr(variant.price)}</span>
         <span className="text-lg text-muted line-through">{inr(variant.mrp)}</span>
         <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">

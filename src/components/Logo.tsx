@@ -9,8 +9,11 @@ export function InfinityMark({
   className?: string;
   draw?: boolean;
 }) {
+  // viewBox padded by 5 units on every side: the path fill runs flush to
+  // 0..342.84 / 0..151.78, and the `draw` variant adds a 1.5px stroke — without
+  // the margin the outer edges and stroke get clipped by the SVG boundary.
   return (
-    <svg viewBox="0 0 342.84 151.78" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
+    <svg viewBox="-5 -5 352.84 161.78" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden>
       <path
         className={draw ? "infinity-draw" : undefined}
         pathLength={1}

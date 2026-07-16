@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { VARIANTS, inr, variantImages, type Variant } from "@/lib/product";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
@@ -34,11 +35,13 @@ export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] 
                   Best value
                 </span>
               )}
-              <div className={`mb-5 overflow-hidden rounded-2xl ${v.popular ? "bg-white/10" : "bg-brand-soft"}`}>
-                <img
+              <div className={`relative mb-5 aspect-[4/3] overflow-hidden rounded-2xl ${v.popular ? "bg-white/10" : "bg-brand-soft"}`}>
+                <Image
                   src={variantImages(v.key)[0]}
                   alt={`${v.label} — ${v.weight}`}
-                  className="aspect-[4/3] w-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 90vw, 360px"
+                  className="object-cover"
                 />
               </div>
               <p className={`font-display text-lg font-bold ${v.popular ? "text-accent-soft" : "text-accent"}`}>

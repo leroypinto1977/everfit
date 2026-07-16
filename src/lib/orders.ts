@@ -109,6 +109,18 @@ async function logEvent(orderId: string, type: string, actor: string, note?: str
   await db().insert(orderEvents).values({ orderId, type, actor, note });
 }
 
+/**
+ * Timeline entry for an email outcome (used by notify.ts). Never throws —
+ * a logging hiccup must not break the payment or fulfilment flow around it.
+ */
+export async function logEmailEvent(orderId: string, note: string, actor = "system") {
+  try {
+    await logEvent(orderId, "email", actor, note);
+  } catch (err) {
+    console.error(`Could not log email event for ${orderId}:`, err);
+  }
+}
+
 /* ---------- create ---------- */
 
 export async function saveOrder(input: {

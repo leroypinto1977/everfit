@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import InfoPage from "@/components/InfoPage";
 
-export const metadata: Metadata = { title: "Terms of service — EVHERFIT" };
+export const metadata: Metadata = {
+  title: "Terms of service",
+  description:
+    "The terms and conditions that govern your use of the EVHERFIT store and your purchases.",
+  alternates: { canonical: "/terms" },
+};
 
 export default function TermsPage() {
   return (

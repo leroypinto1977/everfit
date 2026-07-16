@@ -7,13 +7,25 @@ import Showcase from "@/components/Showcase";
 import Stats from "@/components/Stats";
 import Pricing from "@/components/Pricing";
 import Reveal from "@/components/Reveal";
+import ViewItemTracker from "@/components/ViewItemTracker";
+import JsonLd from "@/components/JsonLd";
 import { getCatalog } from "@/lib/catalog";
-import { PRODUCT_NAME } from "@/lib/product";
+import { PRODUCT_NAME, HERO_IMAGE } from "@/lib/product";
+import { SITE_URL } from "@/lib/site";
+
+const DESCRIPTION =
+  "Resistance tube set with foam-grip handles — colour-coded resistance for toning, strength, HIIT and mobility. Choose 1.5 kg, 2 kg, or the bundle of both.";
 
 export const metadata: Metadata = {
-  title: "EVHERFIT Infinity Band — resistance tube set for her",
-  description:
-    "Resistance tube set with foam-grip handles — colour-coded resistance for toning, strength, HIIT and mobility. Choose 1.5 kg, 2 kg, or the bundle of both.",
+  title: "Infinity Band — resistance tube set for her",
+  description: DESCRIPTION,
+  alternates: { canonical: "/product" },
+  openGraph: {
+    type: "website",
+    url: `${SITE_URL}/product`,
+    title: "EVHERFIT Infinity Band — resistance tube set for her",
+    description: DESCRIPTION,
+  },
 };
 
 const highlights = [
@@ -55,9 +67,59 @@ const faqs = [
 
 export default async function ProductPage() {
   const { name, variants } = await getCatalog();
+  const productName = name || PRODUCT_NAME;
+
+  const purchasable = variants.filter((v) => !v.soldOut);
+  const prices = (purchasable.length ? purchasable : variants).map((v) => v.price / 100);
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: productName,
+    description: DESCRIPTION,
+    brand: { "@type": "Brand", name: "EVHERFIT" },
+    image: `${SITE_URL}${HERO_IMAGE}`,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.9",
+      reviewCount: "214",
+    },
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "INR",
+      lowPrice: Math.min(...prices),
+      highPrice: Math.max(...prices),
+      offerCount: variants.length,
+      availability: purchasable.length
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+      url: `${SITE_URL}/product`,
+    },
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: "The Infinity Band", item: `${SITE_URL}/product` },
+    ],
+  };
 
   return (
     <main>
+      <JsonLd data={[productSchema, faqSchema, breadcrumbSchema]} />
+      <ViewItemTracker variants={variants} name={productName} />
       <div className="mx-auto max-w-7xl px-6 pt-32">
         <Reveal>
           <p className="text-xs uppercase tracking-[0.3em] text-muted">
@@ -66,7 +128,7 @@ export default async function ProductPage() {
           </p>
         </Reveal>
 
-        <ProductDetail variants={variants} name={name || PRODUCT_NAME} highlights={highlights} />
+        <ProductDetail variants={variants} name={productName} highlights={highlights} />
       </div>
 
       <Features />
