@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Exo_2, Poppins, Inter } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
+import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/GTM";
+import JsonLd from "@/components/JsonLd";
+import { SITE_URL, BRAND, SUPPORT_EMAIL } from "@/lib/site";
 
 // Brand faces: Renoric (slanted display) ≈ Exo 2 italic,
 // URW Geometric (body) ≈ Poppins.
@@ -25,10 +28,50 @@ const admin = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
+const DESCRIPTION =
+  "EVHERFIT — women-centred fitness for lifelong strength. Shop the Infinity Band resistance tube set with foam-grip handles, plus live coaching and programs built for her.";
+
 export const metadata: Metadata = {
-  title: "EVHERFIT — Be the woman",
-  description:
-    "The EVHERFIT Infinity Band: weighted resistance bands designed for her, built for life. Iron-sand core, silicone shell, sold as a pair — for walks, yoga and strength.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "EVHERFIT — Resistance tubes & women's fitness gear",
+    template: "%s — EVHERFIT",
+  },
+  description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: BRAND,
+    url: SITE_URL,
+    title: "EVHERFIT — Resistance tubes & women's fitness gear",
+    description: DESCRIPTION,
+    locale: "en_IN",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "EVHERFIT — Resistance tubes & women's fitness gear",
+    description: DESCRIPTION,
+  },
+};
+
+// Organisation + site-search-free WebSite schema, sitewide. Gives Google a
+// stable brand entity (name, logo, contact, social) for the Knowledge Panel.
+const orgSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: BRAND,
+  url: SITE_URL,
+  logo: `${SITE_URL}/icon.svg`,
+  email: SUPPORT_EMAIL,
+  description: DESCRIPTION,
+  slogan: "Be the woman",
+};
+
+const webSiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: BRAND,
+  url: SITE_URL,
 };
 
 export default function RootLayout({
@@ -39,6 +82,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${display.variable} ${body.variable} ${admin.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        <JsonLd data={[orgSchema, webSiteSchema]} />
+        <GoogleTagManagerNoScript />
+        <GoogleTagManager />
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

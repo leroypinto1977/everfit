@@ -55,10 +55,11 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       options={{
         lerp: 0.1, // wheel smoothing — lower = smoother/heavier, higher = snappier
         smoothWheel: true,
-        syncTouch: true, // smooth scrolling on touch devices too
-        syncTouchLerp: 0.08,
+        // Leave touch scrolling to the browser. syncTouch hijacks native touch
+        // momentum and produces floaty/stuttery scroll on phones (esp. iOS
+        // Safari) and jitters the fixed header — smoothWheel still covers desktop.
+        syncTouch: false,
         wheelMultiplier: 1,
-        touchMultiplier: 1.4,
       }}
     >
       <ScrollManager />

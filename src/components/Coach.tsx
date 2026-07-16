@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "motion/react";
 import Reveal from "./Reveal";
 
@@ -23,10 +24,12 @@ export default function Coach() {
             transition={{ duration: 0.8, ease: [0.21, 0.65, 0.36, 1] }}
             className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand to-brand-deep shadow-[0_24px_70px_rgba(43,51,125,0.3)]"
           >
-            <img
+            <Image
               src="/manjula.jpg"
               alt="Manjula Narayanan, EVHERFIT women's fitness coach"
-              className="absolute inset-0 h-full w-full object-cover object-[center_25%]"
+              fill
+              sizes="(max-width: 640px) 90vw, 384px"
+              className="object-cover object-[center_25%]"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-deep/85 via-brand-deep/30 to-transparent p-7">
               <p className="font-display text-2xl font-bold leading-none text-white">Manjula Narayanan</p>
@@ -53,12 +56,12 @@ export default function Coach() {
             </p>
           </Reveal>
 
-          <div className="mt-10 grid grid-cols-3 gap-4">
+          <div className="mt-10 grid grid-cols-3 gap-3 sm:gap-4">
             {stats.map((s, i) => (
               <Reveal key={s.label} delay={i * 0.1}>
-                <div className="rounded-2xl border border-line bg-card px-4 py-6 text-center">
-                  <p className="font-display text-2xl font-bold text-brand sm:text-3xl lg:text-4xl">{s.value}</p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.15em] text-muted">{s.label}</p>
+                <div className="rounded-2xl border border-line bg-card px-2.5 py-6 text-center sm:px-4">
+                  <p className="font-display text-xl font-bold text-brand sm:text-3xl lg:text-4xl">{s.value}</p>
+                  <p className="mt-2 text-[0.65rem] uppercase tracking-[0.12em] text-muted sm:text-xs sm:tracking-[0.15em]">{s.label}</p>
                 </div>
               </Reveal>
             ))}

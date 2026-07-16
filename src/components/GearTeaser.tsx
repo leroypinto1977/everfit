@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { inr, HERO_IMAGE } from "@/lib/product";
 import Reveal from "./Reveal";
@@ -24,10 +25,13 @@ export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number
               transition={{ duration: 0.9, ease: [0.21, 0.65, 0.36, 1] }}
               className="animate-float-slow"
             >
-              <img
+              <Image
                 src={HERO_IMAGE}
                 alt="EVHERFIT Infinity Band resistance tube set"
-                className="w-full rounded-3xl border border-line object-cover shadow-[0_12px_40px_rgba(43,51,125,0.14)]"
+                width={1600}
+                height={1066}
+                sizes="(max-width: 640px) 288px, 384px"
+                className="h-auto w-full rounded-3xl border border-line object-cover shadow-[0_12px_40px_rgba(43,51,125,0.14)]"
               />
             </motion.div>
           </div>

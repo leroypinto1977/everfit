@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { variantImages, type Variant } from "@/lib/product";
 import ProductBuyPanel from "./ProductBuyPanel";
@@ -41,15 +42,22 @@ export default function ProductDetail({
         <div>
           <div className="relative overflow-hidden rounded-3xl border border-line bg-card p-6 shadow-[0_2px_24px_rgba(43,51,125,0.06)]">
             <div className="absolute inset-12 -z-0 rounded-full bg-brand-soft blur-[60px]" />
-            <motion.img
+            <motion.div
               key={active}
-              src={active}
-              alt={alt}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="relative aspect-[4/5] w-full rounded-2xl object-cover"
-            />
+              className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl"
+            >
+              <Image
+                src={active}
+                alt={alt}
+                fill
+                priority
+                sizes="(max-width: 1024px) 90vw, 560px"
+                className="object-cover"
+              />
+            </motion.div>
           </div>
 
           {images.length > 1 && (
@@ -61,13 +69,13 @@ export default function ProductDetail({
                   onClick={() => setImgIndex(i)}
                   aria-label={`View photo ${i + 1}`}
                   aria-pressed={i === imgIndex}
-                  className={`overflow-hidden rounded-2xl border bg-card transition-all ${
+                  className={`relative aspect-[4/5] overflow-hidden rounded-2xl border bg-card transition-all ${
                     i === imgIndex
                       ? "border-brand shadow-[0_4px_16px_rgba(43,51,125,0.15)]"
                       : "border-line hover:border-brand/40"
                   }`}
                 >
-                  <img src={src} alt="" className="aspect-[4/5] w-full object-cover" />
+                  <Image src={src} alt="" fill sizes="80px" className="object-cover" />
                 </button>
               ))}
             </div>

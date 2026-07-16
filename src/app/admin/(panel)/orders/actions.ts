@@ -44,7 +44,7 @@ export async function markShippedAction(
   if (!order) {
     return { error: "This order is no longer awaiting shipment — its status just changed." };
   }
-  await sendShippedEmail(order);
+  await sendShippedEmail(order, user.email);
   return undefined;
 }
 
@@ -63,7 +63,7 @@ export async function bulkShipAction(formData: FormData) {
     const order = await markShipped(id, { courier, actor: user.email });
     if (order) shipped.push(order);
   }
-  await Promise.allSettled(shipped.map((o) => sendShippedEmail(o)));
+  await Promise.allSettled(shipped.map((o) => sendShippedEmail(o, user.email)));
 
   revalidatePath("/admin/orders");
   revalidatePath("/admin");
@@ -80,7 +80,7 @@ export async function markDeliveredAction(
   if (!order) {
     return { error: "Only shipped orders can be marked delivered — this one's status just changed." };
   }
-  await sendDeliveredEmail(order);
+  await sendDeliveredEmail(order, user.email);
   return undefined;
 }
 
@@ -123,7 +123,7 @@ export async function refundOrderAction(
     { refundId: refund.id, amount: Number(refund.amount ?? order.amount), reason: reason || undefined },
     user.email
   );
-  if (updated) await sendRefundEmail(updated, Number(refund.amount ?? order.amount));
+  if (updated) await sendRefundEmail(updated, Number(refund.amount ?? order.amount), user.email);
   refresh(id);
   return undefined;
 }
@@ -133,19 +133,16 @@ const STAGE_EMAILS = {
   confirmation: {
     statuses: ["paid", "shipped", "delivered"],
     send: sendConfirmationEmail,
-    note: "Order-confirmation email sent to the customer",
     invalid: "The confirmation email applies once the order is paid.",
   },
   shipped: {
     statuses: ["shipped", "delivered"],
     send: sendShippedEmail,
-    note: "Shipped email sent to the customer",
     invalid: "The shipped email applies once the order is marked shipped.",
   },
   delivered: {
     statuses: ["delivered"],
     send: sendDeliveredEmail,
-    note: "Delivered email sent to the customer",
     invalid: "The delivered email applies once the order is marked delivered.",
   },
 } as const;
@@ -176,8 +173,8 @@ export async function sendStageEmailAction(
     return { error: stage.invalid };
   }
 
-  await stage.send(order);
-  await addOrderNote(id, stage.note, user.email);
+  // the sender records the outcome on the order timeline, attributed to user
+  await stage.send(order, user.email);
   refresh(id);
   return { ok: `Sent to ${order.customer.email}.` };
 }
@@ -205,8 +202,7 @@ export async function sendRecoveryEmailAction(
     return { error: "This order has no customer email on file." };
   }
 
-  await sendPaymentFailedEmail(order);
-  await addOrderNote(id, "Recovery email re-sent to the customer", user.email);
+  await sendPaymentFailedEmail(order, user.email);
   refresh(id);
   return undefined;
 }

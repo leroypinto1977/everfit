@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import InfoPage from "@/components/InfoPage";
 
-export const metadata: Metadata = { title: "Cancellations, returns & refunds — EVHERFIT" };
+export const metadata: Metadata = {
+  title: "Cancellations, returns & refunds",
+  description:
+    "EVHERFIT's 7-day return policy, cancellation process and how refunds are processed for your order.",
+  alternates: { canonical: "/refunds" },
+};
 
 export default function RefundsPage() {
   return (

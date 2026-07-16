@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useScroll, useTransform } from "motion/react";
 import { HERO_IMAGE } from "@/lib/product";
 import SplitText from "./SplitText";
@@ -93,10 +94,14 @@ export default function Hero() {
         >
           <div className="animate-breathe absolute inset-8 -z-10 rounded-full bg-brand/15 blur-[70px]" />
           <div className="animate-float-slow">
-            <img
+            <Image
               src={HERO_IMAGE}
               alt="EVHERFIT Infinity Band resistance tube set"
-              className="w-full rounded-[2rem] border border-line object-cover shadow-[0_20px_60px_rgba(43,51,125,0.18)]"
+              width={1600}
+              height={1066}
+              priority
+              sizes="(max-width: 640px) 320px, 384px"
+              className="h-auto w-full rounded-[2rem] border border-line object-cover shadow-[0_20px_60px_rgba(43,51,125,0.18)]"
             />
           </div>
         </motion.div>

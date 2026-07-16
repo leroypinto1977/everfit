@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import InfoPage from "@/components/InfoPage";
 
-export const metadata: Metadata = { title: "About us — EVHERFIT" };
+export const metadata: Metadata = {
+  title: "About us",
+  description:
+    "EVHERFIT is a women-centred fitness brand built for lifelong strength, vitality and longevity. Meet the story behind the infinity mark and the Infinity Band.",
+  alternates: { canonical: "/about" },
+};
 
 export default function AboutPage() {
   return (
@@ -32,9 +37,9 @@ export default function AboutPage() {
         <Link href="/product" className="text-brand underline-offset-2 hover:underline">
           EVHERFIT Infinity Band
         </Link>{" "}
-        is where we started: weighted resistance bands contoured for women&apos;s wrists
-        and ankles, built to turn everyday movement — walks, flows, lifts — into strength
-        that lasts. Designed for her, built for life.
+        is where we started: a resistance tube set with padded foam-grip handles and
+        colour-coded resistance, built to turn everyday movement — presses, rows, curls,
+        squats — into strength that lasts. Designed for her, built for life.
       </p>
       <h2>Get in touch</h2>
       <p>

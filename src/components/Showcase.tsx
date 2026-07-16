@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Reveal from "./Reveal";
 
 const panels: { img: string; kicker: string; title: string; body: string }[] = [
@@ -44,17 +45,20 @@ export default function Showcase() {
               <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
                 <div className={`relative mx-auto w-64 sm:w-80 ${flip ? "lg:order-2" : ""}`}>
                   <div className="absolute inset-8 -z-10 rounded-full bg-brand-soft blur-[60px]" />
-                  <img
+                  <Image
                     src={panel.img}
                     alt={panel.title}
-                    className="w-full rounded-3xl border border-line object-cover shadow-[0_8px_30px_rgba(43,51,125,0.10)]"
+                    width={1600}
+                    height={1066}
+                    sizes="(max-width: 640px) 256px, 320px"
+                    className="h-auto w-full rounded-3xl border border-line object-cover shadow-[0_8px_30px_rgba(43,51,125,0.10)]"
                   />
                 </div>
                 <div className={flip ? "lg:order-1" : ""}>
                   <p className="mb-3 text-xs uppercase tracking-[0.3em] text-accent">{panel.kicker}</p>
-                  <h3 className="font-display text-3xl font-bold tracking-tight text-brand sm:text-4xl lg:text-5xl">
+                  <h2 className="font-display text-3xl font-bold tracking-tight text-brand sm:text-4xl lg:text-5xl">
                     {panel.title}
-                  </h3>
+                  </h2>
                   <p className="mt-5 max-w-md text-lg leading-relaxed text-muted">{panel.body}</p>
                 </div>
               </div>
