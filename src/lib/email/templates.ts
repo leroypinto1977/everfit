@@ -25,7 +25,7 @@ export interface Email {
 
 function shipTo(o: Order) {
   const c = o.customer;
-  return `${c.address}, ${c.city}, ${c.state} — ${c.pincode}`;
+  return `${c.address}, ${c.city}, ${c.state}, ${c.pincode}`;
 }
 
 function orderSummary(o: Order) {
@@ -49,7 +49,7 @@ export function orderConfirmation(o: Order): Email {
     subject: "Your EVHERFIT order is confirmed 🎉",
     html: shell(
       [
-        heading("Order confirmed — be the woman."),
+        heading("Order confirmed. Be the woman."),
         paragraph(
           `Hi ${o.customer.name}, thank you for your order! Your EVHERFIT Infinity Band pair is being prepared and ships within 24 hours. We'll email tracking the moment it's on the way.`
         ),
@@ -60,7 +60,7 @@ export function orderConfirmation(o: Order): Email {
         ),
         button("Track your order", siteUrl("/track")),
       ].join(""),
-      { preheader: `Order confirmed — ${o.item ?? "EVHERFIT Infinity Band"}, ${inr(o.amount)}.` }
+      { preheader: `Order confirmed: ${o.item ?? "EVHERFIT Infinity Band"}, ${inr(o.amount)}.` }
     ),
   };
 }
@@ -86,19 +86,19 @@ export function orderShipped(o: Order): Email {
         link ? button("Track your package", link) : button("Track your order", siteUrl("/track")),
         paragraph(`Order ${mono(o.id)} · Shipping to ${o.customer.city}.`),
       ].join(""),
-      { preheader: `Shipped${via} — track your EVHERFIT order.` }
+      { preheader: `Shipped${via}. Track your EVHERFIT order.` }
     ),
   };
 }
 
 export function orderDelivered(o: Order): Email {
   return {
-    subject: "Delivered — time to train 💪",
+    subject: "Delivered. Time to train 💪",
     html: shell(
       [
         heading("Your Infinity Band has arrived."),
         paragraph(
-          `Hi ${o.customer.name}, order ${mono(o.id)} was delivered. Strap in for your next walk, flow or lift — strong is infinite.`
+          `Hi ${o.customer.name}, order ${mono(o.id)} was delivered. Strap in for your next walk, flow or lift. Strong is infinite.`
         ),
         panel(
           `Not quite right? You have <strong style="color:${brand.ink}">7 days</strong> for a no-questions return, plus a 1-year warranty. Just reply to this email.`,
@@ -130,18 +130,18 @@ export function refundInitiated(o: Order, amount: number): Email {
 
 export function paymentFailed(o: Order): Email {
   return {
-    subject: "Your EVHERFIT order didn't go through — finish it here",
+    subject: "Your EVHERFIT order didn't go through. Finish it here",
     html: shell(
       [
-        heading("Almost there — let's complete your order"),
+        heading("Almost there. Let's complete your order"),
         paragraph(
-          `Hi ${o.customer.name}, your payment for the ${o.item ?? "EVHERFIT Infinity Band"} didn't complete, so the order wasn't placed. No money was charged — and if your bank shows a hold, it's released automatically within 5–7 days.`
+          `Hi ${o.customer.name}, your payment for the ${o.item ?? "EVHERFIT Infinity Band"} didn't complete, so the order wasn't placed. No money was charged, and if your bank shows a hold, it's released automatically within 5–7 days.`
         ),
         paragraph(`Ready to try again? It only takes a minute.`),
         button("Complete your order", siteUrl("/product")),
         paragraph(`Hit a snag? Just reply to this email and we'll help you check out.`),
       ].join(""),
-      { preheader: "Your payment didn't complete — finish your EVHERFIT order." }
+      { preheader: "Your payment didn't complete. Finish your EVHERFIT order." }
     ),
   };
 }

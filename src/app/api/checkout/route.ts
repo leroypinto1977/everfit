@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   // client gets a clear message instead of a keyId-less Razorpay modal error.
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     return NextResponse.json(
-      { error: "Online payments aren't available right now — please try again shortly." },
+      { error: "Online payments aren't available right now. Please try again shortly." },
       { status: 503 }
     );
   }
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   }
   if (variant.soldOut) {
     return NextResponse.json(
-      { error: `The ${variant.weight} option is sold out — please pick another weight.` },
+      { error: `The ${variant.weight} option is sold out. Please pick another weight.` },
       { status: 409 }
     );
   }

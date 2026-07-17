@@ -29,12 +29,12 @@ const admin = Inter({
 });
 
 const DESCRIPTION =
-  "EVHERFIT — women-centred fitness for lifelong strength. Shop the Infinity Band resistance tube set with foam-grip handles, plus live coaching and programs built for her.";
+  "EVHERFIT is women-centred fitness for lifelong strength. Shop the Infinity Band resistance band set with foam-grip handles, plus live coaching and programs built for her.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "EVHERFIT — Resistance tubes & women's fitness gear",
+    default: "EVHERFIT — Resistance bands & women's fitness gear",
     template: "%s — EVHERFIT",
   },
   description: DESCRIPTION,
@@ -43,13 +43,13 @@ export const metadata: Metadata = {
     type: "website",
     siteName: BRAND,
     url: SITE_URL,
-    title: "EVHERFIT — Resistance tubes & women's fitness gear",
+    title: "EVHERFIT — Resistance bands & women's fitness gear",
     description: DESCRIPTION,
     locale: "en_IN",
   },
   twitter: {
     card: "summary_large_image",
-    title: "EVHERFIT — Resistance tubes & women's fitness gear",
+    title: "EVHERFIT — Resistance bands & women's fitness gear",
     description: DESCRIPTION,
   },
 };

@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 
 // Sitewide social share card. Next serves this for every route that doesn't
 // define its own opengraph-image, and reuses it for the Twitter card.
-export const alt = "EVHERFIT — Resistance tubes & women's fitness gear";
+export const alt = "EVHERFIT — Resistance bands & women's fitness gear";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -34,7 +34,7 @@ export default function OpengraphImage() {
             Strong is infinite.
           </div>
           <div style={{ fontSize: 34, marginTop: 32, color: "#c9cdec", maxWidth: 900 }}>
-            The Infinity Band — resistance tube set with foam-grip handles, built for her.
+            The Infinity Band, a resistance band with foam-grip handles, built for her.
           </div>
         </div>
       </div>

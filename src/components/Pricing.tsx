@@ -15,7 +15,7 @@ export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] 
           Start light. <span className="text-foreground/60">Grow infinite.</span>
         </h2>
         <p className="mt-5 max-w-xl text-lg text-muted">
-          Every set is a tube with two foam-grip handles. Free shipping across
+          Every set is a band with two foam-grip handles. Free shipping across
           India, 7-day returns.
         </p>
       </Reveal>

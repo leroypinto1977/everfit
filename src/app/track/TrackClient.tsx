@@ -137,7 +137,7 @@ export default function TrackClient() {
 
                 {result.status === "failed" ? (
                   <p className="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
-                    Payment for this order failed — nothing was charged, or any deduction
+                    Payment for this order failed. Nothing was charged, or any deduction
                     will be auto-refunded by your bank within 5–7 days. Place the order again
                     any time.
                   </p>
@@ -147,7 +147,7 @@ export default function TrackClient() {
                   </p>
                 ) : result.status === "refunded" ? (
                   <p className="mt-6 rounded-xl bg-brand-soft px-4 py-3 text-sm text-brand">
-                    This order has been refunded — the amount typically reaches your account
+                    This order has been refunded. The amount typically reaches your account
                     within 5–7 working days of the refund being initiated.
                   </p>
                 ) : (

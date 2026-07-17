@@ -48,8 +48,8 @@ export default function Footer() {
           </span>
           <p className="mt-2 text-xs uppercase tracking-[0.4em] text-white/60">Be the woman</p>
           <p className="mt-6 max-w-xs text-sm leading-relaxed text-white/65">
-            Women-centred fitness for lifelong strength, vitality and longevity —
-            live programs, personal coaching and gear built for her.
+            Women-centred fitness for lifelong strength, vitality and longevity,
+            with live programs, personal coaching and gear built for her.
           </p>
         </div>
 

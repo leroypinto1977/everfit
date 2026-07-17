@@ -5,7 +5,7 @@ import InfoPage from "@/components/InfoPage";
 export const metadata: Metadata = {
   title: "Contact us",
   description:
-    "Get in touch with EVHERFIT — email or WhatsApp for order questions, returns and support. Replies within one working day, Mon–Sat.",
+    "Get in touch with EVHERFIT by email or WhatsApp for order questions, returns and support. Replies within one working day, Mon–Sat.",
   alternates: { canonical: "/contact" },
 };
 
@@ -30,7 +30,7 @@ export default function ContactPage() {
   return (
     <InfoPage kicker="Help" title="Contact us">
       <p>
-        Order question, sizing doubt, return, or just want to say hi — we&apos;d love to
+        Order question, sizing doubt, return, or just want to say hi? We&apos;d love to
         hear from you.
       </p>
       <div className="not-prose mt-8 grid gap-4 sm:grid-cols-2">
@@ -55,7 +55,7 @@ export default function ContactPage() {
           {/* TODO: replace with the client's registered business address before KYC */}
           No. 123, Address Line, Locality,
           <br />
-          City, State — 600 001, India
+          City, State, 600 001, India
         </p>
         <p className="mt-2 text-sm text-muted">Business hours: Mon–Sat, 10am–6pm IST</p>
       </div>
@@ -63,8 +63,8 @@ export default function ContactPage() {
         Tracking an order? The fastest way is the{" "}
         <Link href="/track" className="text-brand underline-offset-2 hover:underline">
           track-order page
-        </Link>{" "}
-        — you just need your order ID and phone number.
+        </Link>
+        . You just need your order ID and phone number.
       </p>
     </InfoPage>
   );

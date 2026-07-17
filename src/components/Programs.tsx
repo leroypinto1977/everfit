@@ -20,7 +20,7 @@ export default function Programs() {
           <span className="text-foreground/60">One infinite goal.</span>
         </h2>
         <p className="mt-5 max-w-xl text-lg text-muted">
-          Whether you thrive in a live group or want a plan built only for you —
+          Whether you thrive in a live group or want a plan built only for you,
           there&apos;s a path here. Take a look, then step in.
         </p>
       </Reveal>

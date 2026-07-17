@@ -15,7 +15,7 @@ export default function ShippingPage() {
       <h2>Where we ship</h2>
       <p>
         We ship across India to every serviceable PIN code, through our courier
-        partners. Shipping is <strong>free on all orders</strong> — no minimums, no
+        partners. Shipping is <strong>free on all orders</strong>, with no minimums and no
         hidden charges.
       </p>
       <h2>Dispatch & delivery times</h2>
@@ -38,14 +38,14 @@ export default function ShippingPage() {
       <h2>Delays & failed deliveries</h2>
       <p>
         If the courier can&apos;t reach you, they attempt delivery up to 3 times before
-        returning the package to us — we&apos;ll contact you to reschedule or refund in
+        returning the package to us. We&apos;ll contact you to reschedule or refund in
         full. For weather or logistics delays beyond the windows above, write to us via
         the contact page and we&apos;ll chase the courier on your behalf.
       </p>
       <h2>Damaged on arrival</h2>
       <p>
         If the package arrives visibly damaged, refuse delivery if possible, or photograph
-        the package before opening and contact us within 48 hours — we&apos;ll ship a free
+        the package before opening and contact us within 48 hours and we&apos;ll ship a free
         replacement.
       </p>
     </InfoPage>

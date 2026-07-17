@@ -75,7 +75,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
         setCouponMsg(null);
       }
     } catch {
-      setCouponMsg("Couldn't check that code — try again.");
+      setCouponMsg("Couldn't check that code. Try again.");
     } finally {
       setCouponLoading(false);
     }
@@ -172,7 +172,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
             Shipping details
           </h1>
           <p className="mt-2 text-muted">
-            No account needed — we&apos;ll send order updates to your email and phone.
+            No account needed. We&apos;ll send order updates to your email and phone.
           </p>
 
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
@@ -218,7 +218,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
           </motion.button>
 
           <p className="mt-4 text-center text-xs text-muted">
-            UPI · Cards · Netbanking · EMI — processed by Razorpay
+            UPI · Cards · Netbanking · EMI · processed by Razorpay
           </p>
         </motion.form>
 
@@ -240,7 +240,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
             />
           </div>
           <h2 className="mt-4 font-display text-xl font-bold text-brand">EVHERFIT Infinity Band</h2>
-          <p className="mt-1 text-sm text-muted">Be the woman · Resistance tube set</p>
+          <p className="mt-1 text-sm text-muted">Be the woman · Resistance band set</p>
 
           {/* weight picker */}
           <div className="mt-5 grid grid-cols-3 gap-2">

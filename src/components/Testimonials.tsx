@@ -5,19 +5,19 @@ import Reveal from "./Reveal";
 const reviews = [
   {
     quote:
-      "I keep the blue tube by the door and do 15 minutes before work. Rows, presses, curls — my arms finally feel worked without a single dumbbell.",
+      "I keep the blue band by the door and do 15 minutes before work. Rows, presses, curls, and my arms finally feel worked without a single dumbbell.",
     name: "Ananya R.",
     tag: "Morning routine, Bengaluru",
   },
   {
     quote:
-      "The foam handles are so comfy and clip on in seconds. I started on 1.5 kg and just moved up to 2 kg — having both has kept me progressing.",
+      "The foam handles are so comfy and clip on in seconds. I started on 1.5 kg and just moved up to 2 kg, and having both has kept me progressing.",
     name: "Priya S.",
     tag: "Pilates, Mumbai",
   },
   {
     quote:
-      "They coil into my carry-on, so my routine travels with me. Full-body workout in a hotel room, no excuses — that's what sold me on the bundle.",
+      "They coil into my carry-on, so my routine travels with me. Full-body workout in a hotel room, no excuses. That's what sold me on the bundle.",
     name: "Meera K.",
     tag: "HIIT, Pune",
   },
@@ -29,7 +29,7 @@ export default function Testimonials() {
       <Reveal>
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Reviews</p>
         <h2 className="font-display text-4xl font-bold tracking-tight text-brand sm:text-6xl">
-          Women who don&apos;t skip. <span className="text-foreground/60">Neither do these.</span>
+          Women who don&apos;t skip.
         </h2>
       </Reveal>
 

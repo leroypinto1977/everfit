@@ -25,8 +25,8 @@ export default function TermsPage() {
       </p>
       <h2>Returns & warranty</h2>
       <p>
-        7-day no-questions returns and a 1-year warranty against manufacturing defects —
-        see the returns &amp; refunds policy for full details.
+        7-day no-questions returns and a 1-year warranty against manufacturing defects.
+        See the returns &amp; refunds policy for full details.
       </p>
       <h2>Safe use</h2>
       <p>
@@ -36,7 +36,7 @@ export default function TermsPage() {
         numbness. The band is not a medical device.
       </p>
       <h2>Contact</h2>
-      <p>For anything else, reach us via the contact page — we reply within 1 working day.</p>
+      <p>For anything else, reach us via the contact page. We reply within 1 working day.</p>
     </InfoPage>
   );
 }

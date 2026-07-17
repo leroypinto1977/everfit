@@ -8,12 +8,12 @@ const features = [
   {
     icon: "🌸",
     title: "Made for her",
-    body: "Comfortable foam grips and manageable resistance levels — built around how women actually train.",
+    body: "Comfortable foam grips and manageable resistance levels, built around how women actually train.",
   },
   {
     icon: "🎨",
     title: "Colour-coded resistance",
-    body: "Blue is 1.5 kg, red is 2 kg. Pick your level at a glance — or clip both tubes together for more.",
+    body: "Blue is 1.5 kg, red is 2 kg. Pick your level at a glance, or clip both bands together for more.",
   },
   {
     icon: "🚶‍♀️",
@@ -23,12 +23,12 @@ const features = [
   {
     icon: "🔒",
     title: "Clip-on handles",
-    body: "Padded foam handles attach to the tube with metal carabiners — swap tubes in seconds, no tools.",
+    body: "Padded foam handles attach to the band with metal carabiners, so you swap bands in seconds, no tools.",
   },
   {
     icon: "🎒",
     title: "Train anywhere",
-    body: "Light, packable latex tubing coils down small. Home, gym, park or travel — it comes with you.",
+    body: "Light, packable latex band coils down small. Home, gym, park or travel, it comes with you.",
   },
   {
     icon: "🛡️",
@@ -73,7 +73,7 @@ export default function Features() {
         <h2 className="font-display text-4xl font-bold tracking-tight text-brand sm:text-6xl">
           Made for her.
           <br />
-          <span className="text-foreground/60">Down to the last stitch.</span>
+          <span className="text-foreground/60">Down to the last detail.</span>
         </h2>
       </Reveal>
 

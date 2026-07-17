@@ -15,7 +15,7 @@ export default function RefundsPage() {
       <p>
         You can cancel an order free of charge any time <strong>before it ships</strong>{" "}
         (orders usually ship within 24 hours, so be quick). Write to us via the contact
-        page with your order ID, or WhatsApp us — once we confirm the cancellation, a
+        page with your order ID, or WhatsApp us. Once we confirm the cancellation, a
         full refund is initiated the same day. If the order has already shipped, simply
         refuse the delivery or use the 7-day return below.
       </p>
@@ -33,14 +33,14 @@ export default function RefundsPage() {
       </ul>
       <h2>Refund timelines</h2>
       <p>
-        Refunds go back to the original payment method via Razorpay — typically 5–7
+        Refunds go back to the original payment method via Razorpay, typically 5–7
         working days for cards and netbanking, and up to 3 days for UPI.
       </p>
       <h2>1-year warranty</h2>
       <p>
-        Manufacturing defects — leaking pods, failed stitching, strap or D-ring failure —
-        are covered for 12 months from delivery with a free replacement. Normal wear,
-        cuts, or damage from misuse aren&apos;t covered.
+        Manufacturing defects (torn latex, failed handle stitching, or carabiner or
+        clip failure) are covered for 12 months from delivery with a free replacement.
+        Normal wear, cuts, or damage from misuse aren&apos;t covered.
       </p>
       <h2>Failed payments</h2>
       <p>

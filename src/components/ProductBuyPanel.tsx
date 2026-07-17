@@ -67,7 +67,7 @@ export default function ProductBuyPanel({
       <div className="mt-8">
         {variant.soldOut ? (
           <span className="block cursor-not-allowed rounded-full bg-line py-4 text-center font-display text-lg font-bold text-muted">
-            Sold out — back soon
+            Sold out · back soon
           </span>
         ) : (
           <Magnetic strength={0.25}>
@@ -75,7 +75,7 @@ export default function ProductBuyPanel({
               href={`/checkout?w=${variant.key}`}
               className="block rounded-full bg-brand py-4 text-center font-display text-lg font-bold text-white transition hover:brightness-95"
             >
-              Buy now — {inr(variant.price)} →
+              Buy now · {inr(variant.price)} →
             </Link>
           </Magnetic>
         )}

@@ -14,50 +14,50 @@ import { PRODUCT_NAME, HERO_IMAGE } from "@/lib/product";
 import { SITE_URL } from "@/lib/site";
 
 const DESCRIPTION =
-  "Resistance tube set with foam-grip handles — colour-coded resistance for toning, strength, HIIT and mobility. Choose 1.5 kg, 2 kg, or the bundle of both.";
+  "Resistance band set with foam-grip handles and colour-coded resistance for toning, strength, HIIT and mobility. Choose 1.5 kg, 2 kg, or the bundle of both.";
 
 export const metadata: Metadata = {
-  title: "Infinity Band — resistance tube set for her",
+  title: "Infinity Band — resistance band set for her",
   description: DESCRIPTION,
   alternates: { canonical: "/product" },
   openGraph: {
     type: "website",
     url: `${SITE_URL}/product`,
-    title: "EVHERFIT Infinity Band — resistance tube set for her",
+    title: "EVHERFIT Infinity Band — resistance band set for her",
     description: DESCRIPTION,
   },
 };
 
 const highlights = [
-  "Foam-grip handles that clip on with metal carabiners — set up in seconds",
-  "Colour-coded resistance: pick your level, or stack both tubes for more",
-  "Light, packable latex tubing — train at home, outdoors or travelling",
+  "Foam-grip handles that clip on with metal carabiners, set up in seconds",
+  "Colour-coded resistance: pick your level, or stack both bands for more",
+  "Light, packable latex band for training at home, outdoors or travelling",
   "Full-body: presses, rows, curls, squats, glute work and beyond",
 ];
 
 const specs = [
-  ["Resistance levels", "1.5 kg / 2 kg per tube (or both in the bundle)"],
-  ["In a set", "1 resistance tube + 2 foam-grip handles"],
+  ["Resistance levels", "1.5 kg / 2 kg per band (or both in the bundle)"],
+  ["In a set", "1 resistance band + 2 foam-grip handles"],
   ["Handles", "Padded foam grips on nylon straps with metal carabiner clips"],
-  ["Tube", "Durable latex resistance tubing"],
+  ["Band", "Durable latex resistance band"],
   ["Best for", "Toning, strength, HIIT, pilates, mobility & rehab"],
-  ["Train anywhere", "Home, gym, park or travel — packs into a bag"],
-  ["Colourway", "Palette-coded — blue (1.5 kg) & red (2 kg)"],
+  ["Train anywhere", "Home, gym, park or travel; packs into a bag"],
+  ["Colourway", "Palette-coded: blue (1.5 kg) & red (2 kg)"],
   ["Warranty", "1 year against manufacturing defects"],
 ];
 
 const faqs = [
   {
     q: "Which resistance should I start with?",
-    a: "New to resistance training? Start with 1.5 kg (blue) for toning, pilates and mobility. Choose 2 kg (red) if you already train and want more load. The bundle gives you both — and you can clip the tubes together for even more resistance.",
+    a: "New to resistance training? Start with 1.5 kg (blue) for toning, pilates and mobility. Choose 2 kg (red) if you already train and want more load. The bundle gives you both, and you can clip the bands together for even more resistance.",
   },
   {
     q: "How do the handles attach?",
-    a: "Each tube clips to two padded foam handles with metal carabiners, so you can attach, detach and swap tubes in seconds — no tools needed.",
+    a: "Each band clips to two padded foam handles with metal carabiners, so you can attach, detach and swap bands in seconds, no tools needed.",
   },
   {
     q: "Where can I use them?",
-    a: "Anywhere. The tubes are light and packable, so you can train at home, in the park, at the gym or on the road. Great for presses, rows, curls, squats and glute work.",
+    a: "Anywhere. The bands are light and packable, so you can train at home, in the park, at the gym or on the road. Great for presses, rows, curls, squats and glute work.",
   },
   {
     q: "What if I change my mind?",
@@ -160,8 +160,8 @@ export default async function ProductPage() {
               <h2 className="font-display text-3xl font-bold tracking-tight text-brand">In the box</h2>
               <ul className="mt-8 space-y-4 rounded-3xl border border-line bg-card p-8">
                 {[
-                  "Resistance tube(s) for your chosen offer",
-                  "2 foam-grip handles per tube",
+                  "Resistance band(s) for your chosen offer",
+                  "2 foam-grip handles per band",
                   "Clip-on metal carabiners for quick swaps",
                   "Quick-start movement guide",
                 ].map((item) => (

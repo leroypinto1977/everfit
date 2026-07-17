@@ -1,5 +1,5 @@
 /**
- * The EVHERFIT Infinity Band — a resistance tube set with foam-grip handles,
+ * The EVHERFIT Infinity Band: a resistance band set with foam-grip handles,
  * offered in two resistance levels (1.5 kg and 2 kg) plus a bundle of both.
  * Live prices/stock come from the DB catalog (src/lib/catalog.ts) and are
  * passed to components as props; the VARIANTS below are only the fallback
@@ -40,7 +40,7 @@ export const VARIANTS: Variant[] = [
     key: "bundle",
     weight: "1.5 kg + 2 kg",
     label: "Complete Set",
-    blurb: "Both tubes — the full range of resistance",
+    blurb: "Both bands, the full range of resistance",
     price: 3999_00,
     mrp: 4498_00,
     popular: true,
@@ -50,7 +50,7 @@ export const VARIANTS: Variant[] = [
 /**
  * Product photography, keyed by variant key. The gallery shows the first image
  * as the hero and the rest as thumbnails. Files live in /public/products.
- * 1.5 kg is the blue tube, 2 kg is the red tube, and the bundle shows both.
+ * 1.5 kg is the blue band, 2 kg is the red band, and the bundle shows both.
  */
 export const PRODUCT_IMAGES: Record<string, string[]> = {
   "1.5": [

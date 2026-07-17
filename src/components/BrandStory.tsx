@@ -7,11 +7,11 @@ import { InfinityMark } from "./Logo";
 const pillars = [
   {
     title: "Vision",
-    body: "A world where women embrace lifelong wellness, strength and vitality — achieving infinite health through empowered, balanced living.",
+    body: "A world where women embrace lifelong wellness, strength and vitality, achieving infinite health through empowered, balanced living.",
   },
   {
     title: "Mission",
-    body: "To support women on their fitness journey with specialised equipment and guidance that promote sustainable health, strength and longevity — inspired by the infinite potential within every woman.",
+    body: "To support women on their fitness journey with specialised equipment and guidance that promote sustainable health, strength and longevity, inspired by the infinite potential within every woman.",
   },
 ];
 
@@ -47,10 +47,10 @@ export default function BrandStory() {
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
               At the heart of EVHERFIT, the infinity mark stands for limitless
-              health and longevity. Fitness isn&apos;t a final goal — it&apos;s a
+              health and longevity. Fitness isn&apos;t a final goal. It&apos;s a
               lifelong loop of strength, balance and continuous growth. We&apos;re
               here to support women at every stage, with the tools and guidance to
-              live with vitality, confidence and purpose — now and always.
+              live with vitality, confidence and purpose, now and always.
             </p>
           </Reveal>
 

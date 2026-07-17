@@ -8,25 +8,25 @@ const panels: { img: string; kicker: string; title: string; body: string }[] = [
     img: "/products/tube-blue-1.jpg",
     kicker: "Clip-on handles",
     title: "Grip. Clip. Go.",
-    body: "Padded foam handles clip to the tube with metal carabiners — attach, detach and swap in seconds. No hardware, no fuss, a solid grip through every rep.",
+    body: "Padded foam handles clip to the band with metal carabiners, so you can attach, detach and swap in seconds. No hardware, no fuss, a solid grip through every rep.",
   },
   {
     img: "/products/bundle-3.jpg",
     kicker: "Colour-coded resistance",
     title: "Know your level at a glance.",
-    body: "Blue is 1.5 kg, red is 2 kg. Pick the tube that matches your session — or clip both together when you want to push past your usual load.",
+    body: "Blue is 1.5 kg, red is 2 kg. Pick the band that matches your session, or clip both together when you want to push past your usual load.",
   },
   {
     img: "/products/tube-red-1.jpg",
     kicker: "Train anywhere",
     title: "Your gym, in a bag.",
-    body: "Light, packable latex tubing coils down small enough to drop in a tote. Home, park, hotel room — your full-body workout comes with you.",
+    body: "Light, packable latex band coils down small enough to drop in a tote. Home, park, hotel room, your full-body workout comes with you.",
   },
   {
     img: "/products/bundle-1.jpg",
     kicker: "The complete set",
-    title: "Both tubes. Full range.",
-    body: "The bundle pairs the 1.5 kg and 2 kg tubes so you can progress from toning to strength — and stack them for the days you want more.",
+    title: "Both bands. Full range.",
+    body: "The bundle pairs the 1.5 kg and 2 kg bands so you can progress from toning to strength, and stack them for the days you want more.",
   },
 ];
 

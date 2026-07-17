@@ -48,7 +48,7 @@ export default function Coach() {
               Tamil Nadu&apos;s trusted women&apos;s fitness coach
             </p>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
-              Seven years. Twenty thousand women. One belief — that real, lasting
+              Seven years. Twenty thousand women. One belief: that real, lasting
               fitness is built on sustainable habits, not crash diets or punishing
               gym hours. Manjula guides women through both the live Challenge and
               personal One-to-One coaching, with cultural understanding of everyday

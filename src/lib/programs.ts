@@ -21,7 +21,7 @@ export const PROGRAMS: Program[] = [
     key: "challenge",
     badge: "Group · Live",
     name: "The 4-Week Challenge",
-    tagline: "Eat idli, dosa, rice — and still lose weight in 4 weeks.",
+    tagline: "Eat idli, dosa, rice, and still lose weight in 4 weeks.",
     desc:
       "Live morning workouts in Tamil, beginner-friendly and equipment-free. Daily WhatsApp accountability, weekly recipes and habit templates included.",
     points: [
@@ -37,7 +37,7 @@ export const PROGRAMS: Program[] = [
     key: "one-to-one",
     badge: "1-to-1 · Personalised",
     name: "One-to-One Coaching",
-    tagline: "Your fittest self — faster.",
+    tagline: "Your fittest self, faster.",
     desc:
       "A personalised plan from Manjula and her team: custom workouts, a clinical nutritionist and daily accountability. Lose up to 10 kg in 90 days, organically.",
     points: [

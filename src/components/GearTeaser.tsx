@@ -27,7 +27,7 @@ export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number
             >
               <Image
                 src={HERO_IMAGE}
-                alt="EVHERFIT Infinity Band resistance tube set"
+                alt="EVHERFIT Infinity Band resistance band set"
                 width={1600}
                 height={1066}
                 sizes="(max-width: 640px) 288px, 384px"
@@ -44,7 +44,7 @@ export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number
               The Infinity Band.
             </h2>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">
-              Resistance tubes designed for her — durable latex tubing with padded
+              Resistance bands designed for her, with durable latex and padded
               foam-grip handles. Clip in and turn presses, rows, curls and squats
               into a full-body workout. Strong is infinite.
             </p>
