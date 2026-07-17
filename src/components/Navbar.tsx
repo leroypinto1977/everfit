@@ -207,13 +207,6 @@ export default function Navbar() {
           </li>
 
           <li>
-            <Link href="/#story" onClick={(e) => goToSection("story", e)} className={`${linkBase} ${tone(active === "story")}`}>
-              Our story
-              <span className={underline(active === "story")} />
-            </Link>
-          </li>
-
-          <li>
             <Link href="/track" className={`${linkBase} ${tone(active === "track")}`}>
               Track order
               <span className={underline(active === "track")} />
@@ -293,16 +286,6 @@ export default function Navbar() {
               >
                 The band
               </Link>
-              <button
-                type="button"
-                onClick={(e) => {
-                  setMobileOpen(false);
-                  goToSection("story", e);
-                }}
-                className="block w-full rounded-xl px-3 py-3 text-left font-display font-semibold text-foreground/80 transition-colors hover:bg-brand-soft/60 hover:text-brand"
-              >
-                Our story
-              </button>
               <Link
                 href="/track"
                 onClick={() => setMobileOpen(false)}

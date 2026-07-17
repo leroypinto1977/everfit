@@ -7,10 +7,18 @@ import { inr, HERO_IMAGE } from "@/lib/product";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
 
-const points = ["Clip-on foam handles", "Colour-coded resistance", "Train anywhere"];
+const points = [
+  "Clip-on foam handles",
+  "Colour-coded resistance",
+  "Train anywhere",
+];
 
 /** Condensed band teaser — curiosity here, full detail + buy on /product. */
-export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number }) {
+export default function GearTeaser({
+  fromPrice = 1499_00,
+}: {
+  fromPrice?: number;
+}) {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-20 sm:py-32 lg:grid-cols-2 lg:gap-14">
@@ -39,14 +47,16 @@ export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number
 
         <div className="order-1 lg:order-2">
           <Reveal>
-            <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">Train with the gear</p>
+            <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">
+              Train with the gear
+            </p>
             <h2 className="font-display text-4xl font-bold tracking-tight text-brand sm:text-6xl">
               The Infinity Band.
             </h2>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">
-              Resistance bands designed for her, with durable latex and padded
-              foam-grip handles. Clip in and turn presses, rows, curls and squats
-              into a full-body workout. Strong is infinite.
+              Resistance bands designed for woman, with durable latex and padded
+              foam-grip handles. Clip in and turn presses, rows, curls and
+              squats into a full-body workout. Strong is infinite.
             </p>
           </Reveal>
 
@@ -74,7 +84,9 @@ export default function GearTeaser({ fromPrice = 1499_00 }: { fromPrice?: number
                   <span>→</span>
                 </Link>
               </Magnetic>
-              <span className="text-sm text-muted">Sets from {inr(fromPrice)} · free shipping</span>
+              <span className="text-sm text-muted">
+                Sets from {inr(fromPrice)} · free shipping
+              </span>
             </div>
           </Reveal>
         </div>
