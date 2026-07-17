@@ -23,7 +23,7 @@ import {
  */
 
 const FROM = process.env.EMAIL_FROM ?? "EVHERFIT <no-reply@evherfit.com>";
-const REPLY_TO = process.env.SUPPORT_EMAIL ?? "support@evherfit.com";
+const REPLY_TO = process.env.SUPPORT_EMAIL ?? "info@evherfit.com";
 
 /** "EVHERFIT <orders@evherfit.com>" → { name, email } for Brevo's sender object. */
 function parseFrom(from: string): { name?: string; email: string } {

@@ -119,7 +119,7 @@ export function shell(
   opts: { preheader: string; headerBar?: string }
 ) {
   const bar = opts.headerBar ?? brand.indigo;
-  const support = process.env.SUPPORT_EMAIL ?? "support@evherfit.com";
+  const support = process.env.SUPPORT_EMAIL ?? "info@evherfit.com";
 
   return `<!DOCTYPE html>
 <html lang="en"><head>

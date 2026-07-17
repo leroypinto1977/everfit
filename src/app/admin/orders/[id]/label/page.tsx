@@ -24,7 +24,7 @@ export default async function LabelPage({ params }: { params: Promise<{ id: stri
   const c = order.customer;
   const invoiceId = order.invoiceNo ? `EVH-${String(order.invoiceNo).padStart(4, "0")}` : null;
   const site = process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, "") ?? "evherfit.com";
-  const support = process.env.SUPPORT_EMAIL ?? "support@evherfit.com";
+  const support = process.env.SUPPORT_EMAIL ?? "info@evherfit.com";
 
   return (
     <main className="min-h-screen bg-[#eef0f7] py-8 print:min-h-0 print:bg-white print:py-0">

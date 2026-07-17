@@ -13,9 +13,9 @@ const channels = [
   {
     icon: "✉️",
     title: "Email",
-    body: "support@evherfit.com",
+    body: "info@evherfit.com",
     note: "Replies within 1 working day",
-    href: "mailto:support@evherfit.com",
+    href: "mailto:info@evherfit.com",
   },
   {
     icon: "💬",

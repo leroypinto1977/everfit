@@ -24,7 +24,9 @@ export default function AboutPage() {
         health and longevity. It&apos;s a reminder that fitness isn&apos;t a final goal —
         it&apos;s a lifelong journey of strength, balance, and continuous growth. From
         walking in figure-8s to the shape of DNA strands, the 8 symbolises harmony,
-        rhythm, and optimal function — all essential to sustained well-being.
+        rhythm, and optimal function — all essential to sustained well-being. Its
+        flowing curves mirror the grace, strength, and resilience of the feminine
+        form, celebrating women as the source of infinite potential.
       </p>
       <h2>Our vision</h2>
       <p>

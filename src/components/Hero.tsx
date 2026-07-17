@@ -2,9 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, useScroll, useTransform } from "motion/react";
-import { HERO_IMAGE } from "@/lib/product";
 import SplitText from "./SplitText";
 import Magnetic from "./Magnetic";
 import { InfinityMark } from "./Logo";
@@ -16,9 +14,7 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
 
-  // parallax: band drifts up slower than the page, text fades out
-  const bandY = useTransform(scrollYProgress, [0, 1], ["0%", "22%"]);
-  const bandScale = useTransform(scrollYProgress, [0, 1], [1, 1.1]);
+  // parallax: text fades out on scroll
   const textOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
   const textY = useTransform(scrollYProgress, [0, 1], ["0%", "-30%"]);
   const markX = useTransform(scrollYProgress, [0, 1], ["0%", "10%"]);
@@ -34,7 +30,7 @@ export default function Hero() {
       <div className="animate-breathe absolute -left-40 top-1/4 h-[480px] w-[480px] rounded-full bg-brand/10 blur-[140px]" />
       <div className="absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-accent/15 blur-[120px]" />
 
-      <div className="relative mx-auto grid w-full max-w-7xl items-center gap-8 px-6 lg:grid-cols-[1.15fr_1fr] lg:gap-12">
+      <div className="relative mx-auto w-full max-w-6xl px-6 text-center">
         <motion.div style={{ opacity: textOpacity, y: textY }}>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -43,31 +39,31 @@ export default function Hero() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-brand"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-            Women-centred fitness · Be the woman
+            Women-centred fitness
           </motion.p>
 
           <h1 className="font-display text-4xl font-bold leading-[1.02] tracking-tight text-foreground sm:text-7xl lg:text-8xl">
             <SplitText text="Be the woman." delay={0.3} className="text-brand" />
-            <br />
-            <SplitText text="Strong is infinite." delay={0.62} />
           </h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.7 }}
-            className="mt-7 max-w-md text-lg leading-relaxed text-muted"
+            className="mx-auto mt-7 max-w-5xl text-lg leading-relaxed text-muted"
           >
-            EVHERFIT is fitness for life, not just a phase — live programs,
-            personal coaching and gear built for women&apos;s lifelong strength,
-            vitality and longevity.
+            Evherfit is a specialised fitness brand dedicated to promoting
+            lifelong health and wellness, with a core focus on women-centred
+            fitness. Its mission is to empower women on their wellness journey by
+            providing the right equipment and support to help them achieve
+            lasting vitality and strength.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.4, duration: 0.7 }}
-            className="mt-10 flex flex-wrap items-center gap-5"
+            className="mt-10 flex flex-wrap items-center justify-center gap-5"
           >
             <Magnetic>
               <a
@@ -82,28 +78,6 @@ export default function Hero() {
               <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">→</span>
             </Link>
           </motion.div>
-        </motion.div>
-
-        {/* product */}
-        <motion.div
-          style={{ y: bandY, scale: bandScale }}
-          initial={{ opacity: 0, y: 60 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 1, ease: [0.21, 0.65, 0.36, 1] }}
-          className="relative mx-auto w-80 sm:w-96"
-        >
-          <div className="animate-breathe absolute inset-8 -z-10 rounded-full bg-brand/15 blur-[70px]" />
-          <div className="animate-float-slow">
-            <Image
-              src={HERO_IMAGE}
-              alt="EVHERFIT Infinity Band resistance tube set"
-              width={1600}
-              height={1066}
-              priority
-              sizes="(max-width: 640px) 320px, 384px"
-              className="h-auto w-full rounded-[2rem] border border-line object-cover shadow-[0_20px_60px_rgba(43,51,125,0.18)]"
-            />
-          </div>
         </motion.div>
       </div>
 
