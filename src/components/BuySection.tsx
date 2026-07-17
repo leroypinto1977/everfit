@@ -44,14 +44,14 @@ export default function BuySection() {
             <Magnetic strength={0.5}>
               <a
                 href="#programs"
-                className="inline-block rounded-full bg-accent px-10 py-5 font-display text-lg font-bold text-white transition hover:brightness-95"
+                className="inline-block rounded-full bg-accent px-5 py-2.5 font-display text-sm font-bold text-white transition hover:brightness-95"
               >
                 Explore programs →
               </a>
             </Magnetic>
             <Link
               href="/product"
-              className="inline-block rounded-full border border-white/30 px-10 py-5 font-display text-lg font-bold text-white transition hover:bg-white/10"
+              className="inline-block rounded-full border border-white/30 px-5 py-2.5 font-display text-sm font-bold text-white transition hover:bg-white/10"
             >
               Shop the band
             </Link>

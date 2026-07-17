@@ -31,7 +31,7 @@ export default function BrandStory() {
               transition={{ duration: 1, ease: [0.21, 0.65, 0.36, 1] }}
               className="text-brand"
             >
-              <InfinityMark className="w-full" draw />
+              <InfinityMark className="mx-auto w-[85%]" draw />
             </motion.div>
             <p className="mt-6 text-center text-xs uppercase tracking-[0.4em] text-muted">
               The mark of infinite health
