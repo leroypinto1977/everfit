@@ -1,5 +1,7 @@
 import Hero from "@/components/Hero";
 import Marquee from "@/components/Marquee";
+import PainPoints from "@/components/PainPoints";
+import MythBreak from "@/components/MythBreak";
 import BrandStory from "@/components/BrandStory";
 import Coach from "@/components/Coach";
 import Programs from "@/components/Programs";
@@ -18,8 +20,11 @@ export default async function Home() {
 
   return (
     <main>
+      {/* story arc: her face → her pain → the myth → the lifelong loop → the coach → the paths in */}
       <Hero />
       <Marquee />
+      <PainPoints />
+      <MythBreak />
       <BrandStory />
       <Coach />
       <Programs />

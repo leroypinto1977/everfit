@@ -34,8 +34,9 @@ export default function BuySection() {
 
         <Reveal delay={0.3}>
           <p className="mt-6 max-w-xl text-lg text-white/75">
-            Lifelong strength starts with one step. Join a live program, train
-            one-to-one with Manjula, or pick up the gear that goes everywhere you do.
+            Your home is enough. Your thirty minutes are worth taking. Join a
+            live program, train one-to-one with Manjula, or pick up the gear
+            that turns any room into your gym.
           </p>
         </Reveal>
 

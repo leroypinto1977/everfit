@@ -54,9 +54,10 @@ export default function GearTeaser({
               The Infinity Band.
             </h2>
             <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">
-              Resistance bands designed for woman, with durable latex and padded
+              Resistance bands designed for women, with durable latex and padded
               foam-grip handles. Clip in and turn presses, rows, curls and
-              squats into a full-body workout. Strong is infinite.
+              squats into a full-body workout — in the corner of any room, at
+              any hour that&apos;s yours. Strong is infinite.
             </p>
           </Reveal>
 

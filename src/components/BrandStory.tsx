@@ -47,10 +47,12 @@ export default function BrandStory() {
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
               At the heart of EVHERFIT, the infinity mark stands for limitless
-              health and longevity. Fitness isn&apos;t a final goal. It&apos;s a
-              lifelong loop of strength, balance and continuous growth. We&apos;re
-              here to support women at every stage, with the tools and guidance to
-              live with vitality, confidence and purpose, now and always.
+              health and longevity. Fitness isn&apos;t a crash diet or a
+              wedding-season sprint that ends when the occasion does. It&apos;s a
+              lifelong loop of strength, balance and continuous growth,
+              practised in small daily doses at home. We&apos;re here to support
+              women at every stage, with the tools and guidance to live with
+              vitality, confidence and purpose, now and always.
             </p>
           </Reveal>
 
