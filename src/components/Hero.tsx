@@ -120,7 +120,7 @@ export default function Hero() {
               sizes="(max-width: 640px) 90vw, 448px"
               loading="eager"
               fetchPriority="high"
-              className="object-cover object-[center_22%]"
+              className="scale-[1.38] object-cover object-[center_22%] origin-[50%_28%]"
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-deep/85 via-brand-deep/30 to-transparent p-7">
               <p className="font-display text-2xl font-bold leading-none text-white">Manjula Narayanan</p>
