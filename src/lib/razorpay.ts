@@ -14,19 +14,28 @@ export function razorpay() {
   return client;
 }
 
+export interface PaymentInfo {
+  method?: string; // upi | card | netbanking | wallet | …
+  fee?: number; // paise, Razorpay's fee incl. its GST (its `fee` field is tax-inclusive)
+}
+
 /**
- * Best-effort lookup of how a payment was made (upi / card / netbanking / …).
- * Used by the browser verify path so the method is captured immediately; never
- * throws — on any failure the webhook backfills it later.
+ * Best-effort lookup of how a payment was made and what Razorpay charged for it.
+ * Used by the browser verify path so both are captured immediately; never throws
+ * — on any failure the webhook (whose captured event already carries fee/method)
+ * backfills later.
  */
-export async function fetchPaymentMethod(paymentId: string): Promise<string | undefined> {
+export async function fetchPaymentInfo(paymentId: string): Promise<PaymentInfo> {
   try {
-    const payment = await razorpay().payments.fetch(paymentId);
-    const method = (payment as { method?: string }).method;
-    return method || undefined;
+    const p = (await razorpay().payments.fetch(paymentId)) as { method?: string; fee?: number };
+    return {
+      method: p.method || undefined,
+      // fee is only populated once the payment is captured; guard against null
+      fee: typeof p.fee === "number" ? p.fee : undefined,
+    };
   } catch (err) {
-    console.error("Could not fetch payment method", err);
-    return undefined;
+    console.error("Could not fetch payment info", err);
+    return {};
   }
 }
 

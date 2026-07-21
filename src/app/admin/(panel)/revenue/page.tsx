@@ -3,6 +3,7 @@ import {
   getDailyRevenue,
   getMonthlyRevenue,
   getPaymentMethodMix,
+  getProfitStats,
   getRevenueStats,
   getTaxSummary,
   getTopCustomers,
@@ -58,8 +59,9 @@ export default async function RevenuePage({
   const to = istParseInput(sp.to) ?? istDayStart(); // inclusive in the UI
   const toExclusive = istAddDays(to, 1);
 
-  const [stats, daily, mix, monthly, methodMix, topCustomers, taxSummary] = await Promise.all([
+  const [stats, profit, daily, mix, monthly, methodMix, topCustomers, taxSummary] = await Promise.all([
     getRevenueStats(from, toExclusive),
+    getProfitStats(from, toExclusive),
     getDailyRevenue(from, toExclusive),
     getVariantMix(from, toExclusive),
     getMonthlyRevenue(12),
@@ -67,6 +69,19 @@ export default async function RevenuePage({
     getTopCustomers(from, toExclusive),
     getTaxSummary(from, toExclusive),
   ]);
+
+  // P&L runs on EX-GST revenue: prices are GST-inclusive, and the collected GST is
+  // a pass-through liability remitted to the government — not earnings — so it must
+  // not count as profit. Reverse it out before the margin math. gross profit =
+  // ex-GST revenue − COGS; net profit also nets off processor fees.
+  const exGstRevenue = gstSplit(stats.netRevenue).taxable;
+  const grossProfit = exGstRevenue - profit.cogs;
+  const netProfit = grossProfit - profit.fees;
+  const margin = exGstRevenue > 0 ? netProfit / exGstRevenue : 0;
+  // estDeposit stays on GST-inclusive net revenue: that's the actual cash Razorpay
+  // settles (the business receives the GST, then remits it separately).
+  const estDeposit = stats.netRevenue - profit.fees; // what actually lands after Razorpay's cut
+  const costCoverage = profit.soldOrders > 0 ? profit.costedOrders / profit.soldOrders : 1;
 
   // month-on-month with % change vs the previous month (on NET), newest first
   const months = monthly
@@ -165,6 +180,34 @@ export default async function RevenuePage({
       </div>
 
       {days && <RevenueChart days={days} title={`Revenue — ${rangeDays} days`} />}
+
+      {/* profitability */}
+      <div>
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-semibold">Profit &amp; margin</h2>
+          <span className="text-xs text-[#9aa0c3]">
+            ex-GST revenue − COGS − payment fees · same range
+          </span>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <KpiCard index={0} label="Gross profit" value={inr(grossProfit)} hint={`ex-GST revenue − ${inr(profit.cogs)} COGS`} />
+          <KpiCard index={1} label="Net profit" value={inr(netProfit)} hint={`after ${inr(profit.fees)} payment fees`} />
+          <KpiCard index={2} label="Margin" value={`${(margin * 100).toFixed(1)}%`} hint="net profit ÷ ex-GST revenue" />
+          <KpiCard index={3} label="Payment fees" value={inr(profit.fees)} hint="Razorpay, incl. its GST" />
+        </div>
+        <div className="mt-3 rounded-2xl border border-[#e3e5f0] bg-[#f8f9fd] px-6 py-4 text-sm text-[#4a5072]">
+          Estimated bank deposit after fees:{" "}
+          <span className="font-semibold text-[#1c2030]">{inr(estDeposit)}</span>{" "}
+          <span className="text-[#9aa0c3]">(net revenue − payment fees; excludes any refund fee retained by Razorpay)</span>
+          {costCoverage < 1 && (
+            <p className="mt-2 text-amber-700">
+              ⚠️ Cost of goods is set for {profit.costedOrders} of {profit.soldOrders} sold orders in this range —
+              profit and margin are an upper bound until every variant has a cost.{" "}
+              <a href="/admin/products" className="font-semibold underline">Set costs</a>.
+            </p>
+          )}
+        </div>
+      </div>
 
       {/* month on month */}
       <div className="overflow-x-auto rounded-2xl border border-[#e3e5f0] bg-white">
@@ -375,7 +418,10 @@ export default async function RevenuePage({
         <h2 className="font-semibold text-[#1c2030]">Settlements & fees</h2>
         <p className="mt-3 leading-relaxed">
           Razorpay deducts its fee before paying out, so the amount that lands in the bank is lower than
-          net revenue here. Reconcile payouts in{" "}
+          net revenue here. This range&apos;s captured fees total{" "}
+          <span className="font-semibold text-[#1c2030]">{inr(profit.fees)}</span>, giving an estimated
+          deposit of <span className="font-semibold text-[#1c2030]">{inr(estDeposit)}</span>. Reconcile the
+          exact payouts in{" "}
           <a
             href="https://dashboard.razorpay.com/app/settlements"
             target="_blank"

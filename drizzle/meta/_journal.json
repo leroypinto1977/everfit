@@ -43,6 +43,13 @@
       "when": 1784000000000,
       "tag": "0005_login_attempts",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786000000000,
+      "tag": "0006_cost_fees",
+      "breakpoints": true
     }
   ]
 }

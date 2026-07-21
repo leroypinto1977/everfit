@@ -47,6 +47,15 @@ export async function POST(req: Request) {
   }
   const amount = variant.price - discount;
 
+  // Razorpay rejects orders under 100 paise (₹1). A coupon that covers the whole
+  // (or nearly all) price would otherwise surface as an opaque 500 from the SDK.
+  if (amount < 100) {
+    return NextResponse.json(
+      { error: "This discount can't be applied to this item. Please remove the code or pick another option." },
+      { status: 400 }
+    );
+  }
+
   let rzpOrder;
   try {
     rzpOrder = await razorpay().orders.create({
@@ -67,6 +76,7 @@ export async function POST(req: Request) {
     variantKey: variant.key,
     couponCode,
     discount,
+    unitCost: variant.cost, // snapshot COGS at checkout for margin reporting
     customer: { name, email, phone, address, city: city ?? "", state: state ?? "", pincode },
   });
 

@@ -78,6 +78,7 @@ export const productVariants = pgTable("product_variants", {
   blurb: text("blurb").notNull().default(""),
   price: integer("price").notNull(), // paise
   mrp: integer("mrp").notNull(), // paise, struck-through
+  cost: integer("cost"), // paise, unit COGS for margin reporting; null = unknown
   stock: integer("stock"), // null = not tracked
   popular: boolean("popular").notNull().default(false),
   active: boolean("active").notNull().default(true),
@@ -128,6 +129,8 @@ export const orders = pgTable("orders", {
   qty: integer("qty").notNull().default(1),
   couponCode: text("coupon_code"),
   discount: integer("discount").notNull().default(0), // paise taken off list price
+  unitCost: integer("unit_cost"), // paise, COGS per unit snapshotted at sale; null = unknown
+  fee: integer("fee").notNull().default(0), // paise, payment-processor fee (incl. its GST); 0 for cash/manual
   paymentId: text("payment_id"),
   courier: text("courier"),
   tracking: text("tracking"),

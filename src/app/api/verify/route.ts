@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { markPaid, markFailed } from "@/lib/orders";
-import { fetchPaymentMethod } from "@/lib/razorpay";
+import { markPaid } from "@/lib/orders";
+import { fetchPaymentInfo } from "@/lib/razorpay";
 import { sendLowStockAlert, sendOrderNotifications } from "@/lib/notify";
+
+/** Constant-time compare of two hex-encoded HMACs (length-safe). */
+function hmacMatches(expected: string, received: string): boolean {
+  const a = Buffer.from(expected, "hex");
+  const b = Buffer.from(received ?? "", "hex");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 /**
  * Called by the browser right after the Razorpay modal reports success.
@@ -27,13 +34,15 @@ export async function POST(req: Request) {
     .update(`${razorpay_order_id}|${razorpay_payment_id}`)
     .digest("hex");
 
-  if (expected !== razorpay_signature) {
-    await markFailed(razorpay_order_id, "Signature verification failed");
+  // Do NOT mutate order state here: the order id is client-visible, so a forged
+  // request must not be able to flip a genuine order to "failed" (which would
+  // also remove it from the reconcile cron's `created`-only safety sweep).
+  if (!hmacMatches(expected, razorpay_signature)) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
-  const method = await fetchPaymentMethod(razorpay_payment_id);
-  const { order, transitioned, lowStock } = await markPaid(razorpay_order_id, razorpay_payment_id, method);
+  const { method, fee } = await fetchPaymentInfo(razorpay_payment_id);
+  const { order, transitioned, lowStock } = await markPaid(razorpay_order_id, razorpay_payment_id, method, fee);
   if (order && transitioned) {
     await sendOrderNotifications(order);
     await sendLowStockAlert(lowStock);

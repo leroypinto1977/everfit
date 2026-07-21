@@ -40,7 +40,7 @@ export default function ProductBuyPanel({
             type="button"
             onClick={() => setVariantKey(v.key)}
             aria-pressed={v.key === variant.key}
-            className={`relative rounded-2xl border px-3 py-4 text-center transition-all ${
+            className={`relative rounded-2xl border px-2 py-4 text-center transition-all sm:px-3 ${
               v.key === variant.key
                 ? "border-brand bg-brand text-white shadow-[0_8px_24px_rgba(43,51,125,0.25)]"
                 : "border-line bg-card text-foreground hover:border-brand/40"

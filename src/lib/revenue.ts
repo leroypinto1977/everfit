@@ -58,6 +58,34 @@ export async function getRevenueStats(from: Date, to: Date): Promise<RevenueStat
   };
 }
 
+export interface ProfitStats {
+  cogs: number; // paise, COGS of goods actually sold (excludes refunded — stock returned)
+  fees: number; // paise, payment-processor fees (charged even on refunded orders)
+  soldOrders: number; // paid/shipped/delivered count (the COGS/coverage base)
+  costedOrders: number; // of soldOrders, how many carry a known unit cost
+}
+
+/**
+ * Cost side of the P&L for a range (bucketed by paid date, IST — same basis as
+ * revenue). COGS counts only non-refunded sales because a refund returns the
+ * goods to stock; fees include refunded orders because Razorpay keeps its fee on
+ * a refund. `costedOrders`/`soldOrders` expose cost coverage so the UI can warn
+ * when some sales have no unit cost set (which would understate COGS).
+ */
+export async function getProfitStats(from: Date, to: Date): Promise<ProfitStats> {
+  const [r] = await db()
+    .select({
+      cogs: sql<number>`coalesce(sum(${orders.unitCost} * ${orders.qty}) filter (where ${orders.status} in ('paid','shipped','delivered') and ${orders.unitCost} is not null), 0)::int`,
+      fees: sql<number>`coalesce(sum(${orders.fee}) filter (where ${orders.status} in ('paid','shipped','delivered','refunded')), 0)::int`,
+      soldOrders: sql<number>`count(*) filter (where ${orders.status} in ('paid','shipped','delivered'))::int`,
+      costedOrders: sql<number>`count(*) filter (where ${orders.status} in ('paid','shipped','delivered') and ${orders.unitCost} is not null)::int`,
+    })
+    .from(orders)
+    .where(and(gte(orders.paidAt, from), lt(orders.paidAt, to)));
+
+  return { cogs: r.cogs, fees: r.fees, soldOrders: r.soldOrders, costedOrders: r.costedOrders };
+}
+
 export async function getDailyRevenue(from: Date, to: Date) {
   const rows = await db().execute(sql`
     SELECT to_char(date_trunc('day', paid_at AT TIME ZONE ${REPORT_TZ}), 'YYYY-MM-DD') AS day,
@@ -242,6 +270,8 @@ export async function getOrdersForExport(from: Date, to: Date) {
            round(o.amount / (1 + ${GST_RATE}::numeric))::int AS taxable_value,
            (o.amount - round(o.amount / (1 + ${GST_RATE}::numeric))::int) AS gst,
            o.discount, o.coupon_code, o.currency, o.item, o.variant_key, o.qty,
+           o.unit_cost, (o.unit_cost * o.qty) AS cogs, o.fee AS payment_fee,
+           (o.amount - coalesce(o.unit_cost, 0) * o.qty - o.fee) AS gross_profit,
            o.payment_id, o.name, o.email, o.phone, o.city, o.state, o.pincode,
            o.created_at, o.paid_at, o.shipped_at, o.delivered_at,
            r.amount AS refund_amount, r.id AS refund_id

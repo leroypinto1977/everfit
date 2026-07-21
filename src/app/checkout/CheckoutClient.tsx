@@ -87,6 +87,18 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
     setCouponMsg(null);
   }
 
+  // A coupon's discount is computed server-side against a specific variant price,
+  // so it can't carry over to a different one — drop it (and let the shopper
+  // re-apply) whenever the selected variant changes, keeping the shown total in
+  // sync with what /api/checkout will actually charge.
+  function selectVariant(key: string) {
+    setVariantKey(key);
+    if (coupon) {
+      setCoupon(null);
+      setCouponMsg("Discount removed — re-apply your code for this option.");
+    }
+  }
+
   async function pay(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -249,7 +261,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
                 key={v.key}
                 type="button"
                 disabled={v.soldOut}
-                onClick={() => setVariantKey(v.key)}
+                onClick={() => selectVariant(v.key)}
                 className={`rounded-xl border px-2 py-2.5 text-center transition-all ${
                   v.key === variant.key
                     ? "border-brand bg-brand text-white"

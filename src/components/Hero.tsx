@@ -111,17 +111,22 @@ export default function Hero() {
             initial={{ opacity: 0, scale: 0.94, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.9, ease: [0.21, 0.65, 0.36, 1] }}
-            className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand to-brand-deep shadow-[0_24px_70px_rgba(43,51,125,0.3)] lg:max-w-md"
+            className="relative mx-auto aspect-[4/5] w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-brand to-brand-deep shadow-[0_24px_70px_rgba(43,51,125,0.3)] lg:max-w-md"
           >
-            <Image
-              src="/manjula.jpg"
-              alt="Manjula Narayanan, founder of EVHERFIT and women's fitness coach"
-              fill
-              sizes="(max-width: 640px) 90vw, 448px"
-              loading="eager"
-              fetchPriority="high"
-              className="scale-[1.38] object-cover object-[center_22%] origin-[50%_28%]"
-            />
+            {/* Dedicated clip layer: its own compositing context (translateZ)
+                keeps the scaled portrait clipped to the rounded frame even
+                after Framer strips the parent transform — Safari/iOS otherwise
+                fails to clip a composited (scaled) child to a rounded parent. */}
+            <div className="absolute inset-0 overflow-hidden rounded-[2rem] [transform:translateZ(0)]">
+              <Image
+                src="/manjula.jpg"
+                alt="Manjula Narayanan, founder of EVHERFIT and women's fitness coach"
+                fill
+                priority
+                sizes="(max-width: 640px) 90vw, 448px"
+                className="scale-[1.38] object-cover object-[center_22%] origin-[50%_28%]"
+              />
+            </div>
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-deep/85 via-brand-deep/30 to-transparent p-7">
               <p className="font-display text-2xl font-bold leading-none text-white">Manjula Narayanan</p>
               <p className="mt-2 text-xs uppercase tracking-[0.25em] text-white/75">

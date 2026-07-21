@@ -22,10 +22,14 @@ export async function updateVariantAction(formData: FormData) {
   const mrpRupees = parseFloat(String(formData.get("mrp")));
   const stockRaw = String(formData.get("stock") ?? "").trim();
   const newStock = stockRaw === "" ? null : Math.max(0, parseInt(stockRaw, 10) || 0);
+  // Cost (COGS) is optional: blank clears it back to "unknown"; 0 is a valid cost.
+  const costRaw = String(formData.get("cost") ?? "").trim();
+  const costRupees = costRaw === "" ? null : parseFloat(costRaw);
 
   await updateVariantAdmin(id, {
     ...(Number.isFinite(priceRupees) && priceRupees > 0 && { price: Math.round(priceRupees * 100) }),
     ...(Number.isFinite(mrpRupees) && mrpRupees > 0 && { mrp: Math.round(mrpRupees * 100) }),
+    cost: costRupees !== null && Number.isFinite(costRupees) && costRupees >= 0 ? Math.round(costRupees * 100) : null,
     active: formData.get("active") === "on",
     blurb: String(formData.get("blurb") ?? "").trim(),
   });

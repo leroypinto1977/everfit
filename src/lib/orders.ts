@@ -132,6 +132,7 @@ export async function saveOrder(input: {
   qty?: number;
   couponCode?: string;
   discount?: number;
+  unitCost?: number | null; // paise, COGS per unit snapshotted at checkout
   customer: Order["customer"];
 }) {
   const c = input.customer;
@@ -172,6 +173,7 @@ export async function saveOrder(input: {
     qty: input.qty ?? 1,
     couponCode: input.couponCode ?? null,
     discount: input.discount ?? 0,
+    unitCost: input.unitCost ?? null,
     name: c.name,
     email: c.email,
     phone: c.phone,
@@ -306,7 +308,7 @@ async function adjustStock(
  * caller whether THIS call won (and should send notifications). Also assigns
  * the invoice number and decrements tracked stock.
  */
-export async function markPaid(id: string, paymentId: string, method?: string) {
+export async function markPaid(id: string, paymentId: string, method?: string, fee?: number) {
   const rows = await db()
     .update(orders)
     .set({
@@ -315,18 +317,26 @@ export async function markPaid(id: string, paymentId: string, method?: string) {
       paidAt: new Date(),
       invoiceNo: sql`nextval('invoice_seq')::int`,
       ...(method ? { paymentMethod: method } : {}),
+      ...(fee != null ? { fee } : {}),
     })
     .where(and(eq(orders.id, id), inArray(orders.status, ["created", "failed"])))
     .returning();
 
   if (!rows[0]) {
     // the other path (verify/webhook) already marked it paid — still backfill
-    // the payment method if this call is the one that knows it (the webhook)
+    // the method / fee if this call is the one that knows them (usually the webhook,
+    // whose captured event carries both). Only fills gaps, never overwrites.
     if (method) {
       await db()
         .update(orders)
         .set({ paymentMethod: method })
         .where(and(eq(orders.id, id), sql`${orders.paymentMethod} IS NULL`));
+    }
+    if (fee != null) {
+      await db()
+        .update(orders)
+        .set({ fee })
+        .where(and(eq(orders.id, id), eq(orders.fee, 0)));
     }
     return { order: await getOrder(id), transitioned: false, lowStock: [] };
   }
@@ -511,6 +521,7 @@ export async function recordManualSale(input: {
       item,
       variantKey: input.variantKey,
       qty,
+      unitCost: variant.cost ?? null,
       paidAt,
       invoiceNo: sql`nextval('invoice_seq')::int`,
       name,

@@ -59,12 +59,41 @@ export async function getCatalog(): Promise<{ name: string; variants: Storefront
   }
 }
 
+/**
+ * Server-only COGS lookup by variant key. Kept separate from getCatalog so the
+ * unit cost is NEVER serialized into the storefront (it would leak into page
+ * source). Returns null when the variant has no cost set or isn't in the DB.
+ */
+export async function getVariantCost(key: string): Promise<number | null> {
+  if (!hasDb()) return null;
+  try {
+    const rows = await db()
+      .select({ cost: productVariants.cost })
+      .from(productVariants)
+      .where(eq(productVariants.key, key))
+      .limit(1);
+    return rows[0]?.cost ?? null;
+  } catch (err) {
+    console.error("Variant cost lookup failed:", err);
+    return null;
+  }
+}
+
 /** Checkout-side lookup: the price ALWAYS comes from here, never the client. */
 export async function getPurchasableVariant(key: string | undefined | null) {
   const { name, variants } = await getCatalog();
-  const variant = variants.find((v) => v.key === key) ?? variants.find((v) => v.popular) ?? variants[0];
+  // A non-empty key that matches nothing is a stale/invalid selection — reject it
+  // (return null) rather than silently substituting a different product, which
+  // would charge the customer for something they didn't choose. Only fall back to
+  // the default variant when no key was supplied at all.
+  const variant = key
+    ? variants.find((v) => v.key === key) ?? null
+    : variants.find((v) => v.popular) ?? variants[0] ?? null;
   if (!variant) return null;
-  return { ...variant, productName: name };
+  // cost is fetched separately (server-only) so it never rides along with the
+  // storefront catalog; used to snapshot COGS onto the order.
+  const cost = await getVariantCost(variant.key);
+  return { ...variant, productName: name, cost };
 }
 
 /* ---------- admin ---------- */
@@ -83,7 +112,7 @@ export async function getProductAdmin() {
 
 export async function updateVariantAdmin(
   id: string,
-  fields: { price?: number; mrp?: number; stock?: number | null; active?: boolean; blurb?: string }
+  fields: { price?: number; mrp?: number; cost?: number | null; stock?: number | null; active?: boolean; blurb?: string }
 ) {
   await db().update(productVariants).set(fields).where(eq(productVariants.id, id));
 }

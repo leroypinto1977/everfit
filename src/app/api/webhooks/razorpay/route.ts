@@ -3,6 +3,13 @@ import crypto from "crypto";
 import { markPaid, markFailed, markRefundFailed, markRefundProcessed } from "@/lib/orders";
 import { sendLowStockAlert, sendOrderNotifications, sendPaymentFailedEmail } from "@/lib/notify";
 
+/** Constant-time compare of two hex-encoded HMACs (length-safe). */
+function hmacMatches(expected: string, received: string): boolean {
+  const a = Buffer.from(expected, "hex");
+  const b = Buffer.from(received ?? "", "hex");
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 /**
  * Razorpay server-to-server webhook — the authoritative "an order happened"
  * signal. Configure in Razorpay Dashboard → Settings → Webhooks:
@@ -24,7 +31,7 @@ export async function POST(req: Request) {
   }
 
   const expected = crypto.createHmac("sha256", secret).update(body).digest("hex");
-  if (expected !== signature) {
+  if (!hmacMatches(expected, signature)) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 
@@ -32,7 +39,9 @@ export async function POST(req: Request) {
   const payment = event.payload?.payment?.entity;
 
   if (event.event === "payment.captured" && payment) {
-    const { order, transitioned, lowStock } = await markPaid(payment.order_id, payment.id, payment.method);
+    // the captured event carries the processor fee (paise, incl. its GST) directly
+    const fee = typeof payment.fee === "number" ? payment.fee : undefined;
+    const { order, transitioned, lowStock } = await markPaid(payment.order_id, payment.id, payment.method, fee);
     if (order && transitioned) {
       await sendOrderNotifications(order);
       await sendLowStockAlert(lowStock);

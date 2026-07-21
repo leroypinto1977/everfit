@@ -63,7 +63,11 @@ export default async function ProductsPage() {
           <form
             key={v.id}
             action={updateVariantAction}
-            className="grid items-end gap-4 rounded-2xl border border-[#e3e5f0] bg-white p-6 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_repeat(3,8rem)_auto_auto]"
+            className={`grid items-end gap-4 rounded-2xl border border-[#e3e5f0] bg-white p-6 sm:grid-cols-2 ${
+              canEdit
+                ? "lg:grid-cols-[1fr_1fr_repeat(4,8rem)_auto_auto]"
+                : "lg:grid-cols-[1fr_1fr_repeat(3,8rem)_auto_auto]"
+            }`}
           >
             <input type="hidden" name="id" value={v.id} />
             <div>
@@ -107,6 +111,20 @@ export default async function ProductsPage() {
                 className={inputCls}
               />
             </div>
+            {canEdit && (
+              <div>
+                <label className="mb-1 block text-xs text-[#6b7194]">Cost ₹</label>
+                <input
+                  name="cost"
+                  type="number"
+                  step="1"
+                  min="0"
+                  defaultValue={v.cost != null ? v.cost / 100 : ""}
+                  placeholder="—"
+                  className={inputCls}
+                />
+              </div>
+            )}
             <div>
               <label className="mb-1 block text-xs text-[#6b7194]">Stock</label>
               <input
@@ -138,6 +156,7 @@ export default async function ProductsPage() {
         <p className="mt-4 text-xs text-[#9aa0c3]">
           Stock left blank = not tracked (never sells out). Stock is reduced automatically when an order is
           paid and restored on refunds. Sold-out variants stay visible but can&apos;t be purchased.
+          {canEdit && " Cost is your landed cost per unit — it feeds the profit & margin figures on Revenue and is snapshotted onto each order at the time of sale, so changing it never rewrites past reports."}
         </p>
       </div>
     </div>

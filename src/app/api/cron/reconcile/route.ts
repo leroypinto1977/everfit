@@ -62,7 +62,8 @@ export async function GET(req: Request) {
       const captured = payments.items?.find((p) => p.status === "captured");
       if (!captured) continue;
 
-      const { order, transitioned, lowStock } = await markPaid(id, captured.id, captured.method);
+      const fee = typeof captured.fee === "number" ? captured.fee : undefined;
+      const { order, transitioned, lowStock } = await markPaid(id, captured.id, captured.method, fee);
       if (order && transitioned) {
         recovered++;
         // notify like the webhook would; never let a send failure abort the sweep
