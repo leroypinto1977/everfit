@@ -96,6 +96,8 @@ export default function TrackClient() {
               onChange={(e) => setPhone(e.target.value)}
               required
               type="tel"
+              autoComplete="tel"
+              inputMode="tel"
               placeholder="Phone"
               className="rounded-xl border border-line bg-card px-4 py-3.5 outline-none transition-all focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
             />

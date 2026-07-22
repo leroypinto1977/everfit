@@ -75,15 +75,23 @@ body {
 }
 .animate-marquee {
   animation: marquee 28s linear infinite;
+  will-change: transform;
 }
 
-/* ---- pulsing glow behind the band ---- */
+/* ---- pulsing glow behind the band ----
+   These glows carry a huge blur radius (70–140px). Animating `transform:
+   scale()` on a blurred element forces the compositor to re-rasterize that
+   enormous blurred texture every frame — the main source of homepage jank.
+   Pulse `opacity` only: it's a compositor-only property (no repaint/re-raster),
+   so the glow still "breathes" without the cost. `will-change` isolates it onto
+   its own layer so the pulse never repaints the content around it. */
 @keyframes breathe {
-  0%, 100% { opacity: 0.55; transform: scale(1); }
-  50% { opacity: 0.95; transform: scale(1.1); }
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.95; }
 }
 .animate-breathe {
   animation: breathe 4.5s ease-in-out infinite;
+  will-change: opacity;
 }
 
 /* ---- slow float for the hero band ---- */
@@ -93,6 +101,7 @@ body {
 }
 .animate-float-slow {
   animation: float-slow 7s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* ---- shimmering text for the buy CTA (on indigo panels) ---- */
@@ -106,7 +115,14 @@ body {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: shine 5s linear infinite;
+}
+/* `background-position` isn't GPU-composited, so animating it repaints the text
+   every frame. Keep the static gradient on phones (where fill-rate is tightest)
+   and only run the shimmer on larger, hover-capable screens. */
+@media (min-width: 640px) {
+  .text-shine {
+    animation: shine 5s linear infinite;
+  }
 }
 
 /* ---- infinity logo draw-on ---- */

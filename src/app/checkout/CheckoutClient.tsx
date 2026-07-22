@@ -17,13 +17,13 @@ declare global {
 }
 
 const fields = [
-  { name: "name", label: "Full name", type: "text", span: 2 },
-  { name: "email", label: "Email", type: "email", span: 1 },
-  { name: "phone", label: "Phone", type: "tel", span: 1 },
-  { name: "address", label: "Address", type: "text", span: 2 },
-  { name: "city", label: "City", type: "text", span: 1 },
-  { name: "state", label: "State", type: "text", span: 1 },
-  { name: "pincode", label: "PIN code", type: "text", span: 2 },
+  { name: "name", label: "Full name", type: "text", span: 2, autoComplete: "name" },
+  { name: "email", label: "Email", type: "email", span: 1, autoComplete: "email", inputMode: "email" },
+  { name: "phone", label: "Phone", type: "tel", span: 1, autoComplete: "tel", inputMode: "tel" },
+  { name: "address", label: "Address", type: "text", span: 2, autoComplete: "street-address" },
+  { name: "city", label: "City", type: "text", span: 1, autoComplete: "address-level2" },
+  { name: "state", label: "State", type: "text", span: 1, autoComplete: "address-level1" },
+  { name: "pincode", label: "PIN code", type: "text", span: 2, autoComplete: "postal-code", inputMode: "numeric" },
 ] as const;
 
 function CheckoutContent({ variants }: { variants: Variant[] }) {
@@ -203,6 +203,8 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
                   id={f.name}
                   type={f.type}
                   required
+                  autoComplete={f.autoComplete}
+                  inputMode={"inputMode" in f ? f.inputMode : undefined}
                   value={form[f.name] ?? ""}
                   onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                   className="w-full rounded-xl border border-line bg-card px-4 py-3.5 outline-none transition-all focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
@@ -294,7 +296,9 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
                   value={couponInput}
                   onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
                   placeholder="Discount code"
-                  className="w-full rounded-xl border border-line bg-card px-4 py-2.5 text-sm uppercase outline-none transition-all focus:border-brand/60"
+                  inputMode="text"
+                  autoCapitalize="characters"
+                  className="w-full rounded-xl border border-line bg-card px-4 py-2.5 text-base uppercase outline-none transition-all focus:border-brand/60 sm:text-sm"
                 />
                 <button
                   type="button"
