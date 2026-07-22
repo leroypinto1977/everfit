@@ -127,7 +127,7 @@ export default function Hero() {
                 className="scale-[1.38] object-cover object-[center_22%] origin-[50%_28%]"
               />
             </div>
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brand-deep/85 via-brand-deep/30 to-transparent p-7">
+            <div className="absolute inset-x-0 bottom-0 rounded-b-[2rem] bg-gradient-to-t from-brand-deep/85 via-brand-deep/30 to-transparent p-7">
               <p className="font-display text-2xl font-bold leading-none text-white">Manjula Narayanan</p>
               <p className="mt-2 text-xs uppercase tracking-[0.25em] text-white/75">
                 Founder · Women&apos;s fitness coach
