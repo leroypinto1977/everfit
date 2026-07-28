@@ -29,8 +29,7 @@ export default function Coach() {
             </div>
             <span className="font-display text-7xl font-bold leading-none text-accent-soft">&ldquo;</span>
             <blockquote className="relative font-display text-2xl font-bold leading-snug text-white sm:text-[1.7rem]">
-              You don&apos;t need a gym to become strong. You need a corner of
-              your home, and a promise to yourself.
+              Strong aaga gym theva illa. Unga veetla oru corner and a strong promise to yourself is what you need.
             </blockquote>
             <div className="relative">
               <p className="font-display text-lg font-bold text-white">Manjula Narayanan</p>

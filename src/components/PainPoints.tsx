@@ -36,14 +36,12 @@ export default function PainPoints() {
       <Reveal>
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">We see you</p>
         <h2 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-brand sm:text-6xl">
-          Your day has no slot
+          Unga schedule la "Me Time"
           <br />
-          <span className="text-foreground/60">that says &ldquo;me&rdquo;.</span>
+          <span className="text-foreground/60">nu oru slot iruka?</span>
         </h2>
         <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-          For most Indian women, health isn&apos;t neglected because it doesn&apos;t
-          matter. It&apos;s neglected because everything else is allowed to matter
-          more. Does any of this sound like your day?
+          For most Indian women, avanga than last priority. Family, Kids, Cooking, Work idhellame first. Does this sound like you?
         </p>
       </Reveal>
 
@@ -64,7 +62,7 @@ export default function PainPoints() {
           None of this means you&apos;ve failed.
           <br />
           <span className="text-brand">
-            It means fitness was never designed around your life. So let&apos;s redesign it.
+            Unga lifestyle ku yetha maadhri fitness plan neenga design Panayala. So let&apos;s redesign it.
           </span>
         </p>
       </Reveal>
