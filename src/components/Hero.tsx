@@ -47,15 +47,15 @@ export default function Hero() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-brand"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
-            Women-centred fitness, at home
+            Women-centered fitness, at home
           </motion.p>
 
           <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
             <span className="block text-foreground">
-              <SplitText text="You care for everyone." delay={0.3} />
+              <SplitText text="Ellarayum paathukringa." delay={0.3} />
             </span>
             <span className="block text-brand">
-              <SplitText text="Who cares for you?" delay={0.65} />
+              <SplitText text="Ungala yaaru paathukra?" delay={0.65} />
             </span>
           </h1>
 

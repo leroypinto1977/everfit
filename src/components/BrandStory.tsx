@@ -43,7 +43,7 @@ export default function BrandStory() {
           <Reveal>
             <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">The story of infinite health</p>
             <h2 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-brand sm:text-5xl">
-              Fitness isn&apos;t a finish line.
+              Fitness destination illa, adhu oru journey.
             </h2>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
               At the heart of EVHERFIT, the infinity mark stands for limitless
