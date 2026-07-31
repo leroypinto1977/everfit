@@ -7,7 +7,7 @@ import {
   istInput,
   istParseInput,
   istNoon,
-} from "@/lib/report-time";
+} from "@everfit/core/lib/report-time";
 
 /**
  * IST is UTC+5:30 with no DST. The instant 2026-05-31T20:30:00Z is

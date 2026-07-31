@@ -1,0 +1,61 @@
+"use client";
+
+import { ReactLenis, useLenis } from "lenis/react";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import SiteHeader from "./SiteHeader";
+
+/**
+ * On each route change: scroll to the hash target if present, otherwise reset
+ * to the top. Combined with manual scroll restoration this also means a plain
+ * refresh always lands at the top of the page (no browser scroll restore).
+ */
+function ScrollManager() {
+  const lenis = useLenis();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (!lenis) return;
+    const raf = requestAnimationFrame(() => {
+      const hash = window.location.hash;
+      if (hash) {
+        const el = document.querySelector(hash);
+        if (el) {
+          lenis.scrollTo(el as HTMLElement, { offset: -80 });
+          return;
+        }
+      }
+      lenis.scrollTo(0, { immediate: true });
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [lenis, pathname]);
+
+  return null;
+}
+
+export default function SmoothScroll({ children }: { children: React.ReactNode }) {
+  useEffect(() => {
+    if (typeof window !== "undefined" && "scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+  }, []);
+
+  return (
+    <ReactLenis
+      root
+      options={{
+        lerp: 0.1, // wheel smoothing — lower = smoother/heavier, higher = snappier
+        smoothWheel: true,
+        // Leave touch scrolling to the browser. syncTouch hijacks native touch
+        // momentum and produces floaty/stuttery scroll on phones (esp. iOS
+        // Safari) and jitters the fixed header — smoothWheel still covers desktop.
+        syncTouch: false,
+        wheelMultiplier: 1,
+      }}
+    >
+      <ScrollManager />
+      <SiteHeader />
+      {children}
+    </ReactLenis>
+  );
+}

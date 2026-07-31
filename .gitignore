@@ -1,7 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+# unanchored: workspaces install to the root but Next writes per-app dirs too
+node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -14,11 +15,11 @@
 /coverage
 
 # next.js
-/.next/
-/out/
+.next/
+out/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store

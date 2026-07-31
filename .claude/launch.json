@@ -2,10 +2,17 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "everfit",
+      "name": "store",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeArgs": ["run", "--workspace=@everfit/store", "dev"],
       "port": 3000,
+      "autoPort": true
+    },
+    {
+      "name": "admin",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "--workspace=@everfit/admin", "dev:port"],
+      "port": 3001,
       "autoPort": true
     }
   ]

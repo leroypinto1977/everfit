@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const appDir = join(root, "src", "app");
+const appDir = join(root, "apps", "store", "src", "app");
 const svg = await readFile(join(appDir, "icon.svg"));
 
 // Apple touch icon: 180x180, opaque (no transparency on iOS home screens).

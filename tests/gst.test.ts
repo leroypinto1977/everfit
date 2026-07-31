@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { gstSplit, GST_RATE } from "@/lib/revenue";
+import { gstSplit, GST_RATE } from "@everfit/core/lib/revenue";
 
 /**
  * Prices are GST-inclusive, so gstSplit must reverse the tax out of the total.
