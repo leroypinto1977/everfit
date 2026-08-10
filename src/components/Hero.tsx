@@ -51,11 +51,12 @@ export default function Hero() {
           </motion.p>
 
           <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
-            <span className="block text-foreground">
-              <SplitText text="Ellarayum paathukringa." delay={0.3} />
+            <span className="not-italic block text-foreground">
+              <SplitText text="You take care of everyone." delay={0.3} />
             </span>
-            <span className="block text-brand">
-              <SplitText text="Ungala yaaru paathukra?" delay={0.65} />
+            <span className="relative italic mt-1 inline-block text-brand">
+              <SplitText text="Now it&apos;s your turn." delay={0.65} />
+              <span className="absolute -bottom-2 left-0 h-[3px] w-16 rounded-full bg-brand" />
             </span>
           </h1>
 
@@ -65,11 +66,8 @@ export default function Hero() {
             transition={{ delay: 1.2, duration: 0.7 }}
             className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-muted lg:mx-0"
           >
-            Coach Manjula Narayanan built EVHERFIT to answer that question —
-            with simple thirty-minute workouts done right at home, around the
-            life you already have. No gym required, no hour you don&apos;t have.
+            Fitness at home, built <span className="font-semibold text-brand">by women, for women.</span>
           </motion.p>
-
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
