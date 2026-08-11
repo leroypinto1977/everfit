@@ -24,5 +24,6 @@ Rules of thumb:
 - The two apps cannot touch each other's Next.js cache. When an admin write should
   refresh a storefront page, go through `revalidateStorefront()` — not
   `revalidatePath()`.
-- In root `package.json` scripts the `--workspace` flag must come **before** the
-  script name; `npm run build --workspace=X` re-runs the root script forever.
+- Root `package.json` scripts must delegate with `npm --prefix apps/<app> run <script>`.
+  Inside a lifecycle script npm ignores `--workspace` in **either** position and re-runs
+  the root script forever — `npm run build` at the repo root then never terminates.

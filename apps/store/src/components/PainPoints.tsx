@@ -36,7 +36,7 @@ export default function PainPoints() {
       <Reveal>
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-accent">We see you</p>
         <h2 className="font-display text-4xl font-bold leading-[1.05] tracking-tight text-brand sm:text-6xl">
-          Unga schedule la "Me Time"
+          Unga schedule la &ldquo;Me Time&rdquo;
           <br />
           <span className="text-foreground/60">nu oru slot iruka?</span>
         </h2>

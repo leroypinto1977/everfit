@@ -4,14 +4,14 @@
     {
       "name": "store",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "--workspace=@everfit/store", "dev"],
+      "runtimeArgs": ["--prefix", "apps/store", "run", "dev"],
       "port": 3000,
       "autoPort": true
     },
     {
       "name": "admin",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "--workspace=@everfit/admin", "dev:port"],
+      "runtimeArgs": ["--prefix", "apps/admin", "run", "dev:port"],
       "port": 3001,
       "autoPort": true
     }
