@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import Reveal from "./Reveal";
 import { InfinityMark } from "./Logo";
-
+import Image from "next/image";
 const stats = [
   { value: "7+", label: "Years coaching" },
   { value: "20,000+", label: "Women transformed" },
@@ -18,22 +18,31 @@ export default function Coach() {
         {/* signature quote — the portrait lives in the hero now */}
         <Reveal>
           <motion.div
-            initial={{ opacity: 0, scale: 0.94 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true, margin: "-80px" }}
-            transition={{ duration: 0.8, ease: [0.21, 0.65, 0.36, 1] }}
-            className="relative mx-auto flex aspect-[4/5] w-full max-w-sm flex-col justify-between overflow-hidden rounded-[2rem] bg-gradient-to-br from-brand to-brand-deep p-8 shadow-[0_24px_70px_rgba(43,51,125,0.3)] sm:p-10"
+            initial={{ opacity: 0, scale: 0.94, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.9, ease: [0.21, 0.65, 0.36, 1] }}
+            className="relative mx-auto aspect-[4/5] w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-brand to-brand-deep shadow-[0_24px_70px_rgba(43,51,125,0.3)] lg:max-w-md"
           >
-            <div className="pointer-events-none absolute -right-16 -top-10 w-64 text-white opacity-[0.08]">
-              <InfinityMark className="w-full" />
+            {/* Dedicated clip layer: its own compositing context (translateZ)
+                keeps the scaled portrait clipped to the rounded frame even
+                after Framer strips the parent transform — Safari/iOS otherwise
+                fails to clip a composited (scaled) child to a rounded parent. */}
+            <div className="absolute inset-0 overflow-hidden rounded-[2rem] [transform:translateZ(0)]">
+              <Image
+                src="/manjula2.jpg"
+                alt="Manjula Narayanan, founder of EVHERFIT and women's fitness coach"
+                fill
+                priority
+                quality={95}
+                sizes="(max-width: 640px) 90vw, 700px"
+                className="object-cover object-[44.2%_50%] scale-[1]"
+              />
             </div>
-            <span className="font-display text-7xl font-bold leading-none text-accent-soft">&ldquo;</span>
-            <blockquote className="relative font-display text-2xl font-bold leading-snug text-white sm:text-[1.7rem]">
-              Strong aaga gym theva illa. Unga veetla oru corner and a strong promise to yourself is what you need.
-            </blockquote>
-            <div className="relative">
-              <p className="font-display text-lg font-bold text-white">Manjula Narayanan</p>
-              <p className="mt-1.5 text-xs uppercase tracking-[0.25em] text-white/70">Founder, EVHERFIT</p>
+            <div className="absolute inset-x-0 bottom-0 rounded-b-[2rem] bg-gradient-to-t from-brand-deep/85 via-brand-deep/30 to-transparent p-7">
+              <p className="font-display text-2xl font-bold leading-none text-white">Manjula Narayanan</p>
+              <p className="mt-2 text-xs uppercase tracking-[0.25em] text-white/75">
+                Founder · Women&apos;s fitness coach
+              </p>
             </div>
           </motion.div>
         </Reveal>

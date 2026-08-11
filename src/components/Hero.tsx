@@ -121,8 +121,9 @@ export default function Hero() {
                 alt="Manjula Narayanan, founder of EVHERFIT and women's fitness coach"
                 fill
                 priority
-                sizes="(max-width: 640px) 90vw, 448px"
-                className="scale-[1.38] object-cover object-[center_22%] origin-[50%_28%]"
+                quality={95}
+                sizes="(max-width: 640px) 90vw, 700px"
+                className="object-cover object-[44.2%_50%] scale-[1]"
               />
             </div>
             <div className="absolute inset-x-0 bottom-0 rounded-b-[2rem] bg-gradient-to-t from-brand-deep/85 via-brand-deep/30 to-transparent p-7">
