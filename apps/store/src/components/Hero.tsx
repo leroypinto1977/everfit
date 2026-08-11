@@ -56,7 +56,16 @@ export default function Hero() {
             </span>
             <span className="relative italic mt-1 inline-block text-brand">
               <SplitText text="Now it&apos;s your turn." delay={0.65} />
-              <span className="absolute -bottom-2 left-0 h-[3px] w-16 rounded-full bg-brand" />
+              {/* The rule is the only part of the headline outside SplitText, so
+                  without its own transition it painted at full strength while the
+                  words were still masked — a stray dash on an empty hero. Draw it
+                  left-to-right as the last word lands (0.65 + 3×0.07 stagger). */}
+              <motion.span
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ delay: 1.05, duration: 0.55, ease: [0.21, 0.65, 0.36, 1] }}
+                className="absolute -bottom-2 left-0 h-[3px] w-16 origin-left rounded-full bg-brand"
+              />
             </span>
           </h1>
 
