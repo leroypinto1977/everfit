@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* EVHERFIT brand tokens — per the brand book:
+   light, clean surfaces (off-white #F0F0F0 family) with primary indigo
+   #2B337D and near-black #282828; Palette W pink accents the women's
+   line (this product). Display face Renoric ≈ Exo 2 italic. */
+:root {
+  --background: #f4f5f9;
+  --foreground: #22242c;
+  --brand: #2b337d;
+  --brand-deep: #232a68;
+  --brand-soft: #e6e8f4;
+  --accent: #e56ca5;
+  --accent-soft: #fce4ec;
+  --muted: #5e6478;
+  --card: #ffffff;
+  --line: rgba(34, 36, 44, 0.09);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+html {
+  scroll-behavior: auto; /* Lenis owns scrolling */
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--brand);
+  color: #ffffff;
+}
+
+/* Renoric (brand display face) is slanted — echo it on display text */
+.font-display {
+  font-style: italic;
+}
+
+/* ---- marquee ---- */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+  will-change: transform;
+}
+
+/* ---- pulsing glow behind the band ----
+   These glows carry a huge blur radius (70–140px). Animating `transform:
+   scale()` on a blurred element forces the compositor to re-rasterize that
+   enormous blurred texture every frame — the main source of homepage jank.
+   Pulse `opacity` only: it's a compositor-only property (no repaint/re-raster),
+   so the glow still "breathes" without the cost. `will-change` isolates it onto
+   its own layer so the pulse never repaints the content around it. */
+@keyframes breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.95; }
+}
+.animate-breathe {
+  animation: breathe 4.5s ease-in-out infinite;
+  will-change: opacity;
+}
+
+/* ---- slow float for the hero band ---- */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) rotate(-6deg); }
+  50% { transform: translateY(-16px) rotate(-3deg); }
+}
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* ---- shimmering text for the buy CTA (on indigo panels) ---- */
+@keyframes shine {
+  from { background-position: 200% center; }
+  to { background-position: -200% center; }
+}
+.text-shine {
+  background: linear-gradient(110deg, #ffffff 35%, var(--accent-soft) 50%, #ffffff 65%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+/* `background-position` isn't GPU-composited, so animating it repaints the text
+   every frame. Keep the static gradient on phones (where fill-rate is tightest)
+   and only run the shimmer on larger, hover-capable screens. */
+@media (min-width: 640px) {
+  .text-shine {
+    animation: shine 5s linear infinite;
+  }
+}
+
+/* ---- infinity logo draw-on ---- */
+/* The mark is a filled shape: ink the outline first (stroke), then fade the
+   fill in. pathLength=1 on the <path> normalizes the dash maths across sizes. */
+@keyframes infinity-draw-on {
+  0%   { stroke-dashoffset: 1; fill-opacity: 0; }
+  55%  { stroke-dashoffset: 0; fill-opacity: 0; }
+  100% { stroke-dashoffset: 0; fill-opacity: 1; }
+}
+.infinity-draw {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  fill-opacity: 0;
+  animation: infinity-draw-on 2.2s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee,
+  .animate-breathe,
+  .animate-float-slow,
+  .text-shine,
+  .infinity-draw {
+    animation: none;
+  }
+  /* No animation → skip straight to the fully-inked, filled state. */
+  .infinity-draw {
+    fill-opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}

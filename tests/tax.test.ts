@@ -11,7 +11,7 @@ describe("gstBreakdown", () => {
 
   it("is undetermined (combined GST only) when STORE_STATE is unset", async () => {
     vi.stubEnv("STORE_STATE", "");
-    const { gstBreakdown } = await import("@/lib/tax");
+    const { gstBreakdown } = await import("@everfit/core/lib/tax");
     const b = gstBreakdown(149900, "Kerala");
     expect(b.interState).toBeNull();
     expect(b.cgst + b.sgst + b.igst).toBe(0);
@@ -20,7 +20,7 @@ describe("gstBreakdown", () => {
 
   it("intra-state splits into equal CGST + SGST (case/space-insensitive)", async () => {
     vi.stubEnv("STORE_STATE", "Karnataka");
-    const { gstBreakdown } = await import("@/lib/tax");
+    const { gstBreakdown } = await import("@everfit/core/lib/tax");
     const b = gstBreakdown(149900, "  karnataka ");
     expect(b.interState).toBe(false);
     expect(b.igst).toBe(0);
@@ -31,7 +31,7 @@ describe("gstBreakdown", () => {
 
   it("inter-state charges a single IGST", async () => {
     vi.stubEnv("STORE_STATE", "Karnataka");
-    const { gstBreakdown } = await import("@/lib/tax");
+    const { gstBreakdown } = await import("@everfit/core/lib/tax");
     const b = gstBreakdown(149900, "Kerala");
     expect(b.interState).toBe(true);
     expect(b.igst).toBe(b.gst);
@@ -41,7 +41,7 @@ describe("gstBreakdown", () => {
 
   it("is undetermined when the order has no state", async () => {
     vi.stubEnv("STORE_STATE", "Karnataka");
-    const { gstBreakdown } = await import("@/lib/tax");
+    const { gstBreakdown } = await import("@everfit/core/lib/tax");
     expect(gstBreakdown(149900, "").interState).toBeNull();
     expect(gstBreakdown(149900, undefined).interState).toBeNull();
   });

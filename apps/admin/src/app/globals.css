@@ -1,0 +1,92 @@
+@import "tailwindcss";
+
+/* Admin panel styles. Deliberately a trimmed subset of the storefront's
+   globals.css — the brand tokens and the two type treatments the dashboard
+   actually uses. Storefront-only animations (marquee, breathe, float, shine)
+   are not shipped here. */
+:root {
+  --background: #f4f5f9;
+  --foreground: #22242c;
+  --brand: #2b337d;
+  --brand-deep: #232a68;
+  --brand-soft: #e6e8f4;
+  --accent: #e56ca5;
+  --accent-soft: #fce4ec;
+  --muted: #5e6478;
+  --card: #ffffff;
+  --line: rgba(34, 36, 44, 0.09);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--brand);
+  color: #ffffff;
+}
+
+/* Renoric (brand display face) is slanted — echo it on display text.
+   Used by the sign-in / forgot / reset screens, which stay on-brand. */
+.font-display {
+  font-style: italic;
+}
+
+/* ---- admin panel: clean, standardised UI face (Inter) ----
+   Scoped to the dashboard so the brand's italic display face stays on
+   the login. Headings drop the italic slant and use the same neutral
+   face for a crisp, neat admin look. */
+.admin-ui {
+  font-family: var(--font-admin), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.011em;
+}
+.admin-ui .font-display {
+  font-family: var(--font-admin), system-ui, sans-serif;
+  font-style: normal;
+  letter-spacing: -0.02em;
+}
+
+/* ---- infinity logo draw-on (sign-in panel) ---- */
+/* The mark is a filled shape: ink the outline first (stroke), then fade the
+   fill in. pathLength=1 on the <path> normalizes the dash maths across sizes. */
+@keyframes infinity-draw-on {
+  0%   { stroke-dashoffset: 1; fill-opacity: 0; }
+  55%  { stroke-dashoffset: 0; fill-opacity: 0; }
+  100% { stroke-dashoffset: 0; fill-opacity: 1; }
+}
+.infinity-draw {
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  fill-opacity: 0;
+  animation: infinity-draw-on 2.2s ease-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infinity-draw {
+    animation: none;
+    /* No animation → skip straight to the fully-inked, filled state. */
+    fill-opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
