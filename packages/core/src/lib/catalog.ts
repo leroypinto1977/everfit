@@ -112,7 +112,18 @@ export async function getProductAdmin() {
 
 export async function updateVariantAdmin(
   id: string,
-  fields: { price?: number; mrp?: number; cost?: number | null; stock?: number | null; active?: boolean; blurb?: string }
+  fields: {
+    label?: string;
+    weight?: string;
+    price?: number;
+    // mrp is explicitly nullable: passing null clears it, which drops the
+    // struck-through price on the storefront. Omitting the key leaves it as-is.
+    mrp?: number | null;
+    cost?: number | null;
+    stock?: number | null;
+    active?: boolean;
+    blurb?: string;
+  }
 ) {
   await db().update(productVariants).set(fields).where(eq(productVariants.id, id));
 }

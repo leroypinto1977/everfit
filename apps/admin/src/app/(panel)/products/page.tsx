@@ -71,17 +71,18 @@ export default async function ProductsPage() {
           >
             <input type="hidden" name="id" value={v.id} />
             <div>
-              <p className="font-display text-lg font-bold text-[#2b337d]">
-                {v.weight}
+              <p className="mb-2 text-xs text-[#9aa0c3]">
+                SKU {v.sku}
                 {v.popular && (
                   <span className="ml-2 rounded-full bg-[#e23a78]/10 px-2 py-0.5 align-middle text-[0.6rem] font-bold uppercase tracking-wider text-[#e23a78]">
                     Popular
                   </span>
                 )}
               </p>
-              <p className="text-xs text-[#9aa0c3]">
-                {v.label} · SKU {v.sku}
-              </p>
+              <label className="mb-1 block text-xs text-[#6b7194]">Name</label>
+              <input name="label" defaultValue={v.label} disabled={!canEdit} className={inputCls} />
+              <label className="mb-1 mt-3 block text-xs text-[#6b7194]">Weight</label>
+              <input name="weight" defaultValue={v.weight} disabled={!canEdit} className={inputCls} />
             </div>
             <div>
               <label className="mb-1 block text-xs text-[#6b7194]">Tagline</label>
@@ -106,7 +107,8 @@ export default async function ProductsPage() {
                 type="number"
                 step="1"
                 min="1"
-                defaultValue={v.mrp / 100}
+                defaultValue={v.mrp != null ? v.mrp / 100 : ""}
+                placeholder="—"
                 disabled={!canEdit}
                 className={inputCls}
               />

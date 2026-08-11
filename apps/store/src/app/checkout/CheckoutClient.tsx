@@ -314,14 +314,22 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
           </div>
 
           <dl className="mt-6 space-y-3 border-t border-line pt-6 text-sm">
+            {/* With no MRP set there is no launch discount to show, so the
+                set price is the plain price rather than a struck-through one. */}
             <div className="flex justify-between">
               <dt className="text-muted">Price (set)</dt>
-              <dd className="line-through opacity-50">{inr(variant.mrp)}</dd>
+              {variant.mrp != null && variant.mrp > variant.price ? (
+                <dd className="line-through opacity-50">{inr(variant.mrp)}</dd>
+              ) : (
+                <dd>{inr(variant.price)}</dd>
+              )}
             </div>
-            <div className="flex justify-between">
-              <dt className="text-muted">Launch discount</dt>
-              <dd className="text-accent">−{inr(variant.mrp - variant.price)}</dd>
-            </div>
+            {variant.mrp != null && variant.mrp > variant.price && (
+              <div className="flex justify-between">
+                <dt className="text-muted">Launch discount</dt>
+                <dd className="text-accent">−{inr(variant.mrp - variant.price)}</dd>
+              </div>
+            )}
             {discount > 0 && (
               <div className="flex justify-between">
                 <dt className="text-muted">Code {coupon?.code}</dt>

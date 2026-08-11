@@ -1,6 +1,8 @@
 /**
  * The EVHERFIT Infinity Band: a resistance band set with foam-grip handles,
- * offered in two resistance levels (1.5 kg and 2 kg) plus a bundle of both.
+ * offered in two resistance levels (Light 4.5 kg and Heavy 9 kg) plus a combo
+ * of both. The variant `key`s stay "1.5"/"2"/"bundle" — they are baked into
+ * existing order records and ?w= URLs, so renaming them would orphan history.
  * Live prices/stock come from the DB catalog (src/lib/catalog.ts) and are
  * passed to components as props; the VARIANTS below are only the fallback
  * for environments without DATABASE_URL (and the original seed data).
@@ -12,7 +14,7 @@ export interface Variant {
   label: string; // marketing name
   blurb: string;
   price: number; // paise, for the set
-  mrp: number; // paise, struck-through price
+  mrp: number | null; // paise, struck-through price; null = show the price alone
   popular?: boolean;
   soldOut?: boolean;
 }
@@ -22,27 +24,27 @@ export const PRODUCT_NAME = "EVHERFIT Infinity Band";
 export const VARIANTS: Variant[] = [
   {
     key: "1.5",
-    weight: "1.5 kg",
-    label: "Sculpt",
+    weight: "4.5 kg",
+    label: "Light",
     blurb: "Toning, pilates, mobility & everyday resistance",
-    price: 1999_00,
-    mrp: 3299_00,
+    price: 799_00,
+    mrp: null,
   },
   {
     key: "2",
-    weight: "2 kg",
-    label: "Strength",
+    weight: "9 kg",
+    label: "Heavy",
     blurb: "Strength training, HIIT & conditioning",
-    price: 2499_00,
-    mrp: 3999_00,
+    price: 999_00,
+    mrp: null,
   },
   {
     key: "bundle",
-    weight: "1.5 kg + 2 kg",
-    label: "Complete Set",
+    weight: "4.5 kg + 9 kg",
+    label: "Combo",
     blurb: "Both bands, the full range of resistance",
-    price: 3999_00,
-    mrp: 4498_00,
+    price: 1499_00,
+    mrp: 1599_00,
     popular: true,
   },
 ];
@@ -50,7 +52,7 @@ export const VARIANTS: Variant[] = [
 /**
  * Product photography, keyed by variant key. The gallery shows the first image
  * as the hero and the rest as thumbnails. Files live in /public/products.
- * 1.5 kg is the blue band, 2 kg is the red band, and the bundle shows both.
+ * Light is the blue band, Heavy is the red band, and the combo shows both.
  */
 export const PRODUCT_IMAGES: Record<string, string[]> = {
   "1.5": [

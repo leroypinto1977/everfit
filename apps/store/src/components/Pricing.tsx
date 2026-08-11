@@ -58,9 +58,11 @@ export default function Pricing({ variants = VARIANTS }: { variants?: Variant[] 
                 <span className={`font-display text-3xl font-bold ${v.popular ? "text-white" : "text-foreground"}`}>
                   {inr(v.price)}
                 </span>
-                <span className={`line-through ${v.popular ? "text-white/50" : "text-muted/60"}`}>
-                  {inr(v.mrp)}
-                </span>
+                {v.mrp != null && v.mrp > v.price && (
+                  <span className={`line-through ${v.popular ? "text-white/50" : "text-muted/60"}`}>
+                    {inr(v.mrp)}
+                  </span>
+                )}
               </div>
 
               {v.soldOut ? (

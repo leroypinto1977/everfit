@@ -25,10 +25,14 @@ export default function ProductBuyPanel({
     <div>
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="font-display text-4xl font-bold text-brand">{inr(variant.price)}</span>
-        <span className="text-lg text-muted line-through">{inr(variant.mrp)}</span>
-        <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">
-          Save {inr(variant.mrp - variant.price)}
-        </span>
+        {variant.mrp != null && variant.mrp > variant.price && (
+          <>
+            <span className="text-lg text-muted line-through">{inr(variant.mrp)}</span>
+            <span className="rounded-full bg-accent-soft px-3 py-1 text-xs font-bold text-accent">
+              Save {inr(variant.mrp - variant.price)}
+            </span>
+          </>
+        )}
       </div>
       <p className="mt-1 text-sm text-muted">Price for the set · Free shipping · Inclusive of all taxes</p>
 

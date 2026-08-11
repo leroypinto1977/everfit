@@ -77,7 +77,7 @@ export const productVariants = pgTable("product_variants", {
   weight: text("weight").notNull(),
   blurb: text("blurb").notNull().default(""),
   price: integer("price").notNull(), // paise
-  mrp: integer("mrp").notNull(), // paise, struck-through
+  mrp: integer("mrp"), // paise, struck-through; null = no MRP, show price alone
   cost: integer("cost"), // paise, unit COGS for margin reporting; null = unknown
   stock: integer("stock"), // null = not tracked
   popular: boolean("popular").notNull().default(false),
