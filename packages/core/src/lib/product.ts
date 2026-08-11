@@ -56,14 +56,14 @@ export const VARIANTS: Variant[] = [
  */
 export const PRODUCT_IMAGES: Record<string, string[]> = {
   "1.5": [
-    "/products/tube-blue-1.jpg",
-    "/products/tube-blue-2.jpg",
-    "/products/tube-blue-3.jpg",
+    "/products/band-blue-1.jpg",
+    "/products/band-blue-2.jpg",
+    "/products/band-blue-3.jpg",
   ],
   "2": [
-    "/products/tube-red-1.jpg",
-    "/products/tube-red-2.jpg",
-    "/products/tube-red-3.jpg",
+    "/products/band-red-1.jpg",
+    "/products/band-red-2.jpg",
+    "/products/band-red-3.jpg",
   ],
   bundle: [
     "/products/bundle-1.jpg",

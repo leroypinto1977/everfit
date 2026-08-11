@@ -5,7 +5,7 @@ import Reveal from "./Reveal";
 
 const panels: { img: string; kicker: string; title: string; body: string }[] = [
   {
-    img: "/products/tube-blue-1.jpg",
+    img: "/products/band-blue-1.jpg",
     kicker: "Clip-on handles",
     title: "Grip. Clip. Go.",
     body: "Padded foam handles clip to the band with metal carabiners, so you can attach, detach and swap in seconds. No hardware, no fuss, a solid grip through every rep.",
@@ -17,7 +17,7 @@ const panels: { img: string; kicker: string; title: string; body: string }[] = [
     body: "Blue is 4.5 kg, red is 9 kg. Pick the band that matches your session, or clip both together when you want to push past your usual load.",
   },
   {
-    img: "/products/tube-red-1.jpg",
+    img: "/products/band-red-1.jpg",
     kicker: "Train anywhere",
     title: "Your gym, in a bag.",
     body: "Light, packable latex band coils down small enough to drop in a tote. Home, park, hotel room, your full-body workout comes with you.",
