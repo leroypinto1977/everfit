@@ -13,7 +13,7 @@ const features = [
   {
     icon: "🎨",
     title: "Colour-coded resistance",
-    body: "Blue is 1.5 kg, red is 2 kg. Pick your level at a glance, or clip both bands together for more.",
+    body: "Blue is 4.5 kg, red is 9 kg. Pick your level at a glance, or clip both bands together for more.",
   },
   {
     icon: "🚶‍♀️",

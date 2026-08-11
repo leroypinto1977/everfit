@@ -14,7 +14,7 @@ import { PRODUCT_NAME, HERO_IMAGE } from "@everfit/core/lib/product";
 import { SITE_URL } from "@everfit/core/lib/site";
 
 const DESCRIPTION =
-  "Resistance band set with foam-grip handles and colour-coded resistance for toning, strength, HIIT and mobility. Choose 1.5 kg, 2 kg, or the bundle of both.";
+  "Resistance band set with foam-grip handles and colour-coded resistance for toning, strength, HIIT and mobility. Choose Light 4.5 kg, Heavy 9 kg, or the Combo of both.";
 
 export const metadata: Metadata = {
   title: "Infinity Band — resistance band set for her",
@@ -36,20 +36,20 @@ const highlights = [
 ];
 
 const specs = [
-  ["Resistance levels", "1.5 kg / 2 kg per band (or both in the bundle)"],
+  ["Resistance levels", "4.5 kg / 9 kg per band (or both in the Combo)"],
   ["In a set", "1 resistance band + 2 foam-grip handles"],
   ["Handles", "Padded foam grips on nylon straps with metal carabiner clips"],
   ["Band", "Durable latex resistance band"],
   ["Best for", "Toning, strength, HIIT, pilates, mobility & rehab"],
   ["Train anywhere", "Home, gym, park or travel; packs into a bag"],
-  ["Colourway", "Palette-coded: blue (1.5 kg) & red (2 kg)"],
+  ["Colourway", "Palette-coded: blue (4.5 kg) & red (9 kg)"],
   ["Warranty", "1 year against manufacturing defects"],
 ];
 
 const faqs = [
   {
     q: "Which resistance should I start with?",
-    a: "New to resistance training? Start with 1.5 kg (blue) for toning, pilates and mobility. Choose 2 kg (red) if you already train and want more load. The bundle gives you both, and you can clip the bands together for even more resistance.",
+    a: "New to resistance training? Start with Light 4.5 kg (blue) for toning, pilates and mobility. Choose Heavy 9 kg (red) if you already train and want more load. The Combo gives you both, and you can clip the bands together for even more resistance.",
   },
   {
     q: "How do the handles attach?",

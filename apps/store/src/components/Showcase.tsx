@@ -14,7 +14,7 @@ const panels: { img: string; kicker: string; title: string; body: string }[] = [
     img: "/products/bundle-3.jpg",
     kicker: "Colour-coded resistance",
     title: "Know your level at a glance.",
-    body: "Blue is 1.5 kg, red is 2 kg. Pick the band that matches your session, or clip both together when you want to push past your usual load.",
+    body: "Blue is 4.5 kg, red is 9 kg. Pick the band that matches your session, or clip both together when you want to push past your usual load.",
   },
   {
     img: "/products/tube-red-1.jpg",
@@ -26,7 +26,7 @@ const panels: { img: string; kicker: string; title: string; body: string }[] = [
     img: "/products/bundle-1.jpg",
     kicker: "The complete set",
     title: "Both bands. Full range.",
-    body: "The bundle pairs the 1.5 kg and 2 kg bands so you can progress from toning to strength, and stack them for the days you want more.",
+    body: "The Combo pairs the 4.5 kg and 9 kg bands so you can progress from toning to strength, and stack them for the days you want more.",
   },
 ];
 

@@ -9,7 +9,7 @@ import Reveal from "./Reveal";
 
 /**
  * Product hero: a real-photo gallery on the left and the buy panel on the right,
- * sharing one "selected offer" state so picking 1.5 kg / 2 kg / bundle swaps the
+ * sharing one "selected offer" state so picking Light / Heavy / Combo swaps the
  * photos too. Falls back gracefully when an offer has a single image.
  */
 export default function ProductDetail({

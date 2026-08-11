@@ -11,7 +11,7 @@ const reviews = [
   },
   {
     quote:
-      "The foam handles are so comfy and clip on in seconds. I started on 1.5 kg and just moved up to 2 kg, and having both has kept me progressing.",
+      "The foam handles are so comfy and clip on in seconds. I started on the 4.5 kg and just moved up to the 9 kg, and having both has kept me progressing.",
     name: "Priya S.",
     tag: "Pilates, Mumbai",
   },

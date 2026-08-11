@@ -10,7 +10,7 @@
 
 export interface Variant {
   key: string; // used in URLs (?w=1.5) and order records
-  weight: string; // display resistance, e.g. "1.5 kg"
+  weight: string; // display resistance, e.g. "4.5 kg"
   label: string; // marketing name
   blurb: string;
   price: number; // paise, for the set
