@@ -2,6 +2,7 @@
   "name": "@everfit/core",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "Shared domain layer for the storefront and the admin panel: Postgres schema, order/payment/coupon logic, Razorpay, transactional email.",
   "exports": {
     "./db": "./src/db/index.ts",
