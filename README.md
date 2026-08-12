@@ -102,7 +102,47 @@ They share one Postgres database, and otherwise touch in exactly two places:
    password reset) link into the admin panel via `ADMIN_URL`; customer-facing
    emails link to the storefront via `NEXT_PUBLIC_SITE_URL`.
 
+## Configuration
+
+Every environment variable either app reads is declared once, in
+`packages/core/src/lib/env.ts` — which app needs it, whether it is required, and
+what breaks without it. Three things read that declaration, so they can no
+longer drift apart: the `check-env` script, each app's `instrumentation.ts`
+startup banner, and the admin panel's **Settings → Store configuration** screen.
+
+```bash
+npm run check-env        # strict: both apps, production env files, exits 1 on a gap
+npm run check-env:dev    # the same against your local .env.local
+```
+
+Two things to keep in mind, because both have already caused a silently broken
+deployment:
+
+- **The apps do not share an environment.** They are separate processes with
+  separate working directories, so `apps/admin` never sees a variable set only
+  for `apps/store`. `DATABASE_URL`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` and
+  `REVALIDATE_SECRET` must be identical on both; `check-env` verifies that.
+- **`NEXT_PUBLIC_*` is baked in at build time.** Changing `NEXT_PUBLIC_SITE_URL`
+  or `NEXT_PUBLIC_GTM_ID` needs a rebuild, not a restart.
+
 ## Deploying
+
+Production runs on a **Hostinger VPS**; Vercel stays connected as a
+staging/preview target. The full runbook — Nginx, PM2, TLS, cron, firewall,
+troubleshooting — is in **[deploy/README.md](deploy/README.md)**.
+
+```bash
+cd /var/www/everfit && ./deploy/deploy.sh
+```
+
+Both apps run under PM2 (`everfit-store` on 3000, `everfit-admin` on 3001),
+bound to loopback, with Nginx terminating TLS for `evherfit.com` and
+`admin.evherfit.com`. Production values live in `apps/store/.env.production` and
+`apps/admin/.env.production` (templates in `deploy/env/`); never create the
+`apps/*/.env.local` symlinks on the server — they are the development file and
+outrank `.env.production`.
+
+### Vercel (staging)
 
 Two Vercel projects, one Git repo. Both auto-deploy on push to `main`; a push
 that only touches one app still rebuilds both unless you add Ignored Build Steps.
@@ -135,8 +175,9 @@ The panel is not linked from the storefront anywhere, sends
 sign-in; if you later want a second gate in front of it, Vercel's Deployment
 Protection on the `everfit-admin` project does that without touching code.
 
-The reconciliation cron (`apps/store/vercel.json`) stays on the storefront
-project. Keep it at most once a day — sub-daily crons silently block deploys on
+The reconciliation cron is defined twice, once per host: `apps/store/vercel.json`
+drives it on Vercel, `deploy/cron/reconcile.sh` (from crontab) drives it on the
+VPS. Keep it at most once a day — sub-daily crons silently block deploys on
 Vercel's Hobby plan.
 
 ## How orders work without a login (the Fittr model)
