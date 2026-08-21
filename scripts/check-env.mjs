@@ -60,6 +60,7 @@ function report(app, result) {
       variable.level === "optional" && !set ? dim("optional") : "",
       variable.buildTime ? amber("build-time") : "",
       variable.sharedSecret ? dim("must match on both apps") : "",
+      variable.dbOverridable ? dim("editable in admin panel") : "",
     ]
       .filter(Boolean)
       .join(" ");
@@ -67,6 +68,9 @@ function report(app, result) {
     console.log(`  [${mark}] ${variable.name.padEnd(24)} ${tags}`);
     if (!set && variable.level !== "optional") {
       console.log(dim(`           ${variable.impact}`));
+      if (variable.dbOverridable) {
+        console.log(dim("           (fine to leave unset if it is saved in Settings -> Business details)"));
+      }
     }
   }
 }

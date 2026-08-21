@@ -187,3 +187,16 @@ export const inventoryMovements = pgTable("inventory_movements", {
   actor: text("actor").notNull().default("system"), // admin email or "system"
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/**
+ * Owner-editable store configuration. Sparse: a row appears only when someone
+ * edits that setting in the admin panel, and reads fall back to the env var and
+ * then a hardcoded default (see lib/settings.ts). Secrets and build-time values
+ * are deliberately NOT stored here — only non-secret business details.
+ */
+export const settings = pgTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedBy: text("updated_by"), // admin email, or null for a system write
+});

@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getOrder } from "@everfit/core/lib/orders";
 import { inr } from "@everfit/core/lib/product";
-import { gstBreakdown, HSN_CODE, STORE_GSTIN } from "@everfit/core/lib/tax";
+import { gstBreakdown, HSN_CODE } from "@everfit/core/lib/tax";
+import { getSettings } from "@everfit/core/lib/settings";
 import PrintButton from "./PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -18,10 +19,12 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const order = await getOrder(id);
   if (!order?.invoiceNo) notFound();
 
+  const { store_gstin: storeGstin, store_state: storeState } = await getSettings();
+
   const c = order.customer;
   const invoiceId = `EVH-${String(order.invoiceNo).padStart(4, "0")}`;
   const date = new Date(order.paidAt ?? order.createdAt);
-  const tax = gstBreakdown(order.amount, c.state); // amount is GST-inclusive
+  const tax = gstBreakdown(order.amount, c.state, storeState); // amount is GST-inclusive
   const halfRate = (tax.rate * 100) / 2;
 
   return (
@@ -39,7 +42,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <p className="mt-1 text-xs text-[#6b7194]">
             {process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, "") ?? "evherfit.com"}
           </p>
-          {STORE_GSTIN && <p className="mt-1 text-xs text-[#6b7194]">GSTIN: {STORE_GSTIN}</p>}
+          {storeGstin && <p className="mt-1 text-xs text-[#6b7194]">GSTIN: {storeGstin}</p>}
         </div>
         <div className="text-right text-sm">
           <p className="font-display text-lg font-bold">Tax invoice</p>

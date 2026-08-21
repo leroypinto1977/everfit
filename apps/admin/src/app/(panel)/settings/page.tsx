@@ -1,8 +1,10 @@
 import { checkEnv, type EnvCheckEntry } from "@everfit/core/lib/env";
+import { listSettings } from "@everfit/core/lib/settings";
 import { requireAdmin } from "@/lib/admin-auth";
 import { listAdminUsers } from "@/lib/team";
 import { setRoleAction, toggleActiveAction } from "./actions";
 import { AddUserForm, ChangePasswordForm } from "./SettingsForms";
+import { StoreSettingsForm } from "./StoreSettingsForm";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,7 @@ export default async function SettingsPage() {
   const team = me.role === "owner" ? await listAdminUsers() : [];
   const env = me.role === "owner" ? checkEnv("admin") : null;
   const groups = env ? groupChecks(env.entries) : [];
+  const storeSettings = me.role === "owner" ? await listSettings() : [];
 
   return (
     <div className="space-y-6">
@@ -64,10 +67,21 @@ export default async function SettingsPage() {
         )}
       </div>
 
+      {me.role === "owner" && (
+        <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
+          <h2 className="font-semibold">Business details</h2>
+          <p className="mt-1 text-sm text-[#6b7194]">
+            Editable here and applied immediately — no redeploy. These override the matching environment
+            variables on the server; clear a field to hand control back to the <code>.env</code> file.
+          </p>
+          <StoreSettingsForm settings={storeSettings} />
+        </div>
+      )}
+
       {env && (
         <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="font-semibold">Store configuration</h2>
+            <h2 className="font-semibold">Deployment configuration</h2>
             <span
               className={`rounded-full px-3 py-1 text-xs font-semibold ${
                 env.ok ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
@@ -115,6 +129,12 @@ export default async function SettingsPage() {
                         </span>
                         <span className="block text-xs leading-relaxed text-[#6b7194]">
                           {variable.summary} {!set && variable.level !== "optional" && variable.impact}
+                          {variable.dbOverridable && (
+                            <span className="block text-[#9aa0c3]">
+                              Also editable above under Business details, which takes precedence over this
+                              variable.
+                            </span>
+                          )}
                         </span>
                       </span>
                     </li>
