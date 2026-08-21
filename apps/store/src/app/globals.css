@@ -134,6 +134,26 @@ body {
   animation: rule-draw 0.55s cubic-bezier(0.21, 0.65, 0.36, 1) both;
 }
 
+/* ---- scroll reveal (see components/Reveal.tsx) ----
+   `[data-armed]` is set from JS after mount, and only on elements that start
+   below the fold — so the server HTML never ships a hidden section and a
+   JS-less visit renders everything in place. `opacity` and `transform` only:
+   both are compositor-only, unlike the `filter: blur()` this used to carry. */
+.reveal {
+  transition:
+    opacity 0.7s cubic-bezier(0.21, 0.65, 0.36, 1),
+    transform 0.7s cubic-bezier(0.21, 0.65, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0s);
+}
+.reveal[data-armed] {
+  opacity: 0;
+  transform: translateY(32px);
+}
+.reveal[data-armed].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
 /* ---- slow float for the hero band ---- */
 @keyframes float-slow {
   0%, 100% { transform: translateY(0) rotate(-6deg); }
@@ -202,5 +222,14 @@ body {
   .infinity-draw {
     fill-opacity: 1;
     stroke-dashoffset: 0;
+  }
+  /* Reveal.tsx already declines to arm anything under this preference, so
+     `[data-armed]` should never appear. Kept as a backstop: if one ever did
+     get armed, this keeps it visible rather than stranding it at opacity 0. */
+  .reveal,
+  .reveal[data-armed] {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
