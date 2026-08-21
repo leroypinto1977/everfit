@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { SettingValidationError, validateSetting } from "@everfit/core/lib/settings";
+import { SettingValidationError, senderDomain, validateSetting } from "@everfit/core/lib/settings";
 
 /**
  * The write path is where a bad value would reach a legal document, so the
@@ -41,6 +41,13 @@ describe("validateSetting", () => {
     expect(validateSetting("gst_rate", "1")).toBe("1");
   });
 
+  it("normalises a sender address with or without a display name", () => {
+    expect(validateSetting("email_from", "EVHERFIT <Orders@EVHERFIT.com>")).toBe("EVHERFIT <orders@evherfit.com>");
+    expect(validateSetting("email_from", "  orders@evherfit.com ")).toBe("orders@evherfit.com");
+    expect(() => validateSetting("email_from", "EVHERFIT <not-an-address>")).toThrow(SettingValidationError);
+    expect(() => validateSetting("email_from", "nope")).toThrow(SettingValidationError);
+  });
+
   it("treats an empty value as 'clear this setting'", () => {
     // every kind must allow it — that is the only way back to env control
     expect(validateSetting("store_gstin", "   ")).toBe("");
@@ -51,6 +58,15 @@ describe("validateSetting", () => {
   it("collapses whitespace on single-line values but preserves multiline ones", () => {
     expect(validateSetting("store_state", "  West   Bengal ")).toBe("West Bengal");
     expect(validateSetting("store_address", " 12 MG Road\nBengaluru ")).toBe("12 MG Road\nBengaluru");
+  });
+});
+
+describe("senderDomain", () => {
+  it("extracts the domain from either sender shape", () => {
+    expect(senderDomain("EVHERFIT <orders@evherfit.com>")).toBe("evherfit.com");
+    expect(senderDomain("orders@evherfit.com")).toBe("evherfit.com");
+    expect(senderDomain("Sub <a@mail.evherfit.co.in>")).toBe("mail.evherfit.co.in");
+    expect(senderDomain("garbage")).toBeNull();
   });
 });
 

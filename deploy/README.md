@@ -249,6 +249,8 @@ npm run build && npm run build:admin && pm2 reload deploy/ecosystem.config.cjs
 | Price edits do not show on the storefront | `REVALIDATE_SECRET` missing or different between the two files. `npm run check-env` reports both cases. |
 | Sign-in redirects back to `/login` forever | `X-Forwarded-Proto` not reaching Next, so the `secure` cookie is dropped. Check the Nginx config is the one in this directory. |
 | Payments succeed but orders stay `created` | `RAZORPAY_WEBHOOK_SECRET` wrong, or the webhook URL in Razorpay does not match. The daily reconcile job recovers these — check `logs/cron-reconcile.log`. |
+| Saving a sender address is refused | Brevo has not authenticated that domain, so mail from it would bounce or be filed as spam. Verify the domain in Brevo → Senders, Domains & Dedicated IPs → Domains. The check is skipped entirely when `BREVO_API_KEY` is unset or Brevo is unreachable. |
+| An invoice shows no HSN code | The product has none and `HSN_CODE` is unset. Set it per product on the Products screen. |
 | Changing the GST rate did not change an old invoice | Working as designed. Each order stores the rate it was charged at (`orders.gst_rate`); the setting applies to new sales only. |
 | A business detail edited in the panel does not change | The settings table wins over the env var, not the reverse. If a value looks stuck, check Settings → Business details — a saved value there overrides `.env.production`. Clear the field to hand control back. |
 | `npm run db:migrate` cannot find `DATABASE_URL` | It reads the process env then both apps' env files. Confirm `apps/store/.env.production` exists and is readable by the deploy user. |

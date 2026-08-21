@@ -40,9 +40,10 @@ export type SettingKey =
   | "support_email"
   | "order_notify_email"
   | "brevo_list_id"
-  | "gst_rate";
+  | "gst_rate"
+  | "email_from";
 
-export type SettingKind = "text" | "email" | "state" | "gstin" | "number" | "rate";
+export type SettingKind = "text" | "email" | "state" | "gstin" | "number" | "rate" | "sender";
 
 export interface SettingDef {
   key: SettingKey;
@@ -101,6 +102,17 @@ export const SETTING_DEFS: SettingDef[] = [
     group: "Tax & invoicing",
     multiline: true,
     placeholder: "12 MG Road, Bengaluru 560001",
+  },
+  {
+    key: "email_from",
+    envVar: "EMAIL_FROM",
+    label: "Sender address",
+    help:
+      'Who customer email comes from — "EVHERFIT <orders@evherfit.com>" or a bare address. The domain must be authenticated in Brevo (SPF/DKIM/DMARC); saving is refused if Brevo says it is not, because mail from an unverified domain is rejected or lands in spam.',
+    kind: "sender",
+    fallback: "EVHERFIT <no-reply@evherfit.com>",
+    group: "Contact",
+    placeholder: "EVHERFIT <orders@evherfit.com>",
   },
   {
     key: "support_email",
@@ -272,6 +284,19 @@ export function validateSetting(key: SettingKey, raw: string): string {
       }
       return String(n);
     }
+    case "sender": {
+      // Accept `Name <addr@example.com>` or a bare address; normalise to the
+      // exact shape parseFrom() in notify.ts expects.
+      const m = value.match(/^\s*(?:"?([^"<]*)"?\s*)?<([^>]+)>\s*$/);
+      const addr = (m ? m[2] : value).trim();
+      if (!EMAIL_RE.test(addr)) {
+        throw new SettingValidationError(
+          `${def.label} must be an email address, optionally as: Name <address@domain>.`
+        );
+      }
+      const name = m?.[1]?.trim();
+      return name ? `${name} <${addr.toLowerCase()}>` : addr.toLowerCase();
+    }
     case "state":
       if (value.length < 3) throw new SettingValidationError(`${def.label} looks too short.`);
       return value;
@@ -327,4 +352,12 @@ export async function getGstRate(): Promise<number> {
   const raw = (await getSettings()).gst_rate;
   const n = Number(raw);
   return Number.isFinite(n) && n >= 0 && n <= 1 ? n : 0.18;
+}
+
+/** The domain part of a sender string, lower-cased. */
+export function senderDomain(sender: string): string | null {
+  const m = sender.match(/<([^>]+)>\s*$/);
+  const addr = (m ? m[1] : sender).trim().toLowerCase();
+  const at = addr.lastIndexOf("@");
+  return at > 0 ? addr.slice(at + 1) : null;
 }

@@ -23,7 +23,12 @@ import {
  * Templates live in src/lib/email/. This module only decides who gets what.
  */
 
-const FROM = process.env.EMAIL_FROM ?? "EVHERFIT <no-reply@evherfit.com>";
+const FROM_FALLBACK = "EVHERFIT <no-reply@evherfit.com>";
+
+/** Resolved sender: the owner-editable setting, else EMAIL_FROM, else the fallback. */
+async function from(): Promise<string> {
+  return (await getSettings()).email_from || FROM_FALLBACK;
+}
 
 /** "EVHERFIT <orders@evherfit.com>" → { name, email } for Brevo's sender object. */
 function parseFrom(from: string): { name?: string; email: string } {
@@ -76,7 +81,7 @@ async function send(to: string | undefined, email: Email, opts?: { replyTo?: boo
   if (!process.env.BREVO_API_KEY || !to) return "skipped";
   const replyTo = (await getSettings()).support_email;
   const result = await brevoPost("/smtp/email", {
-    sender: parseFrom(FROM),
+    sender: parseFrom(await from()),
     to: [{ email: to }],
     subject: email.subject,
     htmlContent: email.html,
@@ -213,7 +218,7 @@ export async function sendTestEmail(to: string, email: Email): Promise<{ error?:
     return { error: "BREVO_API_KEY is not set — add it to the environment first." };
   }
   const result = await brevoPost("/smtp/email", {
-    sender: parseFrom(FROM),
+    sender: parseFrom(await from()),
     to: [{ email: to }],
     subject: `[Test] ${email.subject}`,
     htmlContent: email.html,
@@ -239,4 +244,29 @@ export async function sendPasswordResetEmail(input: { name: string; email: strin
     return;
   }
   await send(input.email, passwordReset(input), { replyTo: false });
+}
+
+/**
+ * Domains Brevo will actually send from, lower-cased. Returns null when we
+ * cannot tell — no API key, network failure, unexpected response — so callers
+ * can distinguish "not verified" from "could not check" and avoid blocking on
+ * a third party being briefly unreachable.
+ */
+export async function verifiedSenderDomains(): Promise<string[] | null> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return null;
+  try {
+    const res = await fetch("https://api.brevo.com/v3/senders/domains", {
+      headers: { "api-key": apiKey, accept: "application/json" },
+      signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { domains?: { domain_name?: string; authenticated?: boolean }[] };
+    if (!Array.isArray(body.domains)) return null;
+    return body.domains
+      .filter((d) => d.authenticated && d.domain_name)
+      .map((d) => d.domain_name!.toLowerCase());
+  } catch {
+    return null;
+  }
 }

@@ -12,12 +12,14 @@ import {
 import { sendTeammateWelcome } from "@everfit/core/lib/notify";
 import {
   getSettings,
+  senderDomain,
   SETTING_DEFS,
   SettingValidationError,
   setSetting,
   validateSetting,
   type SettingKey,
 } from "@everfit/core/lib/settings";
+import { verifiedSenderDomains } from "@everfit/core/lib/notify";
 import { revalidateStorefront } from "@/lib/revalidate-store";
 
 type FormState = { error?: string; ok?: string } | undefined;
@@ -107,6 +109,28 @@ export async function saveSettingsAction(_prev: FormState, formData: FormData): 
   // not needlessly copied into the database.
   const changed = clean.filter(({ key, value }) => value !== current[key]);
   if (!changed.length) return { ok: "No changes to save." };
+
+  /*
+   * A sender on a domain Brevo has not authenticated does not "mostly work" —
+   * it is rejected or filed as spam, and nothing in the app would report it.
+   * So the change is refused, but only on positive evidence: if Brevo cannot be
+   * reached, or there is no API key to ask with, verifiedSenderDomains() returns
+   * null and the save proceeds. A third party being briefly down must not block
+   * the owner from editing their own settings.
+   */
+  const sender = changed.find((c) => c.key === "email_from");
+  if (sender?.value) {
+    const domain = senderDomain(sender.value);
+    const verified = await verifiedSenderDomains();
+    if (domain && verified && !verified.includes(domain)) {
+      return {
+        error:
+          `Brevo has not authenticated "${domain}", so mail from that address would bounce or land in spam. ` +
+          `Add and verify the domain in Brevo (Senders, Domains & Dedicated IPs → Domains), then save again.` +
+          (verified.length ? ` Verified right now: ${verified.join(", ")}.` : ""),
+      };
+    }
+  }
 
   try {
     for (const { key, value } of changed) await setSetting(key, value, me.email);

@@ -24,7 +24,9 @@ export default async function ProductsPage() {
       <div>
         <h1 className="font-display text-3xl font-bold italic">Products</h1>
         <p className="mt-1 text-sm text-[#6b7194]">
-          Prices and stock go live on the storefront the moment you save.
+          Prices and stock go live on the storefront the moment you save. The HSN code is printed on tax
+          invoices for this product; blank falls back to the <code className="font-mono">HSN_CODE</code>{" "}
+          environment variable.
           {!canEdit && " Editing is restricted to the owner account."}
         </p>
       </div>
@@ -40,6 +42,19 @@ export default async function ProductsPage() {
             Product name
           </label>
           <input id="pname" name="name" defaultValue={product.name} disabled={!canEdit} className={inputCls} />
+        </div>
+        <div className="w-40">
+          <label htmlFor="phsn" className="mb-2 block text-sm text-[#6b7194]">
+            HSN code
+          </label>
+          <input
+            id="phsn"
+            name="hsn"
+            defaultValue={product.hsnCode ?? ""}
+            placeholder="9506"
+            disabled={!canEdit}
+            className={inputCls}
+          />
         </div>
         <label className="flex items-center gap-2 pb-2 text-sm text-[#4a5072]">
           <input type="checkbox" name="active" defaultChecked={product.active} disabled={!canEdit} />

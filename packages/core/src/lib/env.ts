@@ -158,6 +158,7 @@ export const ENV_VARS: EnvVar[] = [
   },
   {
     name: "EMAIL_FROM",
+    dbOverridable: true,
     apps: BOTH,
     level: "recommended",
     group: "Email",
@@ -234,8 +235,8 @@ export const ENV_VARS: EnvVar[] = [
     apps: ["admin"],
     level: "optional",
     group: "Invoicing & reporting",
-    summary: "HSN code for the product (9506 = sports/fitness equipment).",
-    impact: "Omitted from the invoice.",
+    summary: "Fallback HSN code. Set it per product on the Products screen instead — HSN classifies a commodity, not a store.",
+    impact: "Omitted from the invoice unless the product carries its own code.",
   },
   {
     name: "STORE_ADDRESS",
