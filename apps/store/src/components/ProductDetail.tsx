@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { m } from "motion/react";
 import { variantImages, type Variant } from "@everfit/core/lib/product";
@@ -24,6 +24,36 @@ export default function ProductDetail({
   const fallback = variants.find((v) => v.popular && !v.soldOut) ?? variants.find((v) => !v.soldOut) ?? variants[0];
   const [selected, setSelected] = useState(fallback.key);
   const [imgIndex, setImgIndex] = useState(0);
+
+  /*
+   * Deep links: /product?v=light | heavy | combo (the marketing names), and the
+   * raw variant keys work too. Resolved on the client rather than from the
+   * page's searchParams on purpose — touching searchParams server-side would
+   * opt this route out of static rendering, and a marketing landing page that
+   * has to be rendered per request is a bad trade for preselecting a chip.
+   *
+   * A link to a sold-out variant still selects it, so the visitor sees the
+   * thing they clicked marked sold out rather than silently landing on a
+   * different one.
+   *
+   * This reads an external system (the URL) exactly once after hydration, which
+   * is the case set-state-in-effect exists to permit rather than forbid. The two
+   * alternatives are both worse here: resolving it during render would make the
+   * client's first render disagree with the server HTML and break hydration, and
+   * useSearchParams() would force a Suspense bailout that empties the product
+   * hero out of the static HTML that search engines read.
+   */
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("v")?.trim().toLowerCase();
+    if (!wanted) return;
+    const match = variants.find(
+      (v) => v.key.toLowerCase() === wanted || v.label.toLowerCase() === wanted
+    );
+    if (!match) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- see above
+    setSelected(match.key);
+    setImgIndex(0);
+  }, [variants]);
 
   const variant = variants.find((v) => v.key === selected) ?? fallback;
   const images = variantImages(selected);
