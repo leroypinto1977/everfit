@@ -354,10 +354,15 @@ export async function getGstRate(): Promise<number> {
   return Number.isFinite(n) && n >= 0 && n <= 1 ? n : 0.18;
 }
 
-/** The domain part of a sender string, lower-cased. */
-export function senderDomain(sender: string): string | null {
+/** The address part of a sender string ("Name <a@b.com>" or "a@b.com"), lower-cased. */
+export function senderAddress(sender: string): string | null {
   const m = sender.match(/<([^>]+)>\s*$/);
   const addr = (m ? m[1] : sender).trim().toLowerCase();
-  const at = addr.lastIndexOf("@");
-  return at > 0 ? addr.slice(at + 1) : null;
+  return addr.includes("@") ? addr : null;
+}
+
+/** The domain part of a sender string, lower-cased. */
+export function senderDomain(sender: string): string | null {
+  const addr = senderAddress(sender);
+  return addr ? addr.slice(addr.lastIndexOf("@") + 1) : null;
 }

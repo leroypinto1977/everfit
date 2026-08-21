@@ -247,26 +247,66 @@ export async function sendPasswordResetEmail(input: { name: string; email: strin
 }
 
 /**
- * Domains Brevo will actually send from, lower-cased. Returns null when we
- * cannot tell — no API key, network failure, unexpected response — so callers
- * can distinguish "not verified" from "could not check" and avoid blocking on
- * a third party being briefly unreachable.
+ * Whether Brevo will actually accept mail from `address`.
+ *
+ * Two ways an address can be usable, and checking only the first is wrong:
+ *   - its domain is authenticated (SPF/DKIM), which covers every address on it;
+ *   - the exact address is registered as an active sender, which Brevo allows
+ *     on its own — this is how most small accounts send before they get round
+ *     to authenticating a domain.
+ *
+ * Returns null when we cannot tell (no API key, network failure, unexpected
+ * response) so callers can distinguish "not verified" from "could not check"
+ * and avoid blocking on a third party being briefly unreachable.
  */
-export async function verifiedSenderDomains(): Promise<string[] | null> {
+export async function senderIsUsable(address: string): Promise<boolean | null> {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) return null;
+
+  const addr = address.trim().toLowerCase();
+  const domain = addr.slice(addr.lastIndexOf("@") + 1);
+  const headers = { "api-key": apiKey, accept: "application/json" };
+
+  const get = async (path: string) => {
+    const res = await fetch(`https://api.brevo.com/v3${path}`, {
+      headers,
+      signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
+    });
+    return res.ok ? await res.json() : null;
+  };
+
   try {
-    const res = await fetch("https://api.brevo.com/v3/senders/domains", {
+    const [domains, senders] = await Promise.all([get("/senders/domains"), get("/senders")]);
+    if (!domains && !senders) return null;
+
+    const authed = (domains as { domains?: { domain_name?: string; authenticated?: boolean }[] } | null)?.domains;
+    if (Array.isArray(authed) && authed.some((d) => d.authenticated && d.domain_name?.toLowerCase() === domain)) {
+      return true;
+    }
+
+    const list = (senders as { senders?: { email?: string; active?: boolean }[] } | null)?.senders;
+    if (Array.isArray(list) && list.some((x) => x.active && x.email?.toLowerCase() === addr)) return true;
+
+    // Only a definite "no" if at least one list came back to say so.
+    return Array.isArray(authed) || Array.isArray(list) ? false : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Active sender addresses Brevo knows about, for error messages. Best effort. */
+export async function usableSenders(): Promise<string[]> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return [];
+  try {
+    const res = await fetch("https://api.brevo.com/v3/senders", {
       headers: { "api-key": apiKey, accept: "application/json" },
       signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
     });
-    if (!res.ok) return null;
-    const body = (await res.json()) as { domains?: { domain_name?: string; authenticated?: boolean }[] };
-    if (!Array.isArray(body.domains)) return null;
-    return body.domains
-      .filter((d) => d.authenticated && d.domain_name)
-      .map((d) => d.domain_name!.toLowerCase());
+    if (!res.ok) return [];
+    const body = (await res.json()) as { senders?: { email?: string; active?: boolean }[] };
+    return (body.senders ?? []).filter((s) => s.active && s.email).map((s) => s.email!);
   } catch {
-    return null;
+    return [];
   }
 }

@@ -12,14 +12,14 @@ import {
 import { sendTeammateWelcome } from "@everfit/core/lib/notify";
 import {
   getSettings,
-  senderDomain,
+  senderAddress,
   SETTING_DEFS,
   SettingValidationError,
   setSetting,
   validateSetting,
   type SettingKey,
 } from "@everfit/core/lib/settings";
-import { verifiedSenderDomains } from "@everfit/core/lib/notify";
+import { senderIsUsable, usableSenders } from "@everfit/core/lib/notify";
 import { revalidateStorefront } from "@/lib/revalidate-store";
 
 type FormState = { error?: string; ok?: string } | undefined;
@@ -120,14 +120,15 @@ export async function saveSettingsAction(_prev: FormState, formData: FormData): 
    */
   const sender = changed.find((c) => c.key === "email_from");
   if (sender?.value) {
-    const domain = senderDomain(sender.value);
-    const verified = await verifiedSenderDomains();
-    if (domain && verified && !verified.includes(domain)) {
+    const addr = senderAddress(sender.value);
+    const usable = addr ? await senderIsUsable(addr) : null;
+    if (usable === false) {
+      const known = await usableSenders();
       return {
         error:
-          `Brevo has not authenticated "${domain}", so mail from that address would bounce or land in spam. ` +
-          `Add and verify the domain in Brevo (Senders, Domains & Dedicated IPs → Domains), then save again.` +
-          (verified.length ? ` Verified right now: ${verified.join(", ")}.` : ""),
+          `Brevo will not send from "${addr}" — neither that address nor its domain is verified there, ` +
+          `so mail would bounce or land in spam. Add it in Brevo (Senders, Domains & Dedicated IPs), then save again.` +
+          (known.length ? ` Currently usable: ${known.join(", ")}.` : ""),
       };
     }
   }

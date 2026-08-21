@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { SettingValidationError, senderDomain, validateSetting } from "@everfit/core/lib/settings";
+import { SettingValidationError, senderAddress, senderDomain, validateSetting } from "@everfit/core/lib/settings";
 
 /**
  * The write path is where a bad value would reach a legal document, so the
@@ -61,7 +61,13 @@ describe("validateSetting", () => {
   });
 });
 
-describe("senderDomain", () => {
+describe("senderAddress / senderDomain", () => {
+  it("extracts the address from either sender shape", () => {
+    expect(senderAddress("EVHERFIT <Orders@Evherfit.com>")).toBe("orders@evherfit.com");
+    expect(senderAddress("orders@evherfit.com")).toBe("orders@evherfit.com");
+    expect(senderAddress("garbage")).toBeNull();
+  });
+
   it("extracts the domain from either sender shape", () => {
     expect(senderDomain("EVHERFIT <orders@evherfit.com>")).toBe("evherfit.com");
     expect(senderDomain("orders@evherfit.com")).toBe("evherfit.com");
