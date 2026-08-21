@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getOrder } from "@everfit/core/lib/orders";
 import { inr } from "@everfit/core/lib/product";
-import { gstBreakdown, HSN_CODE } from "@everfit/core/lib/tax";
+import { gstBreakdown, HSN_CODE, LEGACY_GST_RATE } from "@everfit/core/lib/tax";
 import { getSettings } from "@everfit/core/lib/settings";
 import PrintButton from "./PrintButton";
 
@@ -24,7 +24,14 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   const c = order.customer;
   const invoiceId = `EVH-${String(order.invoiceNo).padStart(4, "0")}`;
   const date = new Date(order.paidAt ?? order.createdAt);
-  const tax = gstBreakdown(order.amount, c.state, storeState); // amount is GST-inclusive
+  // The order's own rate, snapshotted when it was paid — never the live setting,
+  // or reprinting this invoice after a rate change would show a different total
+  // from the one the customer was charged.
+  const tax = gstBreakdown(order.amount, {
+    customerState: c.state,
+    storeState,
+    rate: order.gstRate ?? LEGACY_GST_RATE,
+  });
   const halfRate = (tax.rate * 100) / 2;
 
   return (

@@ -3,6 +3,7 @@ import { and, count, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "../db";
 import { customers, inventoryMovements, orderEvents, orders, productVariants, refunds } from "../db/schema";
 import { redeemCoupon } from "./coupons";
+import { getGstRate } from "./settings";
 import { getPurchasableVariant } from "./catalog";
 
 /**
@@ -34,6 +35,7 @@ export interface Order {
   qty: number;
   couponCode?: string;
   discount: number; // paise off list price
+  gstRate?: number; // rate charged on this order, snapshotted at payment
   courier?: string;
   tracking?: string;
   invoiceNo?: number;
@@ -79,6 +81,7 @@ function toOrder(r: Row): Order {
     qty: r.qty,
     couponCode: r.couponCode ?? undefined,
     discount: r.discount,
+    gstRate: r.gstRate == null ? undefined : Number(r.gstRate),
     courier: r.courier ?? undefined,
     tracking: r.tracking ?? undefined,
     invoiceNo: r.invoiceNo ?? undefined,
@@ -309,12 +312,18 @@ async function adjustStock(
  * the invoice number and decrements tracked stock.
  */
 export async function markPaid(id: string, paymentId: string, method?: string, fee?: number) {
+  // Snapshot the rate in force right now. The invoice this order will print
+  // months from now must show what the customer was actually charged, not
+  // whatever the rate has since been changed to.
+  const gstRate = await getGstRate();
+
   const rows = await db()
     .update(orders)
     .set({
       status: "paid",
       paymentId,
       paidAt: new Date(),
+      gstRate: String(gstRate),
       invoiceNo: sql`nextval('invoice_seq')::int`,
       ...(method ? { paymentMethod: method } : {}),
       ...(fee != null ? { fee } : {}),
@@ -522,6 +531,7 @@ export async function recordManualSale(input: {
       variantKey: input.variantKey,
       qty,
       unitCost: variant.cost ?? null,
+      gstRate: String(await getGstRate()),
       paidAt,
       invoiceNo: sql`nextval('invoice_seq')::int`,
       name,

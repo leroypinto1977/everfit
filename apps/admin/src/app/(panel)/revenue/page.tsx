@@ -8,7 +8,6 @@ import {
   getTaxSummary,
   getTopCustomers,
   getVariantMix,
-  gstSplit,
 } from "@everfit/core/lib/revenue";
 import {
   REPORT_TZ,
@@ -74,7 +73,7 @@ export default async function RevenuePage({
   // a pass-through liability remitted to the government — not earnings — so it must
   // not count as profit. Reverse it out before the margin math. gross profit =
   // ex-GST revenue − COGS; net profit also nets off processor fees.
-  const exGstRevenue = gstSplit(stats.netRevenue).taxable;
+  const exGstRevenue = stats.netTaxable;
   const grossProfit = exGstRevenue - profit.cogs;
   const netProfit = grossProfit - profit.fees;
   const margin = exGstRevenue > 0 ? netProfit / exGstRevenue : 0;
@@ -109,13 +108,18 @@ export default async function RevenuePage({
     }
   }
 
-  const tax = gstSplit(stats.netRevenue);
+  // A date range can span a rate change, so there is no single "the" rate to
+  // print any more. Derive the effective rate from the figures themselves — it
+  // equals the configured rate whenever the range is uniform, and tells the
+  // truth when it is not.
+  const tax = { taxable: stats.netTaxable, gst: stats.netGst };
+  const effectiveRatePct = tax.taxable > 0 ? (tax.gst / tax.taxable) * 100 : 0;
   // Place-of-supply split for GST filing (on gross sales), only when the store's
   // own state is configured. CGST/SGST are half each of intra-state GST.
-  const intraGst = gstSplit(taxSummary.intraGross).gst;
+  const intraGst = taxSummary.intraGst;
   const cgst = Math.round(intraGst / 2);
   const sgst = intraGst - cgst;
-  const igst = gstSplit(taxSummary.interGross).gst;
+  const igst = taxSummary.interGst;
   const exportUrl = `/api/export?from=${istInput(from)}&to=${istInput(to)}`;
 
   return (
@@ -364,7 +368,8 @@ export default async function RevenuePage({
         <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
           <h2 className="font-semibold">GST breakdown</h2>
           <p className="mt-1 text-xs text-[#9aa0c3]">
-            Prices are GST-inclusive, so this back-computes the tax from net revenue at {(tax.rate * 100).toFixed(0)}%.
+            Prices are GST-inclusive, so this back-computes the tax from net revenue — each order at the rate
+            it was actually charged.
           </p>
           <dl className="mt-4 divide-y divide-[#eef0f7] text-sm">
             <div className="flex items-center justify-between py-3">
@@ -372,7 +377,7 @@ export default async function RevenuePage({
               <dd className="font-medium">{inr(tax.taxable)}</dd>
             </div>
             <div className="flex items-center justify-between py-3">
-              <dt className="text-[#6b7194]">GST @ {(tax.rate * 100).toFixed(0)}%</dt>
+              <dt className="text-[#6b7194]">GST @ {effectiveRatePct.toFixed(effectiveRatePct % 1 ? 2 : 0)}%</dt>
               <dd className="font-medium">{inr(tax.gst)}</dd>
             </div>
             <div className="flex items-center justify-between py-3">
@@ -398,7 +403,7 @@ export default async function RevenuePage({
                 {taxSummary.unknownGross > 0 && (
                   <div className="flex items-center justify-between py-2">
                     <dt className="text-[#6b7194]">Unclassified (no state)</dt>
-                    <dd>{inr(gstSplit(taxSummary.unknownGross).gst)}</dd>
+                    <dd>{inr(taxSummary.unknownGst)}</dd>
                   </div>
                 )}
               </dl>
@@ -413,8 +418,12 @@ export default async function RevenuePage({
             </p>
           )}
           <p className="mt-3 text-xs text-[#9aa0c3]">
-            Indicative only — the rate comes from <code className="font-mono">GST_RATE</code> on the server.
-            Confirm filings with your accountant.
+            Indicative only — each order is split at the rate it was actually charged. Change the rate for
+            future sales in{" "}
+            <a href="/settings" className="underline underline-offset-2 hover:text-[#2b337d]">
+              Settings → Business details
+            </a>
+            . Confirm filings with your accountant.
           </p>
         </div>
       </div>

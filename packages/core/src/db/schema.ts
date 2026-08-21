@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  numeric,
   pgTable,
   text,
   timestamp,
@@ -131,6 +132,10 @@ export const orders = pgTable("orders", {
   discount: integer("discount").notNull().default(0), // paise taken off list price
   unitCost: integer("unit_cost"), // paise, COGS per unit snapshotted at sale; null = unknown
   fee: integer("fee").notNull().default(0), // paise, payment-processor fee (incl. its GST); 0 for cash/manual
+  // GST rate in force when this order was paid, e.g. 0.1800. Snapshotted so an
+  // edit to the live rate can never restate an invoice already issued.
+  // NULL only for orders that have not reached payment yet.
+  gstRate: numeric("gst_rate", { precision: 6, scale: 4 }),
   paymentId: text("payment_id"),
   courier: text("courier"),
   tracking: text("tracking"),

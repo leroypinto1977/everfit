@@ -39,9 +39,10 @@ export type SettingKey =
   | "store_address"
   | "support_email"
   | "order_notify_email"
-  | "brevo_list_id";
+  | "brevo_list_id"
+  | "gst_rate";
 
-export type SettingKind = "text" | "email" | "state" | "gstin" | "number";
+export type SettingKind = "text" | "email" | "state" | "gstin" | "number" | "rate";
 
 export interface SettingDef {
   key: SettingKey;
@@ -67,6 +68,17 @@ export const SETTING_DEFS: SettingDef[] = [
     fallback: "",
     group: "Tax & invoicing",
     placeholder: "29ABCDE1234F1Z5",
+  },
+  {
+    key: "gst_rate",
+    envVar: "GST_RATE",
+    label: "GST rate",
+    help:
+      "As a decimal fraction: 0.18 means 18%. Applies to NEW sales only — every order stores the rate it was charged at, so past invoices and past revenue reports never change when you edit this.",
+    kind: "rate",
+    fallback: "0.18",
+    group: "Tax & invoicing",
+    placeholder: "0.18",
   },
   {
     key: "store_state",
@@ -246,6 +258,20 @@ export function validateSetting(key: SettingKey, raw: string): string {
     case "number":
       if (!/^\d+$/.test(value)) throw new SettingValidationError(`${def.label} must be a whole number.`);
       return value;
+    case "rate": {
+      const n = Number(value);
+      if (!Number.isFinite(n) || n < 0) {
+        throw new SettingValidationError(`${def.label} must be a number, e.g. 0.18 for 18%.`);
+      }
+      // The mistake this is really guarding: typing 18 for 18%, which would
+      // otherwise be read as 1800% and quietly wreck every new invoice.
+      if (n > 1) {
+        throw new SettingValidationError(
+          `${def.label} must be a decimal fraction — 0.18 for 18%, not ${value}.`
+        );
+      }
+      return String(n);
+    }
     case "state":
       if (value.length < 3) throw new SettingValidationError(`${def.label} looks too short.`);
       return value;
@@ -290,4 +316,15 @@ export async function listSettings(): Promise<ResolvedSetting[]> {
     const { value, source } = fromEnvOrFallback(def);
     return { def, value, source };
   });
+}
+
+/**
+ * The GST rate to charge on a NEW sale. Never use this to re-derive tax on an
+ * existing order — read that order's own `gstRate`, which was snapshotted when
+ * it was paid. See drizzle/0009_gst_rate_snapshot.sql.
+ */
+export async function getGstRate(): Promise<number> {
+  const raw = (await getSettings()).gst_rate;
+  const n = Number(raw);
+  return Number.isFinite(n) && n >= 0 && n <= 1 ? n : 0.18;
 }
