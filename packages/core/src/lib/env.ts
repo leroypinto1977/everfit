@@ -204,10 +204,11 @@ export const ENV_VARS: EnvVar[] = [
   },
   {
     name: "GST_RATE",
+    dbOverridable: true,
     apps: ["admin"],
     level: "optional",
     group: "Invoicing & reporting",
-    summary: "GST rate used to back-compute the tax split from GST-inclusive prices.",
+    summary: "Fallback GST rate for new sales. Each order stores the rate it was charged at.",
     impact: "Defaults to 0.18 (18%).",
   },
   {

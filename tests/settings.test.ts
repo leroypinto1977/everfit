@@ -28,6 +28,19 @@ describe("validateSetting", () => {
     expect(() => validateSetting("brevo_list_id", "2.5")).toThrow(SettingValidationError);
   });
 
+  it("rejects a GST rate typed as a percentage", () => {
+    // the mistake that matters: 18 meaning 18%, which would be read as 1800%
+    expect(() => validateSetting("gst_rate", "18")).toThrow(/decimal fraction/);
+    expect(() => validateSetting("gst_rate", "-0.1")).toThrow(SettingValidationError);
+    expect(() => validateSetting("gst_rate", "abc")).toThrow(SettingValidationError);
+  });
+
+  it("accepts a GST rate as a decimal fraction", () => {
+    expect(validateSetting("gst_rate", "0.18")).toBe("0.18");
+    expect(validateSetting("gst_rate", " 0.050 ")).toBe("0.05");
+    expect(validateSetting("gst_rate", "1")).toBe("1");
+  });
+
   it("treats an empty value as 'clear this setting'", () => {
     // every kind must allow it — that is the only way back to env control
     expect(validateSetting("store_gstin", "   ")).toBe("");

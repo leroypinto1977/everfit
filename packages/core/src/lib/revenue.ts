@@ -1,8 +1,8 @@
-import { and, gte, lt, sql } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "../db";
 import { orders, refunds } from "../db/schema";
 import { REPORT_TZ, istMonthStart } from "./report-time";
-import { GST_RATE, gstSplit } from "./tax";
+import { GST_RATE, gstSplit, LEGACY_GST_RATE } from "./tax";
 import { getSetting } from "./settings";
 
 // Re-exported so existing callers can keep importing GST helpers from here.
@@ -27,6 +27,13 @@ export interface RevenueStats {
   refundCount: number;
   refundRate: number; // refunded ÷ gross, 0–1 (value-weighted)
   avgOrderValue: number;
+  /**
+   * Net revenue split into its taxable base and GST, summed PER ORDER at each
+   * order's own snapshotted rate. Reversing one rate out of the aggregate would
+   * be wrong the moment two orders in the range were charged different rates.
+   */
+  netTaxable: number;
+  netGst: number;
 }
 
 const REVENUE_STATUSES = `('paid','shipped','delivered','refunded')`;
@@ -36,18 +43,24 @@ export async function getRevenueStats(from: Date, to: Date): Promise<RevenueStat
     .select({
       gross: sql<number>`coalesce(sum(${orders.amount}) filter (where ${orders.status} in ('paid','shipped','delivered','refunded')), 0)::int`,
       paidOrders: sql<number>`count(*) filter (where ${orders.status} in ('paid','shipped','delivered','refunded'))::int`,
+      taxable: sql<number>`coalesce(sum(round(${orders.amount} / (1 + coalesce(${orders.gstRate}, ${LEGACY_GST_RATE})))) filter (where ${orders.status} in ('paid','shipped','delivered','refunded')), 0)::int`,
     })
     .from(orders)
     .where(and(gte(orders.paidAt, from), lt(orders.paidAt, to)));
 
+  // Refunds carry the tax back out at the rate their own order was charged, so
+  // this joins rather than applying a single rate to the refund total.
   const [r] = await db()
     .select({
       amount: sql<number>`coalesce(sum(${refunds.amount}), 0)::int`,
       n: sql<number>`count(*)::int`,
+      taxable: sql<number>`coalesce(sum(round(${refunds.amount} / (1 + coalesce(${orders.gstRate}, ${LEGACY_GST_RATE})))), 0)::int`,
     })
     .from(refunds)
+    .leftJoin(orders, eq(refunds.orderId, orders.id))
     .where(and(gte(refunds.createdAt, from), lt(refunds.createdAt, to)));
 
+  const netTaxable = o.taxable - r.taxable;
   return {
     grossRevenue: o.gross,
     refundedAmount: r.amount,
@@ -56,6 +69,8 @@ export async function getRevenueStats(from: Date, to: Date): Promise<RevenueStat
     refundCount: r.n,
     refundRate: o.gross > 0 ? r.amount / o.gross : 0,
     avgOrderValue: o.paidOrders ? Math.round(o.gross / o.paidOrders) : 0,
+    netTaxable,
+    netGst: o.gross - r.amount - netTaxable,
   };
 }
 
@@ -231,6 +246,14 @@ export interface TaxSummary {
   intraGross: number; // paise, sales within the seller's state (CGST+SGST)
   interGross: number; // paise, sales to other states (IGST)
   unknownGross: number; // paise, orders with no state captured
+  /**
+   * The GST inside each bucket, summed per order at that order's own rate.
+   * Kept alongside the gross figures rather than derived from them, because a
+   * single rate applied to a mixed-rate total does not reconcile.
+   */
+  intraGst: number;
+  interGst: number;
+  unknownGst: number;
 }
 
 /**
@@ -252,7 +275,17 @@ export async function getTaxSummary(from: Date, to: Date): Promise<TaxSummary> {
       ), 0)::int AS inter,
       coalesce(sum(amount) filter (
         where ${normStore} = '' or coalesce(state,'') = ''
-      ), 0)::int AS unknown
+      ), 0)::int AS unknown,
+      coalesce(sum(amount - round(amount / (1 + coalesce(gst_rate, ${LEGACY_GST_RATE})))) filter (
+        where ${normStore} <> '' and lower(regexp_replace(coalesce(state,''), '[^a-zA-Z]', '', 'g')) = ${normStore}
+      ), 0)::int AS intra_gst,
+      coalesce(sum(amount - round(amount / (1 + coalesce(gst_rate, ${LEGACY_GST_RATE})))) filter (
+        where ${normStore} <> '' and coalesce(state,'') <> ''
+          and lower(regexp_replace(state, '[^a-zA-Z]', '', 'g')) <> ${normStore}
+      ), 0)::int AS inter_gst,
+      coalesce(sum(amount - round(amount / (1 + coalesce(gst_rate, ${LEGACY_GST_RATE})))) filter (
+        where ${normStore} = '' or coalesce(state,'') = ''
+      ), 0)::int AS unknown_gst
     FROM orders
     WHERE status IN ('paid','shipped','delivered','refunded')
       AND paid_at >= ${from} AND paid_at < ${to}
@@ -263,6 +296,9 @@ export async function getTaxSummary(from: Date, to: Date): Promise<TaxSummary> {
     intraGross: Number(r.intra),
     interGross: Number(r.inter),
     unknownGross: Number(r.unknown),
+    intraGst: Number(r.intra_gst),
+    interGst: Number(r.inter_gst),
+    unknownGst: Number(r.unknown_gst),
   };
 }
 
@@ -270,8 +306,9 @@ export async function getTaxSummary(from: Date, to: Date): Promise<TaxSummary> {
 export async function getOrdersForExport(from: Date, to: Date) {
   const rows = await db().execute(sql`
     SELECT o.id, o.invoice_no, o.status, o.amount,
-           round(o.amount / (1 + ${GST_RATE}::numeric))::int AS taxable_value,
-           (o.amount - round(o.amount / (1 + ${GST_RATE}::numeric))::int) AS gst,
+           coalesce(o.gst_rate, ${LEGACY_GST_RATE})::numeric AS gst_rate,
+           round(o.amount / (1 + coalesce(o.gst_rate, ${LEGACY_GST_RATE})))::int AS taxable_value,
+           (o.amount - round(o.amount / (1 + coalesce(o.gst_rate, ${LEGACY_GST_RATE})))::int) AS gst,
            o.discount, o.coupon_code, o.currency, o.item, o.variant_key, o.qty,
            o.unit_cost, (o.unit_cost * o.qty) AS cogs, o.fee AS payment_fee,
            (o.amount - coalesce(o.unit_cost, 0) * o.qty - o.fee) AS gross_profit,
