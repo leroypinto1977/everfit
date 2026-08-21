@@ -9,7 +9,7 @@
  */
 
 export interface Variant {
-  key: string; // used in URLs (?w=1.5) and order records
+  key: string; // deep links (/product?v=<key|label>) and order records
   weight: string; // display resistance, e.g. "4.5 kg"
   label: string; // marketing name
   blurb: string;

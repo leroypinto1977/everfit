@@ -76,7 +76,7 @@ export const productVariants = pgTable("product_variants", {
   productId: uuid("product_id")
     .notNull()
     .references(() => products.id, { onDelete: "cascade" }),
-  key: text("key").notNull().unique(), // used in URLs (?w=1) and orders
+  key: text("key").notNull().unique(), // deep links (/product?v=<key|label>) and orders
   sku: text("sku").notNull(),
   label: text("label").notNull(),
   weight: text("weight").notNull(),
