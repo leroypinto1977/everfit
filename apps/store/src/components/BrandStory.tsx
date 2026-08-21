@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import Reveal from "./Reveal";
 import { InfinityMark } from "@everfit/core/components/Logo";
 
@@ -24,7 +24,7 @@ export default function BrandStory() {
         <Reveal className="order-2 lg:order-1">
           <div className="relative mx-auto w-full max-w-md">
             <div className="animate-breathe absolute inset-10 -z-10 rounded-full bg-brand/10 blur-[80px]" />
-            <motion.div
+            <m.div
               initial={{ scale: 0.9, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
               viewport={{ once: true, margin: "-100px" }}
@@ -32,7 +32,7 @@ export default function BrandStory() {
               className="text-brand"
             >
               <InfinityMark className="mx-auto w-[85%]" draw />
-            </motion.div>
+            </m.div>
             <p className="mt-6 text-center text-xs uppercase tracking-[0.4em] text-muted">
               The mark of infinite health
             </p>

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, type Variants } from "motion/react";
+import { m, type Variants } from "motion/react";
 
 const variants: Variants = {
   hidden: { opacity: 0, y: 32, filter: "blur(6px)" },
@@ -23,7 +23,7 @@ export default function Reveal({
   className?: string;
 }) {
   return (
-    <motion.div
+    <m.div
       className={className}
       variants={variants}
       custom={delay}
@@ -32,6 +32,6 @@ export default function Reveal({
       viewport={{ once: true, margin: "-80px" }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

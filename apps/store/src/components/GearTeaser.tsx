@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { inr, HERO_IMAGE } from "@everfit/core/lib/product";
 import Reveal from "./Reveal";
 import Magnetic from "./Magnetic";
@@ -26,7 +26,7 @@ export default function GearTeaser({
         <Reveal className="order-2 lg:order-1">
           <div className="relative mx-auto w-72 sm:w-96">
             <div className="animate-breathe absolute inset-8 -z-10 rounded-full bg-accent/15 blur-[70px]" />
-            <motion.div
+            <m.div
               initial={{ opacity: 0, y: 40, rotate: -6 }}
               whileInView={{ opacity: 1, y: 0, rotate: 0 }}
               viewport={{ once: true, margin: "-80px" }}
@@ -41,7 +41,7 @@ export default function GearTeaser({
                 sizes="(max-width: 640px) 288px, 384px"
                 className="h-auto w-full rounded-3xl border border-line object-cover shadow-[0_12px_40px_rgba(43,51,125,0.14)]"
               />
-            </motion.div>
+            </m.div>
           </div>
         </Reveal>
 

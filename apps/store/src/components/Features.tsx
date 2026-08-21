@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import { m, useMotionValue, useSpring, useTransform } from "motion/react";
 import Reveal from "./Reveal";
 
 const features = [
@@ -45,7 +45,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
   const ry = useSpring(useTransform(mx, [0, 1], [-8, 8]), { stiffness: 200, damping: 20 });
 
   return (
-    <motion.div
+    <m.div
       ref={ref}
       onMouseMove={(e) => {
         const r = ref.current!.getBoundingClientRect();
@@ -61,7 +61,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
     >
       <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-br from-brand-soft/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 

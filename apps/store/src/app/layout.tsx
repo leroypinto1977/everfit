@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Exo_2, Poppins } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
+import MotionProvider from "@/components/MotionProvider";
 import { GoogleTagManager, GoogleTagManagerNoScript } from "@/components/GTM";
 import JsonLd from "@/components/JsonLd";
 import { SITE_URL, BRAND, SUPPORT_EMAIL } from "@everfit/core/lib/site";
@@ -77,7 +78,9 @@ export default function RootLayout({
         <JsonLd data={[orgSchema, webSiteSchema]} />
         <GoogleTagManagerNoScript />
         <GoogleTagManager />
-        <SmoothScroll>{children}</SmoothScroll>
+        <MotionProvider>
+          <SmoothScroll>{children}</SmoothScroll>
+        </MotionProvider>
       </body>
     </html>
   );

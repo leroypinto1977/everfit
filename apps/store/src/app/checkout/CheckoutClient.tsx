@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Script from "next/script";
 import { useRouter, useSearchParams } from "next/navigation";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { InfinityMark } from "@everfit/core/components/Logo";
 import { inr, variantImages, PRODUCT_NAME, type Variant } from "@everfit/core/lib/product";
 import { gaItem, stashPurchase, trackAddPaymentInfo, trackBeginCheckout } from "@everfit/core/lib/analytics";
@@ -174,7 +174,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
 
       <div className="mx-auto grid max-w-6xl gap-12 px-6 py-14 lg:grid-cols-[1fr_420px]">
         {/* form */}
-        <motion.form
+        <m.form
           onSubmit={pay}
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -189,7 +189,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
 
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
             {fields.map((f, i) => (
-              <motion.div
+              <m.div
                 key={f.name}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -209,35 +209,35 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
                   onChange={(e) => setForm({ ...form, [f.name]: e.target.value })}
                   className="w-full rounded-xl border border-line bg-card px-4 py-3.5 outline-none transition-all focus:border-brand/60 focus:ring-2 focus:ring-brand/15"
                 />
-              </motion.div>
+              </m.div>
             ))}
           </div>
 
           {error && (
-            <motion.p
+            <m.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="mt-5 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-600"
             >
               {error}
-            </motion.p>
+            </m.p>
           )}
 
-          <motion.button
+          <m.button
             type="submit"
             disabled={loading}
             className="mt-8 w-full rounded-full bg-brand py-4 font-display text-lg font-bold text-white transition hover:brightness-95 disabled:opacity-60"
           >
             {loading ? "Opening payment…" : `Pay ${inr(total)}`}
-          </motion.button>
+          </m.button>
 
           <p className="mt-4 text-center text-xs text-muted">
             UPI · Cards · Netbanking · EMI · processed by Razorpay
           </p>
-        </motion.form>
+        </m.form>
 
         {/* order summary */}
-        <motion.aside
+        <m.aside
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.2, ease: [0.21, 0.65, 0.36, 1] }}
@@ -345,7 +345,7 @@ function CheckoutContent({ variants }: { variants: Variant[] }) {
               <dd>{inr(total)}</dd>
             </div>
           </dl>
-        </motion.aside>
+        </m.aside>
       </div>
     </main>
   );

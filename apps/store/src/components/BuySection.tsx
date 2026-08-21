@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import Magnetic from "./Magnetic";
 import Reveal from "./Reveal";
 import { InfinityMark } from "@everfit/core/components/Logo";
@@ -16,7 +16,7 @@ export default function BuySection() {
       <div className="absolute left-1/2 top-0 h-[400px] w-[700px] max-w-full -translate-x-1/2 rounded-full bg-white/10 blur-[160px]" />
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center px-6 py-24 text-center sm:py-32">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, scale: 0.85, y: 40 }}
           whileInView={{ opacity: 1, scale: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
@@ -24,7 +24,7 @@ export default function BuySection() {
           className="w-48 text-white sm:w-60"
         >
           <InfinityMark className="w-full" draw />
-        </motion.div>
+        </m.div>
 
         <Reveal delay={0.15}>
           <h2 className="mt-10 font-display text-4xl font-bold tracking-tight sm:text-5xl lg:text-7xl">

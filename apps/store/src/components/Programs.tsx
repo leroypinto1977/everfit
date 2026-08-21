@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import Reveal from "./Reveal";
 import { InfinityMark } from "@everfit/core/components/Logo";
 import { PROGRAMS } from "@everfit/core/lib/programs";
@@ -30,7 +30,7 @@ export default function Programs() {
           const dark = p.tone === "brand";
           return (
             <Reveal key={p.key} delay={i * 0.14}>
-              <motion.a
+              <m.a
                 href={p.href}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -94,7 +94,7 @@ export default function Programs() {
                     Opens {new URL(p.href).host}
                   </p>
                 </div>
-              </motion.a>
+              </m.a>
             </Reveal>
           );
         })}
