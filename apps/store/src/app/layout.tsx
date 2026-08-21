@@ -9,31 +9,28 @@ import { SITE_URL, BRAND, SUPPORT_EMAIL } from "@everfit/core/lib/site";
 
 // Brand faces: Renoric (slanted display) ≈ Exo 2 italic,
 // URW Geometric (body) ≈ Poppins.
-// `preload: false` on both, deliberately. next/font emits a
-// `<link rel="preload" as="font">` for every face it generates — here that is
-// six files, 114 KB, all at High priority — and they were being fetched
-// alongside the 10.5 KB stylesheet that is the page's only render-blocking
-// resource. The fonts won that race: the stylesheet did not land until 2.25 s,
-// first paint until 2.4 s, and the hero's CSS entrance animations had already
-// run to completion behind the blank screen, so the whole first screen snapped
-// into place at once instead of animating.
+// Preloaded on purpose, but only because the stylesheet is inlined
+// (`experimental.inlineCss` in next.config.ts). These six faces are 114 KB at
+// High priority, and while the CSS was still a separate <link> they starved
+// it — it took 2.25 s to arrive and the first screen stayed blank behind it.
+// With no render-blocking request left to starve, preloading is free on first
+// paint and buys back what deferring them cost: the display face was not
+// landing until ~3.0 s, leaving the headline in a fallback for over two
+// seconds and intermittently shifting the page (CLS spiked to 0.36) when it
+// finally swapped.
 //
-// Without the preloads the fonts are fetched at normal priority once the CSS
-// asks for them. `font-display: swap` (next/font's default) paints the text in
-// the fallback face immediately, and `adjustFontFallback` (also default) has
-// already metric-matched that fallback, so the swap costs very little shift.
+// So: keep these preloads and `inlineCss` together. Re-introducing a
+// render-blocking stylesheet while they are on brings the blank screen back.
 const display = Exo_2({
   variable: "--font-display",
   subsets: ["latin"],
   style: ["normal", "italic"], // `not-italic` in Hero needs the upright face
-  preload: false,
 });
 
 const body = Poppins({
   variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  preload: false,
 });
 
 const DESCRIPTION =
