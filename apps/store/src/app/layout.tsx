@@ -9,16 +9,31 @@ import { SITE_URL, BRAND, SUPPORT_EMAIL } from "@everfit/core/lib/site";
 
 // Brand faces: Renoric (slanted display) ≈ Exo 2 italic,
 // URW Geometric (body) ≈ Poppins.
+// `preload: false` on both, deliberately. next/font emits a
+// `<link rel="preload" as="font">` for every face it generates — here that is
+// six files, 114 KB, all at High priority — and they were being fetched
+// alongside the 10.5 KB stylesheet that is the page's only render-blocking
+// resource. The fonts won that race: the stylesheet did not land until 2.25 s,
+// first paint until 2.4 s, and the hero's CSS entrance animations had already
+// run to completion behind the blank screen, so the whole first screen snapped
+// into place at once instead of animating.
+//
+// Without the preloads the fonts are fetched at normal priority once the CSS
+// asks for them. `font-display: swap` (next/font's default) paints the text in
+// the fallback face immediately, and `adjustFontFallback` (also default) has
+// already metric-matched that fallback, so the swap costs very little shift.
 const display = Exo_2({
   variable: "--font-display",
   subsets: ["latin"],
-  style: ["normal", "italic"],
+  style: ["normal", "italic"], // `not-italic` in Hero needs the upright face
+  preload: false,
 });
 
 const body = Poppins({
   variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+  preload: false,
 });
 
 const DESCRIPTION =
