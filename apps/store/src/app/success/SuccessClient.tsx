@@ -3,7 +3,7 @@
 import { Suspense, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { flushPurchase } from "@everfit/core/lib/analytics";
 
 function SuccessContent() {
@@ -20,20 +20,20 @@ function SuccessContent() {
     <main className="flex min-h-screen items-center justify-center px-6">
       <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-brand/10 blur-[140px]" />
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 32 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7, ease: [0.21, 0.65, 0.36, 1] }}
         className="relative max-w-md text-center"
       >
-        <motion.div
+        <m.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 14, delay: 0.2 }}
           className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand text-4xl text-white"
         >
           ✓
-        </motion.div>
+        </m.div>
 
         <h1 className="mt-8 font-display text-4xl font-bold tracking-tight text-brand">Order confirmed!</h1>
         <p className="mt-4 leading-relaxed text-muted">
@@ -58,7 +58,7 @@ function SuccessContent() {
             Track this order →
           </Link>
         </div>
-      </motion.div>
+      </m.div>
     </main>
   );
 }

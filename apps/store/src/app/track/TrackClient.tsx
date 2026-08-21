@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import Footer from "@/components/Footer";
 
 interface TrackResult {
@@ -73,7 +73,7 @@ export default function TrackClient() {
   return (
     <main className="flex min-h-screen flex-col">
       <div className="mx-auto w-full max-w-2xl flex-1 px-6 pb-24 pt-36">
-        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+        <m.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
           <p className="text-xs uppercase tracking-[0.3em] text-accent">Order status</p>
           <h1 className="mt-3 font-display text-4xl font-bold tracking-tight text-brand sm:text-5xl">
             Track your order
@@ -112,20 +112,20 @@ export default function TrackClient() {
 
           <AnimatePresence>
             {error && (
-              <motion.p
+              <m.p
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 className="mt-5 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-600"
               >
                 {error}
-              </motion.p>
+              </m.p>
             )}
           </AnimatePresence>
 
           <AnimatePresence>
             {result && (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
@@ -173,7 +173,7 @@ export default function TrackClient() {
                               }`}
                             />
                           )}
-                          <motion.span
+                          <m.span
                             initial={{ scale: 0.6, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             transition={{ delay: 0.15 + i * 0.12, type: "spring", stiffness: 260, damping: 18 }}
@@ -182,7 +182,7 @@ export default function TrackClient() {
                             }`}
                           >
                             {done ? "✓" : s.icon}
-                          </motion.span>
+                          </m.span>
                           <div className="pt-1.5">
                             <p className={`font-semibold ${done ? "text-foreground" : "text-muted"}`}>{s.label}</p>
                             {timestamp && done && <p className="text-sm text-muted">{timestamp}</p>}
@@ -220,10 +220,10 @@ export default function TrackClient() {
                   </a>
                   .
                 </p>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </m.div>
       </div>
 
       <Footer />

@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import Reveal from "./Reveal";
 import Image from "next/image";
 
@@ -17,7 +17,7 @@ export default function Coach() {
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-6 py-20 sm:py-28 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
         {/* signature quote — the portrait lives in the hero now */}
         <Reveal>
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.94, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.9, ease: [0.21, 0.65, 0.36, 1] }}
@@ -32,8 +32,9 @@ export default function Coach() {
                 src="/manjula2.jpg"
                 alt="Manjula Narayanan, founder of EVHERFIT and women's fitness coach"
                 fill
-                priority
-                quality={95}
+                // no `priority`: this sits well below the fold, and preloading it
+                // competes with the hero image for a phone's first bytes.
+                loading="lazy"
                 sizes="(max-width: 640px) 90vw, 700px"
                 className="object-cover object-[44.2%_50%] scale-[1]"
               />
@@ -44,7 +45,7 @@ export default function Coach() {
                 Founder · Women&apos;s fitness coach
               </p>
             </div>
-          </motion.div>
+          </m.div>
         </Reveal>
 
         <div>

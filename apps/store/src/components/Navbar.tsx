@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
+import { m, AnimatePresence } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLenis } from "lenis/react";
 import Magnetic from "./Magnetic";
@@ -128,7 +128,7 @@ export default function Navbar() {
   const tone = (on: boolean) => (on ? "text-brand" : "text-muted hover:text-brand");
 
   return (
-    <motion.header
+    <m.header
       initial={{ y: -80, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.7, ease: [0.21, 0.65, 0.36, 1], delay: 0.2 }}
@@ -161,7 +161,7 @@ export default function Navbar() {
 
             <AnimatePresence>
               {menuOpen && (
-                <motion.div
+                <m.div
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
@@ -194,7 +194,7 @@ export default function Navbar() {
                       Compare both on the site →
                     </button>
                   </div>
-                </motion.div>
+                </m.div>
               )}
             </AnimatePresence>
           </li>
@@ -252,7 +252,7 @@ export default function Navbar() {
       {/* mobile drawer */}
       <AnimatePresence>
         {mobileOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -305,9 +305,9 @@ export default function Navbar() {
                 Join a program
               </button>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </m.header>
   );
 }

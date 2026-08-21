@@ -3,7 +3,7 @@
 import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useScroll, useTransform } from "motion/react";
+import { m, useScroll, useTransform } from "motion/react";
 import SplitText from "./SplitText";
 import Magnetic from "./Magnetic";
 import { InfinityMark } from "@everfit/core/components/Logo";
@@ -39,8 +39,8 @@ export default function Hero() {
 
       <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         {/* copy */}
-        <motion.div style={{ opacity: textOpacity, y: textY }} className="text-center lg:text-left">
-          <motion.p
+        <m.div style={{ opacity: textOpacity, y: textY }} className="text-center lg:text-left">
+          <m.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.6 }}
@@ -48,7 +48,7 @@ export default function Hero() {
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
             Women-centered fitness, at home
-          </motion.p>
+          </m.p>
 
           <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
             <span className="not-italic block text-foreground">
@@ -60,7 +60,7 @@ export default function Hero() {
                   without its own transition it painted at full strength while the
                   words were still masked — a stray dash on an empty hero. Draw it
                   left-to-right as the last word lands (0.65 + 3×0.07 stagger). */}
-              <motion.span
+              <m.span
                 initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ delay: 1.05, duration: 0.55, ease: [0.21, 0.65, 0.36, 1] }}
@@ -69,15 +69,15 @@ export default function Hero() {
             </span>
           </h1>
 
-          <motion.p
+          <m.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.7 }}
             className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-muted lg:mx-0"
           >
             Fitness at home, built <span className="font-semibold text-brand">by women, for women.</span>
-          </motion.p>
-          <motion.div
+          </m.p>
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.4, duration: 0.7 }}
@@ -95,9 +95,9 @@ export default function Hero() {
               Shop the band
               <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">→</span>
             </Link>
-          </motion.div>
+          </m.div>
 
-          <motion.ul
+          <m.ul
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.6, duration: 0.7 }}
@@ -109,12 +109,12 @@ export default function Hero() {
                 <p className="mt-1 text-[0.65rem] uppercase tracking-[0.15em] text-muted sm:text-xs">{p.label}</p>
               </li>
             ))}
-          </motion.ul>
-        </motion.div>
+          </m.ul>
+        </m.div>
 
         {/* founder portrait — the face 20,000+ women already trust */}
-        <motion.div style={{ y: portraitY }} className="relative">
-          <motion.div
+        <m.div style={{ y: portraitY }} className="relative">
+          <m.div
             initial={{ opacity: 0, scale: 0.94, y: 24 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ delay: 0.7, duration: 0.9, ease: [0.21, 0.65, 0.36, 1] }}
@@ -130,7 +130,6 @@ export default function Hero() {
                 alt="Manjula Narayanan, founder of EVHERFIT and women's fitness coach"
                 fill
                 priority
-                quality={95}
                 sizes="(max-width: 640px) 90vw, 700px"
                 className="object-cover object-[44.2%_50%] scale-[1]"
               />
@@ -141,10 +140,10 @@ export default function Hero() {
                 Founder · Women&apos;s fitness coach
               </p>
             </div>
-          </motion.div>
+          </m.div>
 
           {/* floating credibility chip */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.3, duration: 0.7 }}
@@ -152,26 +151,26 @@ export default function Hero() {
           >
             <p className="font-display text-sm font-bold text-brand">Tamil Nadu&apos;s trusted coach</p>
             <p className="mt-0.5 text-xs text-muted">for women&apos;s fitness at home</p>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       </div>
 
       {/* scroll cue */}
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2 }}
         style={{ opacity: textOpacity }}
         className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-xs uppercase tracking-[0.3em] text-muted lg:block"
       >
-        <motion.span
+        <m.span
           animate={{ y: [0, 6, 0] }}
           transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
           className="block"
         >
           Scroll ↓
-        </motion.span>
-      </motion.div>
+        </m.span>
+      </m.div>
     </section>
   );
 }

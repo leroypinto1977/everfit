@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useInView, useMotionValue, useSpring, useMotionValueEvent } from "motion/react";
+import { m, useInView, useMotionValue, useSpring, useMotionValueEvent } from "motion/react";
 import { useState } from "react";
 
 function Counter({ to, suffix = "", duration = 1.6 }: { to: number; suffix?: string; duration?: number }) {
@@ -37,7 +37,7 @@ export default function Stats() {
     <section className="border-y border-line bg-brand-soft/40">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px lg:grid-cols-4">
         {stats.map((s, i) => (
-          <motion.div
+          <m.div
             key={s.label}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -49,7 +49,7 @@ export default function Stats() {
               <Counter to={s.value} suffix={s.suffix} />
             </p>
             <p className="mt-3 text-sm uppercase tracking-[0.2em] text-muted">{s.label}</p>
-          </motion.div>
+          </m.div>
         ))}
       </div>
     </section>

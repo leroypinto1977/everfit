@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 import { variantImages, type Variant } from "@everfit/core/lib/product";
 import ProductBuyPanel from "./ProductBuyPanel";
 import Reveal from "./Reveal";
@@ -42,7 +42,7 @@ export default function ProductDetail({
         <div>
           <div className="relative overflow-hidden rounded-3xl border border-line bg-card p-6 shadow-[0_2px_24px_rgba(43,51,125,0.06)]">
             <div className="absolute inset-12 -z-0 rounded-full bg-brand-soft blur-[60px]" />
-            <motion.div
+            <m.div
               key={active}
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -57,7 +57,7 @@ export default function ProductDetail({
                 sizes="(max-width: 1024px) 90vw, 560px"
                 className="object-cover"
               />
-            </motion.div>
+            </m.div>
           </div>
 
           {images.length > 1 && (
