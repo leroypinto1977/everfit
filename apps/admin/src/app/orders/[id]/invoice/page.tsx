@@ -5,6 +5,7 @@ import { getOrder } from "@everfit/core/lib/orders";
 import { inr } from "@everfit/core/lib/product";
 import { gstBreakdown, HSN_CODE, LEGACY_GST_RATE } from "@everfit/core/lib/tax";
 import { getSettings } from "@everfit/core/lib/settings";
+import { getHsnForVariant } from "@everfit/core/lib/catalog";
 import PrintButton from "./PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,8 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
   if (!order?.invoiceNo) notFound();
 
   const { store_gstin: storeGstin, store_state: storeState } = await getSettings();
+  // Per-product code, falling back to the store-wide env var for older data.
+  const hsn = (await getHsnForVariant(order.variantKey)) ?? HSN_CODE;
 
   const c = order.customer;
   const invoiceId = `EVH-${String(order.invoiceNo).padStart(4, "0")}`;
@@ -94,7 +97,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <tr className="border-b border-[#eef0f7]">
             <td className="py-4">
               {order.item ?? "EVHERFIT Infinity Band"}
-              {HSN_CODE && <span className="block text-xs text-[#9aa0c3]">HSN {HSN_CODE}</span>}
+              {hsn && <span className="block text-xs text-[#9aa0c3]">HSN {hsn}</span>}
             </td>
             <td className="py-4 text-center">{order.qty}</td>
             <td className="py-4 text-right">{inr(order.amount + order.discount)}</td>

@@ -128,6 +128,30 @@ export async function updateVariantAdmin(
   await db().update(productVariants).set(fields).where(eq(productVariants.id, id));
 }
 
-export async function updateProductAdmin(id: string, fields: { name?: string; active?: boolean }) {
+export async function updateProductAdmin(
+  id: string,
+  fields: { name?: string; active?: boolean; hsnCode?: string | null }
+) {
   await db().update(products).set(fields).where(eq(products.id, id));
+}
+
+/**
+ * The HSN code to print for an order's line item, resolved from the product the
+ * ordered variant belongs to. Returns null when the variant is unknown (a
+ * deleted product, or a legacy order with no variant key) so the caller can
+ * fall back to the HSN_CODE environment variable.
+ *
+ * Not snapshotted onto the order, unlike the GST rate: HSN is a classification
+ * rather than an amount, so a correction should apply to reprints of past
+ * invoices too — that is usually the point of changing it.
+ */
+export async function getHsnForVariant(variantKey: string | undefined | null): Promise<string | null> {
+  if (!variantKey) return null;
+  const rows = await db()
+    .select({ hsn: products.hsnCode })
+    .from(productVariants)
+    .innerJoin(products, eq(products.id, productVariants.productId))
+    .where(eq(productVariants.key, variantKey))
+    .limit(1);
+  return rows[0]?.hsn?.trim() || null;
 }

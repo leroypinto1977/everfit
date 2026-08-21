@@ -49,9 +49,12 @@ export async function updateVariantAction(formData: FormData) {
 
 export async function updateProductAction(formData: FormData) {
   await requireOwner();
+  // Blank clears the code, which falls the invoice back to the HSN_CODE env var.
+  const hsn = String(formData.get("hsn") ?? "").trim();
   await updateProductAdmin(String(formData.get("id")), {
     name: String(formData.get("name") ?? "").trim() || undefined,
     active: formData.get("active") === "on",
+    hsnCode: hsn || null,
   });
   await refreshStorefront();
 }

@@ -63,6 +63,10 @@ export const products = pgTable("products", {
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   description: text("description"),
+  // HSN classifies the commodity for GST. Per product, not per store: a
+  // catalogue spanning categories needs a different code for each.
+  // NULL falls back to the HSN_CODE environment variable.
+  hsnCode: text("hsn_code"),
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
