@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { ResolvedSetting } from "@everfit/core/lib/settings";
 import { saveSettingsAction } from "./actions";
 
@@ -26,6 +26,28 @@ function SourceBadge({ source }: { source: ResolvedSetting["source"] }) {
 export function StoreSettingsForm({ settings }: { settings: ResolvedSetting[] }) {
   const [state, action, pending] = useActionState(saveSettingsAction, undefined);
 
+  /*
+   * Controlled inputs, because React resets an uncontrolled form after a form
+   * action completes. With `defaultValue` a single bad field threw away every
+   * other edit in the form: type a state, an address and a malformed GST rate,
+   * and the rate error would take the state and address down with it.
+   *
+   * State is re-seeded from the server whenever the saved values actually
+   * change — which happens after a successful save (and shows normalisation,
+   * e.g. a GSTIN upper-cased) but not after a rejected one, so the typing
+   * survives exactly when it should.
+   */
+  const serverValues = settings.map((s) => s.value);
+  const signature = serverValues.join("\u0000");
+  const [seed, setSeed] = useState(signature);
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(settings.map((s) => [s.def.key, s.value]))
+  );
+  if (seed !== signature) {
+    setSeed(signature);
+    setValues(Object.fromEntries(settings.map((s) => [s.def.key, s.value])));
+  }
+
   const groups = settings.reduce<Record<string, ResolvedSetting[]>>((acc, s) => {
     (acc[s.def.group] ??= []).push(s);
     return acc;
@@ -37,7 +59,7 @@ export function StoreSettingsForm({ settings }: { settings: ResolvedSetting[] })
         <div key={group}>
           <h3 className="text-xs font-semibold uppercase tracking-wider text-[#9aa0c3]">{group}</h3>
           <div className="mt-3 space-y-4">
-            {items.map(({ def, value, source, updatedAt, updatedBy }) => (
+            {items.map(({ def, source, updatedAt, updatedBy }) => (
               <div key={def.key}>
                 <label htmlFor={def.key} className="flex flex-wrap items-center gap-2 text-sm font-medium">
                   {def.label}
@@ -49,7 +71,8 @@ export function StoreSettingsForm({ settings }: { settings: ResolvedSetting[] })
                     id={def.key}
                     name={def.key}
                     rows={2}
-                    defaultValue={value}
+                    value={values[def.key] ?? ""}
+                    onChange={(e) => setValues((v) => ({ ...v, [def.key]: e.target.value }))}
                     placeholder={def.placeholder}
                     className={`mt-1.5 ${inputCls}`}
                   />
@@ -57,7 +80,8 @@ export function StoreSettingsForm({ settings }: { settings: ResolvedSetting[] })
                   <input
                     id={def.key}
                     name={def.key}
-                    defaultValue={value}
+                    value={values[def.key] ?? ""}
+                    onChange={(e) => setValues((v) => ({ ...v, [def.key]: e.target.value }))}
                     placeholder={def.placeholder}
                     inputMode={def.kind === "number" ? "numeric" : undefined}
                     className={`mt-1.5 ${inputCls}`}
