@@ -9,6 +9,13 @@
       "autoPort": true
     },
     {
+      "//": "Production build of the storefront — what perf work must be measured against; `npm run build` first.",
+      "name": "store-prod",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "apps/store", "run", "start", "--", "-p", "3100"],
+      "port": 3100
+    },
+    {
       "name": "admin",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["--prefix", "apps/admin", "run", "dev:port"],
