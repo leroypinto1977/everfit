@@ -128,11 +128,10 @@ export default function Navbar() {
   const tone = (on: boolean) => (on ? "text-brand" : "text-muted hover:text-brand");
 
   return (
-    <m.header
-      initial={{ y: -80, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.7, ease: [0.21, 0.65, 0.36, 1], delay: 0.2 }}
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
+    // CSS entrance, not Motion: the header is above the fold on every page, and
+    // a Motion `initial` left the logo and nav invisible until hydration.
+    <header
+      className={`anim-drop fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
         scrolled
           ? "bg-card/90 backdrop-blur-md border-b border-line shadow-[0_1px_24px_rgba(43,51,125,0.06)]"
           : "bg-transparent border-b border-transparent"
@@ -308,6 +307,6 @@ export default function Navbar() {
           </m.div>
         )}
       </AnimatePresence>
-    </m.header>
+    </header>
   );
 }

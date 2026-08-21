@@ -79,6 +79,61 @@ body {
   will-change: opacity;
 }
 
+/* ---- above-the-fold entrance ----
+   The hero and header are the first thing a visitor sees, so their entrance
+   must not be a Motion `initial`/`animate` pair. Motion cannot run until the
+   bundle has downloaded, React has hydrated and LazyMotion has loaded its
+   features; until then every one of those elements sits at opacity 0 and the
+   phone shows an empty page. These keyframes run at the first frame the
+   browser paints, with no JavaScript involved, so the hero is visible from
+   the moment the HTML lands. Anything below the fold can still use Motion —
+   by the time it scrolls into view hydration is long done.
+
+   `both` fill mode holds the from-state during `animation-delay`, so keep the
+   delays short: the first painted element defines First Contentful Paint. */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+.anim-rise {
+  animation: rise-in 0.6s cubic-bezier(0.21, 0.65, 0.36, 1) both;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(24px) scale(0.94); }
+  to   { opacity: 1; transform: none; }
+}
+.anim-pop {
+  animation: pop-in 0.75s cubic-bezier(0.21, 0.65, 0.36, 1) both;
+}
+
+@keyframes drop-in {
+  from { opacity: 0; transform: translateY(-80px); }
+  to   { opacity: 1; transform: none; }
+}
+.anim-drop {
+  animation: drop-in 0.7s cubic-bezier(0.21, 0.65, 0.36, 1) both;
+}
+
+/* the masked word-rise used by SplitText */
+@keyframes word-rise {
+  from { transform: translateY(110%) rotate(4deg); }
+  to   { transform: none; }
+}
+.anim-word {
+  animation: word-rise 0.8s cubic-bezier(0.21, 0.65, 0.36, 1) both;
+}
+
+/* the rule under the headline, drawn left-to-right */
+@keyframes rule-draw {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.anim-rule {
+  transform-origin: left;
+  animation: rule-draw 0.55s cubic-bezier(0.21, 0.65, 0.36, 1) both;
+}
+
 /* ---- slow float for the hero band ---- */
 @keyframes float-slow {
   0%, 100% { transform: translateY(0) rotate(-6deg); }
@@ -133,7 +188,14 @@ body {
   .animate-breathe,
   .animate-float-slow,
   .text-shine,
-  .infinity-draw {
+  .infinity-draw,
+  /* Dropping the entrance animations leaves each element at its natural
+     state — visible — which is exactly the right resting position. */
+  .anim-rise,
+  .anim-pop,
+  .anim-drop,
+  .anim-word,
+  .anim-rule {
     animation: none;
   }
   /* No animation → skip straight to the fully-inked, filled state. */

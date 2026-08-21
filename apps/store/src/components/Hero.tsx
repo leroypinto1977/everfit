@@ -40,48 +40,42 @@ export default function Hero() {
       <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         {/* copy */}
         <m.div style={{ opacity: textOpacity, y: textY }} className="text-center lg:text-left">
-          <m.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-brand"
+          <p
+            style={{ animationDelay: "0.08s" }}
+            className="anim-rise mb-6 inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-1.5 text-xs uppercase tracking-[0.2em] text-brand"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-accent" />
             Women-centered fitness, at home
-          </m.p>
+          </p>
 
           <h1 className="font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
+            {/* No delay on the first line — it is the element that ends the
+                blank screen, so nothing should hold it back. */}
             <span className="not-italic block text-foreground">
-              <SplitText text="You take care of everyone." delay={0.3} />
+              <SplitText text="You take care of everyone." delay={0} />
             </span>
             <span className="relative italic mt-1 inline-block text-brand">
-              <SplitText text="Now it&apos;s your turn." delay={0.65} />
+              <SplitText text="Now it&apos;s your turn." delay={0.26} />
               {/* The rule is the only part of the headline outside SplitText, so
                   without its own transition it painted at full strength while the
                   words were still masked — a stray dash on an empty hero. Draw it
-                  left-to-right as the last word lands (0.65 + 3×0.07 stagger). */}
-              <m.span
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ delay: 1.05, duration: 0.55, ease: [0.21, 0.65, 0.36, 1] }}
-                className="absolute -bottom-2 left-0 h-[3px] w-16 origin-left rounded-full bg-brand"
+                  left-to-right as the last word lands (0.26 + 3×0.06 stagger). */}
+              <span
+                style={{ animationDelay: "0.44s" }}
+                className="anim-rule absolute -bottom-2 left-0 h-[3px] w-16 rounded-full bg-brand"
               />
             </span>
           </h1>
 
-          <m.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.7 }}
-            className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-muted lg:mx-0"
+          <p
+            style={{ animationDelay: "0.4s" }}
+            className="anim-rise mx-auto mt-7 max-w-xl text-lg leading-relaxed text-muted lg:mx-0"
           >
             Fitness at home, built <span className="font-semibold text-brand">by women, for women.</span>
-          </m.p>
-          <m.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.4, duration: 0.7 }}
-            className="mt-10 flex flex-wrap items-center justify-center gap-5 lg:justify-start"
+          </p>
+          <div
+            style={{ animationDelay: "0.5s" }}
+            className="anim-rise mt-10 flex flex-wrap items-center justify-center gap-5 lg:justify-start"
           >
             <Magnetic>
               <a
@@ -95,13 +89,11 @@ export default function Hero() {
               Shop the band
               <span className="ml-2 inline-block transition-transform group-hover:translate-x-1">→</span>
             </Link>
-          </m.div>
+          </div>
 
-          <m.ul
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.6, duration: 0.7 }}
-            className="mt-12 flex items-center justify-center gap-8 lg:justify-start"
+          <ul
+            style={{ animationDelay: "0.6s" }}
+            className="anim-rise mt-12 flex items-center justify-center gap-8 lg:justify-start"
           >
             {proof.map((p) => (
               <li key={p.label} className="text-center lg:text-left">
@@ -109,16 +101,14 @@ export default function Hero() {
                 <p className="mt-1 text-[0.65rem] uppercase tracking-[0.15em] text-muted sm:text-xs">{p.label}</p>
               </li>
             ))}
-          </m.ul>
+          </ul>
         </m.div>
 
         {/* founder portrait — the face 20,000+ women already trust */}
         <m.div style={{ y: portraitY }} className="relative">
-          <m.div
-            initial={{ opacity: 0, scale: 0.94, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.9, ease: [0.21, 0.65, 0.36, 1] }}
-            className="relative mx-auto aspect-[4/5] w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-brand to-brand-deep shadow-[0_24px_70px_rgba(43,51,125,0.3)] lg:max-w-md"
+          <div
+            style={{ animationDelay: "0.15s" }}
+            className="anim-pop relative mx-auto aspect-[4/5] w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-brand to-brand-deep shadow-[0_24px_70px_rgba(43,51,125,0.3)] lg:max-w-md"
           >
             {/* Dedicated clip layer: its own compositing context (translateZ)
                 keeps the scaled portrait clipped to the rounded frame even
@@ -140,26 +130,24 @@ export default function Hero() {
                 Founder · Women&apos;s fitness coach
               </p>
             </div>
-          </m.div>
+          </div>
 
           {/* floating credibility chip */}
-          <m.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3, duration: 0.7 }}
-            className="absolute -left-2 top-8 hidden rounded-2xl border border-line bg-card/95 px-5 py-3 shadow-[0_12px_36px_rgba(43,51,125,0.16)] backdrop-blur sm:block lg:-left-8"
+          <div
+            style={{ animationDelay: "0.7s" }}
+            className="anim-rise absolute -left-2 top-8 hidden rounded-2xl border border-line bg-card/95 px-5 py-3 shadow-[0_12px_36px_rgba(43,51,125,0.16)] backdrop-blur sm:block lg:-left-8"
           >
             <p className="font-display text-sm font-bold text-brand">Tamil Nadu&apos;s trusted coach</p>
             <p className="mt-0.5 text-xs text-muted">for women&apos;s fitness at home</p>
-          </m.div>
+          </div>
         </m.div>
       </div>
 
       {/* scroll cue */}
+      {/* `style` (the scroll-linked fade) already owns opacity here, so the old
+          initial/animate pair only ever fought it. Scroll-linked opacity stays
+          on Motion; the entrance is gone. */}
       <m.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2 }}
         style={{ opacity: textOpacity }}
         className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-xs uppercase tracking-[0.3em] text-muted lg:block"
       >
