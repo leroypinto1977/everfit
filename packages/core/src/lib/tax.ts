@@ -10,10 +10,19 @@
 /** Combined GST rate on the sale (e.g. 0.18 = 18%). */
 export const GST_RATE = Number(process.env.GST_RATE ?? 0.18);
 
-/** Seller's own GST details, printed on the invoice. All optional. */
-export const STORE_STATE = process.env.STORE_STATE?.trim() || "";
-export const STORE_GSTIN = process.env.STORE_GSTIN?.trim() || "";
+/**
+ * HSN code for the product, printed on the invoice. Still env-only: it is a
+ * product attribute rather than a store-wide policy, so it belongs on the
+ * variant, not in the settings table.
+ */
 export const HSN_CODE = process.env.HSN_CODE?.trim() || "";
+
+/*
+ * The seller's state and GSTIN used to be module constants read from the env at
+ * import time. They are owner-editable settings now (see lib/settings.ts), so
+ * they are passed in explicitly instead — a module constant would be captured
+ * once per process and never see an edit made in the admin panel.
+ */
 
 /** Reverse the tax out of a GST-inclusive amount (paise). */
 export function gstSplit(inclusivePaise: number) {
@@ -27,12 +36,15 @@ function normState(s: string | undefined | null) {
 
 /**
  * Inter-state when the customer's state differs from the seller's. Returns
- * `null` when we can't tell (STORE_STATE unset, or the order has no state) —
- * the caller should then show a single combined GST line.
+ * `null` when we can't tell (no seller state configured, or the order has no
+ * state) — the caller should then show a single combined GST line.
  */
-export function isInterState(customerState: string | undefined | null): boolean | null {
-  if (!STORE_STATE || !customerState?.trim()) return null;
-  return normState(customerState) !== normState(STORE_STATE);
+export function isInterState(
+  customerState: string | undefined | null,
+  storeState: string | undefined | null
+): boolean | null {
+  if (!storeState?.trim() || !customerState?.trim()) return null;
+  return normState(customerState) !== normState(storeState);
 }
 
 export interface GstBreakdown {
@@ -45,10 +57,17 @@ export interface GstBreakdown {
   rate: number;
 }
 
-/** Full CGST/SGST/IGST breakdown for one GST-inclusive amount. */
-export function gstBreakdown(inclusivePaise: number, customerState?: string | null): GstBreakdown {
+/**
+ * Full CGST/SGST/IGST breakdown for one GST-inclusive amount. `storeState` is
+ * the seller's state of supply, resolved from settings by the caller.
+ */
+export function gstBreakdown(
+  inclusivePaise: number,
+  customerState?: string | null,
+  storeState?: string | null
+): GstBreakdown {
   const { taxable, gst, rate } = gstSplit(inclusivePaise);
-  const inter = isInterState(customerState);
+  const inter = isInterState(customerState, storeState);
   if (inter === true) {
     return { taxable, gst, cgst: 0, sgst: 0, igst: gst, interState: true, rate };
   }

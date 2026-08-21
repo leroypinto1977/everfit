@@ -405,11 +405,16 @@ export default async function RevenuePage({
             </div>
           ) : (
             <p className="mt-3 text-xs text-[#9aa0c3]">
-              Set <code className="font-mono">STORE_STATE</code> to split CGST/SGST vs IGST for filing.
+              Set your state of supply in{" "}
+              <a href="/settings" className="underline underline-offset-2 hover:text-[#2b337d]">
+                Settings → Business details
+              </a>{" "}
+              to split CGST/SGST vs IGST for filing.
             </p>
           )}
           <p className="mt-3 text-xs text-[#9aa0c3]">
-            Indicative only — set your rate with <code className="font-mono">GST_RATE</code>. Confirm filings with your accountant.
+            Indicative only — the rate comes from <code className="font-mono">GST_RATE</code> on the server.
+            Confirm filings with your accountant.
           </p>
         </div>
       </div>

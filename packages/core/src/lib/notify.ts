@@ -1,4 +1,5 @@
 import type { Order } from "./orders";
+import { getSettings } from "./settings";
 import { logEmailEvent } from "./orders";
 import {
   type Email,
@@ -23,7 +24,6 @@ import {
  */
 
 const FROM = process.env.EMAIL_FROM ?? "EVHERFIT <no-reply@evherfit.com>";
-const REPLY_TO = process.env.SUPPORT_EMAIL ?? "info@evherfit.com";
 
 /** "EVHERFIT <orders@evherfit.com>" → { name, email } for Brevo's sender object. */
 function parseFrom(from: string): { name?: string; email: string } {
@@ -74,12 +74,13 @@ type SendOutcome = "sent" | "failed" | "skipped";
 
 async function send(to: string | undefined, email: Email, opts?: { replyTo?: boolean }): Promise<SendOutcome> {
   if (!process.env.BREVO_API_KEY || !to) return "skipped";
+  const replyTo = (await getSettings()).support_email;
   const result = await brevoPost("/smtp/email", {
     sender: parseFrom(FROM),
     to: [{ email: to }],
     subject: email.subject,
     htmlContent: email.html,
-    ...(opts?.replyTo === false ? {} : { replyTo: { email: REPLY_TO } }),
+    ...(opts?.replyTo === false || !replyTo ? {} : { replyTo: { email: replyTo } }),
   });
   if (!result.ok) {
     console.error(`Email "${email.subject}" failed (${result.status ?? "network"}):`, result.body);
@@ -88,7 +89,12 @@ async function send(to: string | undefined, email: Email, opts?: { replyTo?: boo
   return "sent";
 }
 
-const adminInbox = () => process.env.ORDER_NOTIFY_EMAIL;
+/**
+ * Owner-facing alert inbox. Async because it is an owner-editable setting now;
+ * awaiting it also warms the settings cache before any template is rendered,
+ * which is what lets the email shell read the support address synchronously.
+ */
+const adminInbox = async () => (await getSettings()).order_notify_email || undefined;
 
 /**
  * Send a customer email and record the outcome on the order's activity
@@ -112,9 +118,10 @@ async function sendCustomerEmail(order: Order, email: Email, kind: string, actor
 
 /** On payment: confirm to the customer, alert the store, sync the contact. */
 export async function sendOrderNotifications(order: Order) {
+  const inbox = await adminInbox();
   await Promise.allSettled([
     sendCustomerEmail(order, orderConfirmation(order), "Confirmation"),
-    send(adminInbox(), newOrderAdmin(order), { replyTo: false }),
+    send(inbox, newOrderAdmin(order), { replyTo: false }),
     syncCustomerToBrevo(order),
   ]);
 }
@@ -149,7 +156,7 @@ export async function sendPaymentFailedEmail(order: Order, actor = "system") {
  * Brevo → Contacts → Lists) is set. Upserts, so repeat buyers just update.
  */
 export async function syncCustomerToBrevo(order: Order) {
-  const listId = Number(process.env.BREVO_LIST_ID);
+  const listId = Number((await getSettings()).brevo_list_id);
   if (!process.env.BREVO_API_KEY || !listId || !order.customer.email) return;
 
   const [first, ...rest] = order.customer.name.trim().split(/\s+/);
@@ -184,7 +191,7 @@ export async function syncCustomerToBrevo(order: Order) {
 
 export async function sendLowStockAlert(items: { weight: string; sku: string; stock: number }[]) {
   if (!items.length) return;
-  await send(adminInbox(), lowStockAdmin(items), { replyTo: false });
+  await send(await adminInbox(), lowStockAdmin(items), { replyTo: false });
 }
 
 export async function sendTeammateWelcome(input: { name: string; email: string; role: string }) {

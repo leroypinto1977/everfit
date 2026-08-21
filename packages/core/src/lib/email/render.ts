@@ -7,6 +7,8 @@
  * pink #e56ca5 / soft #fce4ec, ink #22242c, muted #5e6478, page #f4f5f9.
  */
 
+import { peekSettings } from "../settings";
+
 export const brand = {
   indigo: "#2b337d",
   indigoDeep: "#232a68",
@@ -133,7 +135,11 @@ export function shell(
   opts: { preheader: string; headerBar?: string }
 ) {
   const bar = opts.headerBar ?? brand.indigo;
-  const support = process.env.SUPPORT_EMAIL ?? "info@evherfit.com";
+  // Sync read: shell() is a pure string builder called from deep inside the
+  // templates, and every send path awaits getSettings() before rendering, so
+  // the snapshot is warm. Cold (first render in a fresh process) falls back to
+  // the env value — the behaviour before settings existed.
+  const support = peekSettings().support_email;
 
   return `<!DOCTYPE html>
 <html lang="en"><head>

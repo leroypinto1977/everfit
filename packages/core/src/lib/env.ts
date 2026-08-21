@@ -37,6 +37,12 @@ export interface EnvVar {
   buildTime?: boolean;
   /** Must hold the identical value on both deployments. */
   sharedSecret?: boolean;
+  /**
+   * Owner-editable from the admin panel (lib/settings.ts). The env var is the
+   * fallback, so "not set" here is not a problem when a value has been saved in
+   * the panel instead.
+   */
+  dbOverridable?: boolean;
   group: string;
   summary: string;
   /** What actually breaks when it is missing. Shown in the admin panel. */
@@ -161,6 +167,7 @@ export const ENV_VARS: EnvVar[] = [
   },
   {
     name: "SUPPORT_EMAIL",
+    dbOverridable: true,
     apps: BOTH,
     level: "recommended",
     group: "Email",
@@ -169,6 +176,7 @@ export const ENV_VARS: EnvVar[] = [
   },
   {
     name: "ORDER_NOTIFY_EMAIL",
+    dbOverridable: true,
     apps: BOTH,
     level: "recommended",
     group: "Email",
@@ -177,6 +185,7 @@ export const ENV_VARS: EnvVar[] = [
   },
   {
     name: "BREVO_LIST_ID",
+    dbOverridable: true,
     apps: ["store"],
     level: "optional",
     group: "Email",
@@ -203,6 +212,7 @@ export const ENV_VARS: EnvVar[] = [
   },
   {
     name: "STORE_STATE",
+    dbOverridable: true,
     apps: ["admin"],
     level: "optional",
     group: "Invoicing & reporting",
@@ -211,6 +221,7 @@ export const ENV_VARS: EnvVar[] = [
   },
   {
     name: "STORE_GSTIN",
+    dbOverridable: true,
     apps: ["admin"],
     level: "optional",
     group: "Invoicing & reporting",
@@ -227,6 +238,7 @@ export const ENV_VARS: EnvVar[] = [
   },
   {
     name: "STORE_ADDRESS",
+    dbOverridable: true,
     apps: ["admin"],
     level: "optional",
     group: "Invoicing & reporting",

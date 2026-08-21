@@ -2,7 +2,8 @@ import { and, gte, lt, sql } from "drizzle-orm";
 import { db } from "../db";
 import { orders, refunds } from "../db/schema";
 import { REPORT_TZ, istMonthStart } from "./report-time";
-import { GST_RATE, gstSplit, STORE_STATE } from "./tax";
+import { GST_RATE, gstSplit } from "./tax";
+import { getSetting } from "./settings";
 
 // Re-exported so existing callers can keep importing GST helpers from here.
 export { GST_RATE, gstSplit } from "./tax";
@@ -234,10 +235,12 @@ export interface TaxSummary {
 
 /**
  * Gross paid revenue split by place of supply, for the GST filing view. Only
- * meaningful when STORE_STATE is set; otherwise everything is "unknown".
+ * meaningful once the seller's state of supply is configured; otherwise
+ * everything lands in "unknown".
  */
 export async function getTaxSummary(from: Date, to: Date): Promise<TaxSummary> {
-  const normStore = STORE_STATE.toLowerCase().replace(/[^a-z]/g, "");
+  const storeState = await getSetting("store_state");
+  const normStore = storeState.toLowerCase().replace(/[^a-z]/g, "");
   const rows = await db().execute(sql`
     SELECT
       coalesce(sum(amount) filter (
@@ -256,7 +259,7 @@ export async function getTaxSummary(from: Date, to: Date): Promise<TaxSummary> {
   `);
   const r = rows.rows[0] as Record<string, unknown>;
   return {
-    storeState: STORE_STATE,
+    storeState,
     intraGross: Number(r.intra),
     interGross: Number(r.inter),
     unknownGross: Number(r.unknown),

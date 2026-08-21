@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin-auth";
 import { getOrder } from "@everfit/core/lib/orders";
+import { getSettings } from "@everfit/core/lib/settings";
 import { courierName } from "@everfit/core/lib/couriers";
 import PrintButton from "../invoice/PrintButton";
 import Barcode from "./Barcode";
@@ -24,7 +25,7 @@ export default async function LabelPage({ params }: { params: Promise<{ id: stri
   const c = order.customer;
   const invoiceId = order.invoiceNo ? `EVH-${String(order.invoiceNo).padStart(4, "0")}` : null;
   const site = process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, "") ?? "evherfit.com";
-  const support = process.env.SUPPORT_EMAIL ?? "info@evherfit.com";
+  const { support_email: support, store_address: storeAddress } = await getSettings();
 
   return (
     <main className="min-h-screen bg-[#eef0f7] py-8 print:min-h-0 print:bg-white print:py-0">
@@ -122,7 +123,7 @@ export default async function LabelPage({ params }: { params: Promise<{ id: stri
         {/* return address */}
         <div className="mt-[2.5mm] border-t border-black pt-[1.5mm] text-[6.5pt] leading-snug">
           <span className="font-bold uppercase tracking-wider">If undelivered, return to: </span>
-          EVHERFIT{process.env.STORE_ADDRESS ? `, ${process.env.STORE_ADDRESS}` : " · India"} · {support}
+          EVHERFIT{storeAddress ? `, ${storeAddress}` : " · India"} · {support}
         </div>
 
         {/* barcode pinned to the bottom */}
