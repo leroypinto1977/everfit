@@ -5,7 +5,7 @@ const columns = [
   {
     title: "Programs",
     links: [
-      { href: "https://evherfit.com/", label: "4-Week Challenge", external: true },
+      { href: "https://4week.evherfit.com/", label: "4-Week Challenge", external: true },
       { href: "https://1-to-1.evherfit.com/", label: "One-to-One Coaching", external: true },
       { href: "/#story", label: "Our story" },
     ],

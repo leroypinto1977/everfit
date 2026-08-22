@@ -1,6 +1,6 @@
 /**
  * The two EVHERFIT coaching programs. These live on separate sites
- * (evherfit.com and 1-to-1.evherfit.com) — the main storefront only
+ * (4week.evherfit.com and 1-to-1.evherfit.com) — the main storefront only
  * teases them and links out. Keep copy + URLs here so they're easy to update.
  */
 export type Program = {
@@ -30,7 +30,7 @@ export const PROGRAMS: Program[] = [
       "₹10,000+ in bonuses · from ₹599",
     ],
     cta: "Join the Challenge",
-    href: "https://evherfit.com/",
+    href: "https://4week.evherfit.com/",
     tone: "brand",
   },
   {
