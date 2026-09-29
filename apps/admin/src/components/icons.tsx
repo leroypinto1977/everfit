@@ -218,3 +218,15 @@ export function InventoryIcon(p: SVGProps<SVGSVGElement>) {
     </Base>
   );
 }
+
+/** Bar columns — "units sold per product", distinct from the AnalyticsIcon line chart. */
+export function ProductSalesIcon(p: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...p}>
+      <path d="M3 21h18" />
+      <path d="M6 21V11" />
+      <path d="M12 21V4" />
+      <path d="M18 21v-6" />
+    </Base>
+  );
+}

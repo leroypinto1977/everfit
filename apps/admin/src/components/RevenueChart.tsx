@@ -17,6 +17,9 @@ export default function RevenueChart({
   title?: string;
 }) {
   const max = Math.max(...days.map((d) => d.revenue), 1);
+  // Keep the whole sweep under ~1s however many bars there are — a 90-day range
+  // at a flat 50ms per bar would still be growing five seconds after load.
+  const stagger = Math.min(0.05, 1 / Math.max(days.length, 1));
 
   return (
     <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
@@ -31,7 +34,7 @@ export default function RevenueChart({
             <motion.div
               initial={{ height: 0 }}
               animate={{ height: `${Math.max((d.revenue / max) * 100, d.revenue > 0 ? 4 : 1.5)}%` }}
-              transition={{ delay: 0.2 + i * 0.05, duration: 0.6, ease: [0.21, 0.65, 0.36, 1] }}
+              transition={{ delay: 0.2 + i * stagger, duration: 0.6, ease: [0.21, 0.65, 0.36, 1] }}
               className={`w-full rounded-t-md ${d.revenue > 0 ? "bg-[#2b337d] group-hover:bg-[#ef6fa7]" : "bg-[#e3e5f0]"} transition-colors`}
             />
             {/* tooltip */}

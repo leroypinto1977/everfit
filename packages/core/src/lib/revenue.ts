@@ -139,6 +139,54 @@ export async function getVariantMix(from: Date, to: Date): Promise<VariantMixRow
   return rows.rows as unknown as VariantMixRow[];
 }
 
+export interface ProductSalesRow {
+  key: string; // variant key, or '?' for an order with no variant recorded
+  product: string | null; // parent product name; null once a variant is deleted
+  sku: string | null;
+  weight: string | null;
+  label: string | null;
+  units: number; // units actually sold (refunded orders excluded — goods came back)
+  orders: number; // orders behind those units
+  revenue: number; // paise, net of refunded orders
+  refundedUnits: number; // units on orders that were refunded
+  cogs: number; // paise, cost of the sold units; only counts units with a known cost
+  uncostedUnits: number; // sold units with no unit cost — cogs is a floor while > 0
+}
+
+/**
+ * Units sold per variant for a range, bucketed by paid date (IST).
+ *
+ * One order carries one variant and a quantity, so units are `sum(qty)` — not
+ * the order count that `getVariantMix` reports. Refunded orders are split out
+ * rather than summed in: the goods returned to stock, so they are not "sold",
+ * but the operator still wants to see them. Retired variants keep showing up
+ * via their key so history never silently loses sales.
+ */
+export async function getProductSales(from: Date, to: Date): Promise<ProductSalesRow[]> {
+  const rows = await db().execute(sql`
+    SELECT coalesce(o.variant_key, '?') AS key,
+           p.name AS product, pv.sku, pv.weight, pv.label,
+           coalesce(sum(o.qty) filter (where o.status in ('paid','shipped','delivered')), 0)::int AS units,
+           count(*) filter (where o.status in ('paid','shipped','delivered'))::int AS orders,
+           coalesce(sum(o.amount) filter (where o.status in ('paid','shipped','delivered')), 0)::int AS revenue,
+           coalesce(sum(o.qty) filter (where o.status = 'refunded'), 0)::int AS "refundedUnits",
+           coalesce(sum(o.qty * o.unit_cost) filter (
+             where o.status in ('paid','shipped','delivered') and o.unit_cost is not null
+           ), 0)::int AS cogs,
+           coalesce(sum(o.qty) filter (
+             where o.status in ('paid','shipped','delivered') and o.unit_cost is null
+           ), 0)::int AS "uncostedUnits"
+    FROM orders o
+    LEFT JOIN product_variants pv ON pv.key = o.variant_key
+    LEFT JOIN products p ON p.id = pv.product_id
+    WHERE o.status IN ${sql.raw(REVENUE_STATUSES)}
+      AND o.paid_at >= ${from} AND o.paid_at < ${to}
+    GROUP BY o.variant_key, p.name, pv.sku, pv.weight, pv.label
+    ORDER BY units DESC, revenue DESC
+  `);
+  return rows.rows as unknown as ProductSalesRow[];
+}
+
 export interface MonthRevenue {
   month: string; // YYYY-MM (IST)
   revenue: number; // paise, gross

@@ -7,6 +7,8 @@ import {
   istInput,
   istParseInput,
   istNoon,
+  istYearStart,
+  resolveRange,
 } from "@everfit/core/lib/report-time";
 
 /**
@@ -87,5 +89,66 @@ describe("istNoon", () => {
   });
   it("rejects malformed input", () => {
     expect(istNoon("2026/07/06")).toBeNull();
+  });
+});
+
+describe("istYearStart", () => {
+  it("returns Jan 1 of the IST year", () => {
+    expect(istYearStart(MID_JULY).toISOString()).toBe("2025-12-31T18:30:00.000Z");
+    expect(istInput(istYearStart(MID_JULY))).toBe("2026-01-01");
+  });
+  it("uses the IST year at the UTC/IST boundary", () => {
+    // 2025-12-31T20:00Z is already 01:30 IST on Jan 1 2026
+    expect(istInput(istYearStart(new Date("2025-12-31T20:00:00Z")))).toBe("2026-01-01");
+  });
+});
+
+describe("resolveRange", () => {
+  it("defaults to the last 30 days, `to` inclusive", () => {
+    const r = resolveRange({}, MID_JULY);
+    expect(r.preset).toBe("30d");
+    expect(istInput(r.from)).toBe("2026-06-16");
+    expect(istInput(r.to)).toBe("2026-07-15");
+  });
+
+  it("makes `today` a single IST day", () => {
+    const r = resolveRange({ range: "today" }, MID_JULY);
+    expect(istInput(r.from)).toBe("2026-07-15");
+    expect(istInput(r.to)).toBe("2026-07-15");
+  });
+
+  it("counts 7d and 90d inclusively", () => {
+    expect(istInput(resolveRange({ range: "7d" }, MID_JULY).from)).toBe("2026-07-09");
+    expect(istInput(resolveRange({ range: "90d" }, MID_JULY).from)).toBe("2026-04-17");
+  });
+
+  it("starts `month` and `year` at their IST boundaries", () => {
+    expect(istInput(resolveRange({ range: "month" }, MID_JULY).from)).toBe("2026-07-01");
+    expect(istInput(resolveRange({ range: "year" }, MID_JULY).from)).toBe("2026-01-01");
+  });
+
+  it("lets a named preset win over stale from/to in the URL", () => {
+    const r = resolveRange({ range: "7d", from: "2020-01-01", to: "2020-02-01" }, MID_JULY);
+    expect(r.preset).toBe("7d");
+    expect(istInput(r.from)).toBe("2026-07-09");
+  });
+
+  it("treats bare dates as a custom range", () => {
+    const r = resolveRange({ from: "2026-03-01", to: "2026-03-31" }, MID_JULY);
+    expect(r.preset).toBe("custom");
+    expect(istInput(r.from)).toBe("2026-03-01");
+    expect(istInput(r.to)).toBe("2026-03-31");
+  });
+
+  it("fills in the missing half of a one-sided custom range", () => {
+    const r = resolveRange({ range: "custom", from: "2026-07-10" }, MID_JULY);
+    expect(istInput(r.from)).toBe("2026-07-10");
+    expect(istInput(r.to)).toBe("2026-07-15");
+  });
+
+  it("falls back to 30 days for an unknown preset", () => {
+    const r = resolveRange({ range: "decade" }, MID_JULY);
+    expect(r.preset).toBe("30d");
+    expect(istInput(r.from)).toBe("2026-06-16");
   });
 });

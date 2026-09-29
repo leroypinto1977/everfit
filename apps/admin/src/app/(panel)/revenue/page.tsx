@@ -9,15 +9,9 @@ import {
   getTopCustomers,
   getVariantMix,
 } from "@everfit/core/lib/revenue";
-import {
-  REPORT_TZ,
-  istAddDays,
-  istDayStart,
-  istDaysAgo,
-  istInput,
-  istParseInput,
-} from "@everfit/core/lib/report-time";
+import { REPORT_TZ, istAddDays, istInput, resolveRange } from "@everfit/core/lib/report-time";
 import KpiCard from "@/components/KpiCard";
+import RangeTabs from "@/components/RangeTabs";
 import RevenueChart, { type DayPoint } from "@/components/RevenueChart";
 import { DownloadIcon } from "@/components/icons";
 import { inr } from "@everfit/core/lib/product";
@@ -48,14 +42,14 @@ const METHOD_LABEL: Record<string, string> = {
 export default async function RevenuePage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string }>;
+  searchParams: Promise<{ range?: string; from?: string; to?: string }>;
 }) {
   await requireOwner(); // revenue analytics are owner-only
   const sp = await searchParams;
 
   // All boundaries are IST-midnight instants so buckets and filters agree.
-  const from = istParseInput(sp.from) ?? istDaysAgo(29);
-  const to = istParseInput(sp.to) ?? istDayStart(); // inclusive in the UI
+  const range = resolveRange(sp); // ?range= preset, or explicit from/to
+  const { from, to } = range; // `to` is inclusive in the UI
   const toExclusive = istAddDays(to, 1);
 
   const [stats, profit, daily, mix, monthly, methodMix, topCustomers, taxSummary] = await Promise.all([
@@ -91,22 +85,33 @@ export default async function RevenuePage({
     })
     .reverse();
 
-  // continuous IST-day series for the chart (only for ranges the chart can fit)
+  // Continuous IST-day series for the chart. Long ranges ("This year") would
+  // give one unreadable hairline per day, so those roll up into weekly bars.
   const rangeDays = Math.round((toExclusive.getTime() - from.getTime()) / 86_400_000);
-  let days: DayPoint[] | null = null;
-  if (rangeDays <= 92) {
-    const byDay = new Map(daily.map((d) => [d.day, d]));
-    days = [];
-    for (let i = 0; i < rangeDays; i++) {
-      const dayStart = istAddDays(from, i);
-      const hit = byDay.get(istInput(dayStart));
-      days.push({
-        label: dayLabel(dayStart),
-        revenue: (hit?.revenue ?? 0) / 100,
-        orders: hit?.orders ?? 0,
-      });
+  // ≤ a quarter: one bar per day. Up to ~a year: weekly. Beyond that (a hand-typed
+  // range can be arbitrarily long) widen the bucket so the bar count stays readable.
+  const bucketDays = rangeDays <= 92 ? 1 : rangeDays <= 400 ? 7 : Math.ceil(rangeDays / 60);
+  const byDay = new Map(daily.map((d) => [d.day, d]));
+  const days: DayPoint[] = [];
+  for (let i = 0; i < rangeDays; i += bucketDays) {
+    const bucketStart = istAddDays(from, i);
+    let revenue = 0;
+    let orders = 0;
+    for (let j = i; j < Math.min(i + bucketDays, rangeDays); j++) {
+      const hit = byDay.get(istInput(istAddDays(from, j)));
+      revenue += hit?.revenue ?? 0;
+      orders += hit?.orders ?? 0;
     }
+    days.push({ label: dayLabel(bucketStart), revenue: revenue / 100, orders });
   }
+  const chartTitle =
+    rangeDays === 1
+      ? "Revenue — today"
+      : bucketDays === 1
+        ? `Revenue — ${rangeDays} days`
+        : bucketDays === 7
+          ? `Revenue — ${rangeDays} days, weekly`
+          : `Revenue — ${rangeDays} days, ${bucketDays}-day buckets`;
 
   // A date range can span a rate change, so there is no single "the" rate to
   // print any more. Derive the effective rate from the figures themselves — it
@@ -121,6 +126,11 @@ export default async function RevenuePage({
   const sgst = intraGst - cgst;
   const igst = taxSummary.interGst;
   const exportUrl = `/api/export?from=${istInput(from)}&to=${istInput(to)}`;
+  // carry the chosen range across to the products-sold screen
+  const rangeQuery =
+    range.preset === "custom"
+      ? `range=custom&from=${istInput(from)}&to=${istInput(to)}`
+      : `range=${range.preset}`;
 
   return (
     <div className="space-y-6">
@@ -138,38 +148,7 @@ export default async function RevenuePage({
         </a>
       </div>
 
-      <form className="flex flex-wrap items-end gap-3">
-        <div>
-          <label htmlFor="from" className="mb-1 block text-xs text-[#6b7194]">
-            From
-          </label>
-          <input
-            id="from"
-            type="date"
-            name="from"
-            defaultValue={istInput(from)}
-            className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d]"
-          />
-        </div>
-        <div>
-          <label htmlFor="to" className="mb-1 block text-xs text-[#6b7194]">
-            To
-          </label>
-          <input
-            id="to"
-            type="date"
-            name="to"
-            defaultValue={istInput(to)}
-            className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d]"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-xl bg-[#2b337d] px-5 py-2 text-sm font-semibold text-white hover:bg-[#232a68]"
-        >
-          Apply
-        </button>
-      </form>
+      <RangeTabs basePath="/revenue" range={range} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard index={0} label="Gross revenue" value={inr(stats.grossRevenue)} hint={`${stats.paidOrders} paid orders`} />
@@ -183,7 +162,7 @@ export default async function RevenuePage({
         <KpiCard index={3} label="Avg. order value" value={inr(stats.avgOrderValue)} />
       </div>
 
-      {days && <RevenueChart days={days} title={`Revenue — ${rangeDays} days`} />}
+      <RevenueChart days={days} title={chartTitle} />
 
       {/* profitability */}
       <div>
@@ -262,7 +241,13 @@ export default async function RevenuePage({
 
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
-          <h2 className="font-semibold">Sales by variant</h2>
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="font-semibold">Sales by variant</h2>
+            {/* orders, not units — the unit counts live on their own screen */}
+            <a href={`/product-sales?${rangeQuery}`} className="text-xs font-semibold text-[#2b337d] underline underline-offset-2">
+              Units sold →
+            </a>
+          </div>
           <table className="mt-4 w-full text-left text-sm">
             <thead className="text-xs uppercase tracking-wider text-[#9aa0c3]">
               <tr>

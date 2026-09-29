@@ -1,7 +1,8 @@
 import { requireOwner } from "@/lib/admin-auth";
 import { getFunnel, getCustomerInsights } from "@everfit/core/lib/insights";
-import { istAddDays, istDayStart, istDaysAgo, istInput, istParseInput } from "@everfit/core/lib/report-time";
+import { istAddDays, resolveRange } from "@everfit/core/lib/report-time";
 import KpiCard from "@/components/KpiCard";
+import RangeTabs from "@/components/RangeTabs";
 import { inr } from "@everfit/core/lib/product";
 
 export const dynamic = "force-dynamic";
@@ -13,14 +14,14 @@ function pct(part: number, whole: number) {
 export default async function AnalyticsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string }>;
+  searchParams: Promise<{ range?: string; from?: string; to?: string }>;
 }) {
   await requireOwner();
   const sp = await searchParams;
 
-  const from = istParseInput(sp.from) ?? istDaysAgo(29);
-  const to = istParseInput(sp.to) ?? istDayStart();
-  const toExclusive = istAddDays(to, 1);
+  const range = resolveRange(sp); // ?range= preset, or explicit from/to
+  const toExclusive = istAddDays(range.to, 1);
+  const from = range.from;
 
   const [funnel, customers] = await Promise.all([
     getFunnel(from, toExclusive),
@@ -42,22 +43,7 @@ export default async function AnalyticsPage({
         <p className="mt-1 text-sm text-[#6b7194]">Checkout funnel &amp; customer insights · IST</p>
       </div>
 
-      <form className="flex flex-wrap items-end gap-3">
-        <div>
-          <label htmlFor="from" className="mb-1 block text-xs text-[#6b7194]">From</label>
-          <input id="from" type="date" name="from" defaultValue={istInput(from)}
-            className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d]" />
-        </div>
-        <div>
-          <label htmlFor="to" className="mb-1 block text-xs text-[#6b7194]">To</label>
-          <input id="to" type="date" name="to" defaultValue={istInput(to)}
-            className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm outline-none focus:border-[#2b337d]" />
-        </div>
-        <button type="submit"
-          className="rounded-xl bg-[#2b337d] px-5 py-2 text-sm font-semibold text-white hover:bg-[#232a68]">
-          Apply
-        </button>
-      </form>
+      <RangeTabs basePath="/analytics" range={range} />
 
       {/* checkout funnel */}
       <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">

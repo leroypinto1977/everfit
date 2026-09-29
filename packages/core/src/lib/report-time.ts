@@ -80,3 +80,75 @@ export function istNoon(value: string | undefined | null): Date | null {
   const instant = fromIstWall(new Date(Date.UTC(y, mo - 1, d, 12)));
   return isNaN(instant.getTime()) ? null : instant;
 }
+
+/** Start of the IST calendar year containing `from` (Jan 1, IST midnight). */
+export function istYearStart(from: Date = new Date()): Date {
+  const wall = toIstWall(from);
+  return fromIstWall(new Date(Date.UTC(wall.getUTCFullYear(), 0, 1)));
+}
+
+/* ---------- named report ranges ---------- */
+
+export type RangePreset = "today" | "7d" | "30d" | "90d" | "month" | "year" | "custom";
+
+/** The preset pills the reporting screens offer, in display order. */
+export const RANGE_PRESETS = [
+  { key: "today", label: "Today" },
+  { key: "7d", label: "7 days" },
+  { key: "30d", label: "30 days" },
+  { key: "90d", label: "90 days" },
+  { key: "month", label: "This month" },
+  { key: "year", label: "This year" },
+] as const satisfies readonly { key: RangePreset; label: string }[];
+
+const DEFAULT_PRESET: RangePreset = "30d";
+
+function isPreset(v: string | undefined): v is RangePreset {
+  return !!v && (v === "custom" || RANGE_PRESETS.some((p) => p.key === v));
+}
+
+export interface ResolvedRange {
+  from: Date; // IST midnight, inclusive
+  to: Date; // IST midnight of the last day, INCLUSIVE (add a day for SQL)
+  preset: RangePreset;
+}
+
+/**
+ * Turn a reporting screen's `?range=`/`?from=`/`?to=` params into an IST-aligned
+ * range. A named preset always wins over stale from/to left in the URL; explicit
+ * dates with no preset (or `range=custom`) mean the operator picked their own.
+ * Anything unrecognised falls back to the last 30 days.
+ */
+export function resolveRange(
+  sp: { range?: string; from?: string; to?: string },
+  now: Date = new Date(),
+): ResolvedRange {
+  const today = istDayStart(now);
+  const asked = isPreset(sp.range) ? sp.range : undefined;
+  const custom = sp.from || sp.to;
+
+  // custom either by name or by the mere presence of dates without a preset
+  if (asked === "custom" || (!asked && custom)) {
+    return {
+      from: istParseInput(sp.from) ?? istDaysAgo(29, now),
+      to: istParseInput(sp.to) ?? today,
+      preset: "custom",
+    };
+  }
+
+  const preset = asked ?? DEFAULT_PRESET;
+  switch (preset) {
+    case "today":
+      return { from: today, to: today, preset };
+    case "7d":
+      return { from: istDaysAgo(6, now), to: today, preset };
+    case "90d":
+      return { from: istDaysAgo(89, now), to: today, preset };
+    case "month":
+      return { from: istMonthStart(0, now), to: today, preset };
+    case "year":
+      return { from: istYearStart(now), to: today, preset };
+    default:
+      return { from: istDaysAgo(29, now), to: today, preset: "30d" };
+  }
+}
