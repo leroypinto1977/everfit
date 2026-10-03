@@ -1,6 +1,7 @@
 import {
   boolean,
   integer,
+  jsonb,
   numeric,
   pgTable,
   text,
@@ -208,4 +209,27 @@ export const settings = pgTable("settings", {
   value: text("value").notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   updatedBy: text("updated_by"), // admin email, or null for a system write
+});
+
+/* ---------- leads ---------- */
+
+/**
+ * Applications from the landing sites (1-to-1.evherfit.com). Written by the
+ * storefront's public /api/leads. The same answers reach the team as a WhatsApp
+ * message carrying the same `ref` — that reference is how the two are matched.
+ */
+export const leads = pgTable("leads", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  ref: text("ref").notNull().unique(), // generated in the browser, quoted in the WhatsApp message
+  source: text("source").notNull(),
+  name: text("name").notNull(),
+  phone: text("phone").notNull(), // as typed, with country code
+  email: text("email").notNull(),
+  answers: jsonb("answers").$type<{ label: string; value: string }[]>().notNull(),
+  // Follow-up, edited by the team in the admin panel's 1-to-1 screen.
+  status: text("status").notNull().default("new"), // see LEAD_STATUSES in lib/leads.ts
+  summary: text("summary"), // conclusion of the call, written for the founders
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+  updatedBy: text("updated_by"), // admin name; null until someone follows up
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
