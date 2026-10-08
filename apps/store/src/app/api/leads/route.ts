@@ -3,10 +3,10 @@ import { parseLead, saveLead } from "@everfit/core/lib/leads";
 import { sendLeadNotification } from "@everfit/core/lib/notify";
 
 /**
- * Public lead intake for the landing sites (1-to-1.evherfit.com). The browser
- * fires this with navigator.sendBeacon as it hands off to WhatsApp, so the body
- * arrives as text/plain and nobody reads the response — req.json() parses it
- * regardless of content type, and no CORS headers are needed.
+ * Public lead intake for the landing sites (1-to-1.evherfit.com). The form
+ * posts its JSON as a plain string, which a browser sends as text/plain — a
+ * "simple" cross-origin request with no preflight, so there is no OPTIONS
+ * handler here. req.json() parses the body regardless of content type.
  */
 
 // A browser always sends Origin on a cross-site POST, so this keeps other
@@ -20,11 +20,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  // The form shows the visitor "submitted" or "try again" from this response,
+  // and a page on another origin may only read it if we name that origin.
+  const headers = origin ? { "Access-Control-Allow-Origin": origin, Vary: "Origin" } : undefined;
+
   const lead = parseLead(await req.json().catch(() => null));
-  if (!lead) return NextResponse.json({ error: "Invalid application" }, { status: 400 });
+  if (!lead) return NextResponse.json({ error: "Invalid application" }, { status: 400, headers });
 
   // Awaited, not fire-and-forget: a serverless function can be frozen the moment
-  // it responds, and nobody is waiting on this response anyway.
+  // it responds. A failed email is logged, never thrown — the lead is saved.
   if (await saveLead(lead)) await sendLeadNotification(lead);
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true }, { headers });
 }
