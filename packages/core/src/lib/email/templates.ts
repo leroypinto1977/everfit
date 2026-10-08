@@ -1,9 +1,11 @@
 import type { Order } from "../orders";
+import type { NewLead } from "../leads";
 import { courierName, trackingUrl } from "../couriers";
 import {
   adminUrl,
   brand,
   button,
+  esc,
   heading,
   inr,
   mono,
@@ -233,5 +235,54 @@ export function teammateWelcome(input: { name: string; email: string; role: stri
       ].join(""),
       { preheader: "You've been given access to the EVHERFIT store admin.", headerBar: brand.indigoDeep }
     ),
+  };
+}
+
+/* ---------- 1-to-1 leads ---------- */
+
+/** Replace {{key}} placeholders; an unknown one is left as typed so the typo is visible. */
+function fill(text: string, values: Record<string, string>) {
+  return text.replace(/\{\{\s*(\w+)\s*\}\}/g, (whole, key: string) => values[key] ?? whole);
+}
+
+/**
+ * The team's alert for a new 1-to-1 application. Subject and body are written
+ * by the owner in Settings as plain text with {{placeholders}}; this turns that
+ * text into the branded HTML. Everything the lead typed arrived through a
+ * public form, so each value is escaped before it meets the markup.
+ */
+export function leadNotification(lead: NewLead, template: { subject: string; body: string }): Email {
+  const link = adminUrl(`/one-to-one?q=${encodeURIComponent(lead.ref)}`);
+  const plain = { name: lead.name, phone: lead.phone, email: lead.email, ref: lead.ref, link, answers: "" };
+
+  const answers = lead.answers
+    .map(
+      (a) =>
+        `<span style="font-size:12px;color:${brand.muted}">${esc(a.label)}</span><br>` +
+        `<span style="color:${brand.ink}">${esc(a.value).replace(/\n/g, "<br>")}</span>`
+    )
+    .join("<br><br>");
+  const html: Record<string, string> = {
+    name: esc(lead.name),
+    phone: esc(lead.phone),
+    email: esc(lead.email),
+    ref: esc(lead.ref),
+    link: `<a href="${link}" style="color:${brand.indigo}">${esc(link)}</a>`,
+    answers,
+  };
+
+  const body = template.body
+    .split(/\n{2,}/)
+    .map((block) =>
+      // On a line of its own the answers get the tinted box; inline they just flow.
+      block.trim() === "{{answers}}"
+        ? panel(answers)
+        : paragraph(fill(esc(block), html).replace(/\n/g, "<br>"))
+    )
+    .join("");
+
+  return {
+    subject: fill(template.subject, plain).replace(/\s+/g, " ").trim().slice(0, 200),
+    html: shell(body, { preheader: `${lead.name} applied for the 1-to-1 program.` }),
   };
 }

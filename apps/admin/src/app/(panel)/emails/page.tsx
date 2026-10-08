@@ -1,12 +1,14 @@
 import { requireOwner } from "@/lib/admin-auth";
 import { emailPreviews } from "@everfit/core/lib/email/samples";
 import { emailConfigured } from "@everfit/core/lib/notify";
+import { getSettings } from "@everfit/core/lib/settings";
 import TestSendForm from "./TestSendForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function EmailsPage() {
   const me = await requireOwner();
+  await getSettings(); // so the lead email previews with its saved wording
   const previews = emailPreviews();
   const configured = emailConfigured();
 

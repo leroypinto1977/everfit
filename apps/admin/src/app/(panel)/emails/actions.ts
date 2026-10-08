@@ -3,6 +3,7 @@
 import { requireOwner } from "@/lib/admin-auth";
 import { emailPreviews } from "@everfit/core/lib/email/samples";
 import { sendTestEmail } from "@everfit/core/lib/notify";
+import { getSettings } from "@everfit/core/lib/settings";
 
 export type TestSendResult = { ok?: string; error?: string } | undefined;
 
@@ -19,6 +20,7 @@ export async function sendTestEmailAction(
     return { error: "Enter a valid email address." };
   }
 
+  await getSettings(); // so the lead email is tested with its saved wording
   const preview = emailPreviews().find((p) => p.key === key);
   if (!preview) return { error: "Unknown template." };
 

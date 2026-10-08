@@ -69,9 +69,18 @@ export function parseLead(input: unknown): NewLead | null {
   return { ref, source: clean(o.source, 40) || "unknown", name, phone, email, answers };
 }
 
-/** Idempotent on `ref`: a retried or doubled submit does not create a second row. */
-export async function saveLead(lead: NewLead) {
-  await db().insert(leads).values(lead).onConflictDoNothing({ target: leads.ref });
+/**
+ * Idempotent on `ref`: a retried or doubled submit does not create a second
+ * row. Returns whether this call stored the lead, so the caller notifies the
+ * team once rather than once per retry.
+ */
+export async function saveLead(lead: NewLead): Promise<boolean> {
+  const stored = await db()
+    .insert(leads)
+    .values(lead)
+    .onConflictDoNothing({ target: leads.ref })
+    .returning({ id: leads.id });
+  return stored.length > 0;
 }
 
 export async function listLeads(opts?: { q?: string; status?: LeadStatus | ""; limit?: number; offset?: number }) {

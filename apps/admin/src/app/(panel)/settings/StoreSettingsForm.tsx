@@ -12,14 +12,15 @@ const inputCls =
  * the value is still in the .env file on the server and editing it here moves
  * it into the database, after which the env var stops having any effect.
  */
-function SourceBadge({ source }: { source: ResolvedSetting["source"] }) {
+function SourceBadge({ source, hasDefault }: { source: ResolvedSetting["source"]; hasDefault: boolean }) {
   const style =
     source === "database"
       ? "bg-emerald-50 text-emerald-700"
       : source === "environment"
         ? "bg-indigo-50 text-[#2b337d]"
         : "bg-gray-100 text-gray-500";
-  const label = source === "database" ? "saved here" : source === "environment" ? "from .env" : "not set";
+  const label =
+    source === "database" ? "saved here" : source === "environment" ? "from .env" : hasDefault ? "default" : "not set";
   return <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${style}`}>{label}</span>;
 }
 
@@ -63,14 +64,14 @@ export function StoreSettingsForm({ settings }: { settings: ResolvedSetting[] })
               <div key={def.key}>
                 <label htmlFor={def.key} className="flex flex-wrap items-center gap-2 text-sm font-medium">
                   {def.label}
-                  <SourceBadge source={source} />
+                  <SourceBadge source={source} hasDefault={Boolean(def.fallback)} />
                 </label>
 
                 {def.multiline ? (
                   <textarea
                     id={def.key}
                     name={def.key}
-                    rows={2}
+                    rows={def.kind === "template" ? 12 : 2}
                     value={values[def.key] ?? ""}
                     onChange={(e) => setValues((v) => ({ ...v, [def.key]: e.target.value }))}
                     placeholder={def.placeholder}
@@ -93,7 +94,7 @@ export function StoreSettingsForm({ settings }: { settings: ResolvedSetting[] })
                   <p className="mt-0.5 text-[11px] text-[#9aa0c3]">
                     Changed {new Date(updatedAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
                     {updatedBy ? ` by ${updatedBy}` : ""} · clear the field to go back to{" "}
-                    <code className="font-mono">{def.envVar}</code>
+                    {def.envVar ? <code className="font-mono">{def.envVar}</code> : "the default"}
                   </p>
                 )}
               </div>

@@ -41,14 +41,26 @@ export type SettingKey =
   | "order_notify_email"
   | "brevo_list_id"
   | "gst_rate"
-  | "email_from";
+  | "email_from"
+  | "lead_notify_emails"
+  | "lead_email_subject"
+  | "lead_email_body";
 
-export type SettingKind = "text" | "email" | "state" | "gstin" | "number" | "rate" | "sender";
+export type SettingKind =
+  | "text"
+  | "email"
+  | "emails"
+  | "state"
+  | "gstin"
+  | "number"
+  | "rate"
+  | "sender"
+  | "template";
 
 export interface SettingDef {
   key: SettingKey;
-  /** The environment variable this falls back to. */
-  envVar: string;
+  /** The environment variable this falls back to. Absent for panel-only settings. */
+  envVar?: string;
   label: string;
   help: string;
   kind: SettingKind;
@@ -146,6 +158,39 @@ export const SETTING_DEFS: SettingDef[] = [
     group: "Marketing",
     placeholder: "2",
   },
+  {
+    key: "lead_notify_emails",
+    label: "Send new applications to",
+    help:
+      "Who is emailed the moment someone submits the 1-to-1 application form. Separate addresses with a comma — up to five. Blank means nobody is emailed; the lead still appears on the 1-to-1 screen.",
+    kind: "emails",
+    fallback: "",
+    group: "1-to-1 lead email",
+    placeholder: "founder@evherfit.com, coach@evherfit.com",
+  },
+  {
+    key: "lead_email_subject",
+    label: "Subject",
+    help: "The subject line of that email. {{name}} and {{ref}} are filled in from the application.",
+    kind: "text",
+    fallback: "New 1-to-1 application — {{name}}",
+    group: "1-to-1 lead email",
+  },
+  {
+    key: "lead_email_body",
+    label: "Message",
+    help:
+      "The body of that email, written as plain text; leave a blank line between paragraphs. These are filled in when it is sent: {{name}}, {{phone}}, {{email}}, {{ref}}, {{answers}} (every question and answer — put it on a line of its own) and {{link}} (opens the lead in this panel). Clear the field to restore the original message.",
+    kind: "template",
+    fallback: [
+      "A new 1-to-1 application just came in.",
+      "Name: {{name}}\nWhatsApp: {{phone}}\nEmail: {{email}}\nReference: #{{ref}}",
+      "{{answers}}",
+      "Review it and record the follow-up here: {{link}}",
+    ].join("\n\n"),
+    group: "1-to-1 lead email",
+    multiline: true,
+  },
 ];
 
 const DEFS_BY_KEY = new Map(SETTING_DEFS.map((d) => [d.key, d]));
@@ -166,7 +211,7 @@ export interface ResolvedSetting {
 /* ────────────────────────────── resolution ────────────────────────────── */
 
 function fromEnvOrFallback(def: SettingDef): { value: string; source: SettingSource } {
-  const env = process.env[def.envVar]?.trim();
+  const env = def.envVar ? process.env[def.envVar]?.trim() : "";
   if (env) return { value: env, source: "environment" };
   return { value: def.fallback, source: "default" };
 }
@@ -251,13 +296,25 @@ export function validateSetting(key: SettingKey, raw: string): string {
   const def = DEFS_BY_KEY.get(key);
   if (!def) throw new SettingValidationError(`Unknown setting "${key}".`);
 
-  const value = def.multiline ? raw.trim() : raw.trim().replace(/\s+/g, " ");
+  // A browser submits a textarea with CRLF line endings; without this an
+  // untouched multiline value would look edited and be saved as a "change".
+  const value = def.multiline ? raw.replace(/\r\n?/g, "\n").trim() : raw.trim().replace(/\s+/g, " ");
   if (!value) return "";
 
   switch (def.kind) {
     case "email":
       if (!EMAIL_RE.test(value)) throw new SettingValidationError(`${def.label} must be a valid email address.`);
       return value.toLowerCase();
+    case "emails": {
+      const list = [...new Set(value.toLowerCase().split(/[\s,;]+/).filter(Boolean))];
+      const bad = list.find((addr) => !EMAIL_RE.test(addr));
+      if (bad) throw new SettingValidationError(`${def.label}: "${bad}" is not a valid email address.`);
+      if (list.length > 5) throw new SettingValidationError(`${def.label} takes five addresses at most.`);
+      return list.join(", ");
+    }
+    case "template":
+      if (value.length > 5000) throw new SettingValidationError(`${def.label} is too long (5,000 characters max).`);
+      return value;
     case "gstin": {
       const upper = value.toUpperCase();
       if (!GSTIN_RE.test(upper)) {

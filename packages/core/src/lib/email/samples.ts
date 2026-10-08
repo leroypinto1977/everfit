@@ -1,6 +1,9 @@
 import type { Order } from "../orders";
+import type { NewLead } from "../leads";
+import { peekSettings } from "../settings";
 import {
   type Email,
+  leadNotification,
   lowStockAdmin,
   newOrderAdmin,
   orderConfirmation,
@@ -49,6 +52,26 @@ export const sampleOrder: Order = {
   paidAt: "2026-06-13T09:31:30.000Z",
 };
 
+export const sampleLead: NewLead = {
+  ref: "K7Q2X9AB",
+  source: "one-to-one",
+  name: "Priya Raman",
+  phone: "+91 98765 43210",
+  email: "priya@example.com",
+  answers: [
+    { label: "Full Name", value: "Priya Raman" },
+    { label: "Age", value: "34" },
+    { label: "What is your primary transformation goal?", value: "Fat loss / weight loss" },
+    { label: "What is your current weight?", value: "72 kg" },
+    { label: "What is your target weight?", value: "62 kg" },
+    {
+      label: "If Evherfit is the right fit for your goals, which best describes you?",
+      value: "I am financially ready to invest ₹35,000–₹40,000 and begin",
+    },
+    { label: "If selected for Evherfit, when would you be ready to start?", value: "Within 2 weeks" },
+  ],
+};
+
 export interface EmailPreview {
   key: string; // stable slug for ?t= deep links
   when: string;
@@ -70,6 +93,16 @@ export function emailPreviews(): EmailPreview[] {
         { weight: "1 kg × 2", sku: "EVH-IB-10", stock: 4 },
         { weight: "0.5 kg × 2", sku: "EVH-IB-05", stock: 0 },
       ]),
+    },
+    {
+      key: "lead-notification",
+      when: "Team (Settings → 1-to-1 lead email) · sent the moment someone submits the 1-to-1 application form",
+      // The wording is whatever the owner last saved; callers that want that
+      // rather than the built-in default await getSettings() first.
+      email: leadNotification(sampleLead, {
+        subject: peekSettings().lead_email_subject,
+        body: peekSettings().lead_email_body,
+      }),
     },
     { key: "teammate-welcome", when: "New teammate · sent when the owner adds an admin user", email: teammateWelcome({ name: "Priya Sharma", email: "priya@evherfit.com", role: "Staff" }) },
     { key: "password-reset", when: "Admin · sent when someone requests a password reset", email: passwordReset({ name: "Ananya Rao", resetUrl: "https://evherfit.com/admin/reset?token=sample" }) },

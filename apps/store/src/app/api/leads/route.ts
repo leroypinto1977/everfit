@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseLead, saveLead } from "@everfit/core/lib/leads";
+import { sendLeadNotification } from "@everfit/core/lib/notify";
 
 /**
  * Public lead intake for the landing sites (1-to-1.evherfit.com). The browser
@@ -22,6 +23,8 @@ export async function POST(req: Request) {
   const lead = parseLead(await req.json().catch(() => null));
   if (!lead) return NextResponse.json({ error: "Invalid application" }, { status: 400 });
 
-  await saveLead(lead);
+  // Awaited, not fire-and-forget: a serverless function can be frozen the moment
+  // it responds, and nobody is waiting on this response anyway.
+  if (await saveLead(lead)) await sendLeadNotification(lead);
   return NextResponse.json({ ok: true });
 }

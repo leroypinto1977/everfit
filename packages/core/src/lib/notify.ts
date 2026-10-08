@@ -1,8 +1,10 @@
 import type { Order } from "./orders";
+import type { NewLead } from "./leads";
 import { getSettings } from "./settings";
 import { logEmailEvent } from "./orders";
 import {
   type Email,
+  leadNotification,
   lowStockAdmin,
   newOrderAdmin,
   orderConfirmation,
@@ -77,15 +79,25 @@ async function brevoPost(
 
 type SendOutcome = "sent" | "failed" | "skipped";
 
-async function send(to: string | undefined, email: Email, opts?: { replyTo?: boolean }): Promise<SendOutcome> {
+/** `replyTo`: omitted → the support address, `false` → none, a string → that address. */
+async function send(
+  to: string | undefined,
+  email: Email,
+  opts?: { replyTo?: boolean | string }
+): Promise<SendOutcome> {
   if (!process.env.BREVO_API_KEY || !to) return "skipped";
-  const replyTo = (await getSettings()).support_email;
+  const replyTo =
+    typeof opts?.replyTo === "string"
+      ? opts.replyTo
+      : opts?.replyTo === false
+        ? ""
+        : (await getSettings()).support_email;
   const result = await brevoPost("/smtp/email", {
     sender: parseFrom(await from()),
     to: [{ email: to }],
     subject: email.subject,
     htmlContent: email.html,
-    ...(opts?.replyTo === false || !replyTo ? {} : { replyTo: { email: replyTo } }),
+    ...(replyTo ? { replyTo: { email: replyTo } } : {}),
   });
   if (!result.ok) {
     console.error(`Email "${email.subject}" failed (${result.status ?? "network"}):`, result.body);
@@ -151,6 +163,23 @@ export async function sendRefundEmail(order: Order, amount: number, actor = "sys
 /** Gentle recovery nudge when a payment attempt fails (order never placed). */
 export async function sendPaymentFailedEmail(order: Order, actor = "system") {
   await sendCustomerEmail(order, paymentFailed(order), "Payment-recovery", actor);
+}
+
+/* ---------- 1-to-1 leads ---------- */
+
+/**
+ * Tell the team a new 1-to-1 application arrived. Who gets it, the subject and
+ * the body are all owner-editable (Settings → 1-to-1 lead email); with no
+ * recipients set this does nothing. Each inbox gets its own copy, and replying
+ * to it writes to the lead rather than to a no-reply address.
+ */
+export async function sendLeadNotification(lead: NewLead) {
+  const s = await getSettings();
+  const recipients = s.lead_notify_emails.split(",").map((addr) => addr.trim()).filter(Boolean);
+  if (!recipients.length) return;
+
+  const email = leadNotification(lead, { subject: s.lead_email_subject, body: s.lead_email_body });
+  await Promise.allSettled(recipients.map((to) => send(to, email, { replyTo: lead.email })));
 }
 
 /* ---------- marketing contacts ---------- */
