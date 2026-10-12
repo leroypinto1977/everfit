@@ -17,13 +17,32 @@ import {
 } from "./email/templates";
 
 /**
- * Transactional email via Brevo (https://www.brevo.com). Entirely optional:
- * without BREVO_API_KEY every send is a no-op, so dev and demo environments
- * work without email setup. Failures are logged, never thrown — a missed
- * email must never fail a payment confirmation or a fulfilment action.
+ * Transactional email. Sent through Resend (https://resend.com) when
+ * RESEND_API_KEY is set, otherwise through Brevo (https://www.brevo.com) with
+ * BREVO_API_KEY. Entirely optional: with neither key every send is a no-op, so
+ * dev and demo environments work without email setup. Failures are logged,
+ * never thrown — a missed email must never fail a payment confirmation or a
+ * fulfilment action.
+ *
+ * Brevo contact-list sync (syncCustomerToBrevo) is separate from sending and
+ * keeps using BREVO_API_KEY whichever provider sends the mail.
  *
  * Templates live in src/lib/email/. This module only decides who gets what.
  */
+
+export type EmailProvider = "resend" | "brevo";
+
+/** Which service sends the mail, or null when email is off. Resend wins when both keys are set. */
+export function emailProvider(): EmailProvider | null {
+  if (process.env.RESEND_API_KEY) return "resend";
+  if (process.env.BREVO_API_KEY) return "brevo";
+  return null;
+}
+
+/** "Resend" / "Brevo", for messages shown to the owner. */
+export function emailProviderName(): string {
+  return emailProvider() === "resend" ? "Resend" : "Brevo";
+}
 
 const FROM_FALLBACK = "EVHERFIT <no-reply@evherfit.com>";
 
@@ -43,26 +62,22 @@ function parseFrom(from: string): { name?: string; email: string } {
 }
 
 /**
- * One POST to the Brevo v3 API. Times out after 10s (these calls sit inside
- * payment verification and webhook handlers — they must never hang the
+ * One POST to an email provider's API. Times out after 10s (these calls sit
+ * inside payment verification and webhook handlers — they must never hang the
  * response) and retries once on network errors, 429 and 5xx. Other 4xx are
  * config problems that a retry can't fix.
  */
 const BREVO_TIMEOUT_MS = 10_000;
 
-async function brevoPost(
-  path: string,
-  payload: unknown
-): Promise<{ ok: boolean; status?: number; body?: string }> {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) return { ok: false, body: "BREVO_API_KEY is not set" };
+type PostResult = { ok: boolean; status?: number; body?: string };
 
-  let last: { ok: boolean; status?: number; body?: string } = { ok: false };
+async function post(url: string, auth: Record<string, string>, payload: unknown): Promise<PostResult> {
+  let last: PostResult = { ok: false };
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
-      const res = await fetch(`https://api.brevo.com/v3${path}`, {
+      const res = await fetch(url, {
         method: "POST",
-        headers: { "api-key": apiKey, "content-type": "application/json", accept: "application/json" },
+        headers: { ...auth, "content-type": "application/json", accept: "application/json" },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
       });
@@ -77,6 +92,43 @@ async function brevoPost(
   return last;
 }
 
+async function brevoPost(path: string, payload: unknown): Promise<PostResult> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return { ok: false, body: "BREVO_API_KEY is not set" };
+  return post(`https://api.brevo.com/v3${path}`, { "api-key": apiKey }, payload);
+}
+
+type Message = { from: string; to: string; subject: string; html: string; replyTo?: string };
+
+/** The body Resend's POST /emails expects. Exported for the tests. */
+export function resendPayload(m: Message) {
+  return {
+    from: m.from,
+    to: [m.to],
+    subject: m.subject,
+    html: m.html,
+    ...(m.replyTo ? { reply_to: m.replyTo } : {}),
+  };
+}
+
+/** The body Brevo's POST /smtp/email expects. Exported for the tests. */
+export function brevoPayload(m: Message) {
+  return {
+    sender: parseFrom(m.from),
+    to: [{ email: m.to }],
+    subject: m.subject,
+    htmlContent: m.html,
+    ...(m.replyTo ? { replyTo: { email: m.replyTo } } : {}),
+  };
+}
+
+/** Hands one message to whichever provider is configured. */
+async function deliver(m: Message): Promise<PostResult> {
+  const resendKey = process.env.RESEND_API_KEY;
+  if (resendKey) return post("https://api.resend.com/emails", { authorization: `Bearer ${resendKey}` }, resendPayload(m));
+  return brevoPost("/smtp/email", brevoPayload(m));
+}
+
 type SendOutcome = "sent" | "failed" | "skipped";
 
 /** `replyTo`: omitted → the support address, `false` → none, a string → that address. */
@@ -85,20 +137,14 @@ async function send(
   email: Email,
   opts?: { replyTo?: boolean | string }
 ): Promise<SendOutcome> {
-  if (!process.env.BREVO_API_KEY || !to) return "skipped";
+  if (!emailProvider() || !to) return "skipped";
   const replyTo =
     typeof opts?.replyTo === "string"
       ? opts.replyTo
       : opts?.replyTo === false
         ? ""
         : (await getSettings()).support_email;
-  const result = await brevoPost("/smtp/email", {
-    sender: parseFrom(await from()),
-    to: [{ email: to }],
-    subject: email.subject,
-    htmlContent: email.html,
-    ...(replyTo ? { replyTo: { email: replyTo } } : {}),
-  });
+  const result = await deliver({ from: await from(), to, subject: email.subject, html: email.html, replyTo });
   if (!result.ok) {
     console.error(`Email "${email.subject}" failed (${result.status ?? "network"}):`, result.body);
     return "failed";
@@ -126,7 +172,7 @@ async function sendCustomerEmail(order: Order, email: Email, kind: string, actor
     order.id,
     outcome === "sent"
       ? `${kind} email sent to ${order.customer.email}`
-      : `${kind} email failed to send — check Brevo settings and server logs`,
+      : `${kind} email failed to send — check the ${emailProviderName()} settings and server logs`,
     actor
   );
 }
@@ -234,49 +280,64 @@ export async function sendTeammateWelcome(input: { name: string; email: string; 
 
 /** True when the store can actually send email (used by the admin UI). */
 export function emailConfigured() {
-  return Boolean(process.env.BREVO_API_KEY);
+  return emailProvider() !== null;
 }
 
 /**
  * Send one template (by preview key) to an arbitrary inbox — the "send test"
  * button on /admin/emails. Unlike the fire-and-forget senders above, this
- * reports failure so the owner can see whether Brevo is wired up correctly.
+ * reports failure so the owner can see whether the provider is wired up correctly.
  */
 export async function sendTestEmail(to: string, email: Email): Promise<{ error?: string }> {
-  if (!process.env.BREVO_API_KEY) {
-    return { error: "BREVO_API_KEY is not set — add it to the environment first." };
+  if (!emailProvider()) {
+    return { error: "Neither RESEND_API_KEY nor BREVO_API_KEY is set — add one to the environment first." };
   }
-  const result = await brevoPost("/smtp/email", {
-    sender: parseFrom(await from()),
-    to: [{ email: to }],
-    subject: `[Test] ${email.subject}`,
-    htmlContent: email.html,
-  });
+  const result = await deliver({ from: await from(), to, subject: `[Test] ${email.subject}`, html: email.html });
   if (!result.ok) {
+    const provider = emailProviderName();
     return {
       error: result.status
-        ? `Brevo rejected the send (${result.status}): ${(result.body ?? "").slice(0, 300)}`
-        : `Couldn't reach Brevo: ${result.body ?? "network error"}`,
+        ? `${provider} rejected the send (${result.status}): ${(result.body ?? "").slice(0, 300)}`
+        : `Couldn't reach ${provider}: ${result.body ?? "network error"}`,
     };
   }
   return {};
 }
 
 /**
- * Password-reset link. When email isn't configured (no BREVO_API_KEY) the
+ * Password-reset link. When email isn't configured (no provider key) the
  * link is logged to the server console so the flow is still usable in dev —
- * in production Brevo should be configured, so this never leaks there.
+ * in production email should be configured, so this never leaks there.
  */
 export async function sendPasswordResetEmail(input: { name: string; email: string; resetUrl: string }) {
-  if (!process.env.BREVO_API_KEY) {
-    console.info(`[password reset] no BREVO_API_KEY — reset link for ${input.email}: ${input.resetUrl}`);
+  if (!emailProvider()) {
+    console.info(`[password reset] email not configured — reset link for ${input.email}: ${input.resetUrl}`);
     return;
   }
   await send(input.email, passwordReset(input), { replyTo: false });
 }
 
+/** Domains Resend has verified, or null when it can't be asked (e.g. a send-only API key). */
+async function resendVerifiedDomains(): Promise<string[] | null> {
+  try {
+    const res = await fetch("https://api.resend.com/domains", {
+      headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}`, accept: "application/json" },
+      signal: AbortSignal.timeout(BREVO_TIMEOUT_MS),
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { data?: { name?: string; status?: string }[] };
+    if (!Array.isArray(body.data)) return null;
+    return body.data.filter((d) => d.status === "verified" && d.name).map((d) => d.name!.toLowerCase());
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Whether Brevo will actually accept mail from `address`.
+ * Whether the email provider will actually accept mail from `address`.
+ *
+ * With Resend that means the address's domain is verified there. The rest of
+ * this comment is about Brevo.
  *
  * Two ways an address can be usable, and checking only the first is wrong:
  *   - its domain is authenticated (SPF/DKIM), which covers every address on it;
@@ -289,11 +350,16 @@ export async function sendPasswordResetEmail(input: { name: string; email: strin
  * and avoid blocking on a third party being briefly unreachable.
  */
 export async function senderIsUsable(address: string): Promise<boolean | null> {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) return null;
-
   const addr = address.trim().toLowerCase();
   const domain = addr.slice(addr.lastIndexOf("@") + 1);
+
+  if (process.env.RESEND_API_KEY) {
+    const verified = await resendVerifiedDomains();
+    return verified ? verified.includes(domain) : null;
+  }
+
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) return null;
   const headers = { "api-key": apiKey, accept: "application/json" };
 
   const get = async (path: string) => {
@@ -323,8 +389,9 @@ export async function senderIsUsable(address: string): Promise<boolean | null> {
   }
 }
 
-/** Active sender addresses Brevo knows about, for error messages. Best effort. */
+/** What the provider will send from — Brevo's active senders, or "@domain" per Resend-verified domain. Best effort. */
 export async function usableSenders(): Promise<string[]> {
+  if (process.env.RESEND_API_KEY) return ((await resendVerifiedDomains()) ?? []).map((d) => `@${d}`);
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) return [];
   try {

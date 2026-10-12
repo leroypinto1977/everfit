@@ -120,7 +120,7 @@ export const SETTING_DEFS: SettingDef[] = [
     envVar: "EMAIL_FROM",
     label: "Sender address",
     help:
-      'Who customer email comes from — "EVHERFIT <orders@evherfit.com>" or a bare address. The domain must be authenticated in Brevo (SPF/DKIM/DMARC); saving is refused if Brevo says it is not, because mail from an unverified domain is rejected or lands in spam.',
+      'Who customer email comes from — "EVHERFIT <orders@evherfit.com>" or a bare address. The domain must be verified with the email provider (Resend or Brevo — SPF/DKIM/DMARC); saving is refused if the provider says it is not, because mail from an unverified domain is rejected or lands in spam.',
     kind: "sender",
     fallback: "EVHERFIT <no-reply@evherfit.com>",
     group: "Contact",

@@ -7,7 +7,7 @@ import { getSettings } from "@everfit/core/lib/settings";
 
 export type TestSendResult = { ok?: string; error?: string } | undefined;
 
-/** Owner-only: send one sample template to a real inbox to verify Brevo. */
+/** Owner-only: send one sample template to a real inbox to verify the email provider. */
 export async function sendTestEmailAction(
   _prev: TestSendResult,
   formData: FormData

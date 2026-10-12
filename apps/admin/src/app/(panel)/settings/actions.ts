@@ -19,7 +19,7 @@ import {
   validateSetting,
   type SettingKey,
 } from "@everfit/core/lib/settings";
-import { senderIsUsable, usableSenders } from "@everfit/core/lib/notify";
+import { emailProviderName, senderIsUsable, usableSenders } from "@everfit/core/lib/notify";
 import { revalidateStorefront } from "@/lib/revalidate-store";
 
 type FormState = { error?: string; ok?: string } | undefined;
@@ -111,9 +111,10 @@ export async function saveSettingsAction(_prev: FormState, formData: FormData): 
   if (!changed.length) return { ok: "No changes to save." };
 
   /*
-   * A sender on a domain Brevo has not authenticated does not "mostly work" —
-   * it is rejected or filed as spam, and nothing in the app would report it.
-   * So the change is refused, but only on positive evidence: if Brevo cannot be
+   * A sender on a domain the email provider (Resend or Brevo) has not verified
+   * does not "mostly work" — it is rejected or filed as spam, and nothing in the
+   * app would report it. So the change is refused, but only on positive
+   * evidence: if the provider cannot be
    * reached, or there is no API key to ask with, verifiedSenderDomains() returns
    * null and the save proceeds. A third party being briefly down must not block
    * the owner from editing their own settings.
@@ -124,10 +125,11 @@ export async function saveSettingsAction(_prev: FormState, formData: FormData): 
     const usable = addr ? await senderIsUsable(addr) : null;
     if (usable === false) {
       const known = await usableSenders();
+      const provider = emailProviderName();
       return {
         error:
-          `Brevo will not send from "${addr}" — neither that address nor its domain is verified there, ` +
-          `so mail would bounce or land in spam. Add it in Brevo (Senders, Domains & Dedicated IPs), then save again.` +
+          `${provider} will not send from "${addr}" — neither that address nor its domain is verified there, ` +
+          `so mail would bounce or land in spam. Verify it in ${provider}, then save again.` +
           (known.length ? ` Currently usable: ${known.join(", ")}.` : ""),
       };
     }

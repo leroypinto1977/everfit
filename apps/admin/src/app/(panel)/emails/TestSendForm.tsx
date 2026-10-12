@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { sendTestEmailAction } from "./actions";
 
-/** Pick a template + inbox, send a real email through Brevo to verify setup. */
+/** Pick a template + inbox, send a real email through the provider to verify setup. */
 export default function TestSendForm({
   templates,
   defaultTo,
@@ -18,7 +18,7 @@ export default function TestSendForm({
       <h2 className="font-semibold">Send a test email</h2>
       <p className="mt-1 text-sm text-[#6b7194]">
         Delivers the selected template (with sample data) to a real inbox so you can verify the
-        Brevo setup and how it renders in an email client.
+        email setup and how it renders in an email client.
       </p>
       <div className="mt-4 flex flex-wrap items-end gap-3">
         <div className="w-64">

@@ -149,12 +149,21 @@ export const ENV_VARS: EnvVar[] = [
 
   /* ── Transactional email ─────────────────────────────────────────────── */
   {
+    name: "RESEND_API_KEY",
+    apps: BOTH,
+    level: "optional",
+    group: "Email",
+    summary: "Resend API key (starts with re_). When set, all email is sent through Resend instead of Brevo.",
+    impact: "Unset means email is sent through Brevo (BREVO_API_KEY), or not at all when that is unset too.",
+  },
+  {
     name: "BREVO_API_KEY",
     apps: BOTH,
     level: "recommended",
     group: "Email",
-    summary: "Brevo API key (starts with xkeysib-).",
-    impact: "No email is sent at all — no order confirmations, shipping updates, refund notices or alerts.",
+    summary: "Brevo API key (starts with xkeysib-). Sends email unless RESEND_API_KEY is set; also syncs customers to the Brevo list.",
+    impact:
+      "Without RESEND_API_KEY either, no email is sent at all — no order confirmations, shipping updates, refund notices or alerts.",
   },
   {
     name: "EMAIL_FROM",
@@ -164,7 +173,7 @@ export const ENV_VARS: EnvVar[] = [
     group: "Email",
     summary: 'Sender, e.g. "EVHERFIT <orders@evherfit.com>".',
     impact:
-      "Falls back to no-reply@evherfit.com, which will not be on your Brevo-verified domain — expect spam folders or hard rejects.",
+      "Falls back to no-reply@evherfit.com, which will not be on the domain you verified with Resend or Brevo — expect spam folders or hard rejects.",
   },
   {
     name: "SUPPORT_EMAIL",

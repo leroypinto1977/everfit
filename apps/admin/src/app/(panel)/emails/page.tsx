@@ -1,6 +1,6 @@
 import { requireOwner } from "@/lib/admin-auth";
 import { emailPreviews } from "@everfit/core/lib/email/samples";
-import { emailConfigured } from "@everfit/core/lib/notify";
+import { emailConfigured, emailProviderName } from "@everfit/core/lib/notify";
 import { getSettings } from "@everfit/core/lib/settings";
 import TestSendForm from "./TestSendForm";
 
@@ -18,13 +18,13 @@ export default async function EmailsPage() {
         <h1 className="font-display text-3xl font-bold italic">Email previews</h1>
         <p className="mt-1 text-sm text-[#6b7194]">
           Every transactional email the store sends, with sample data. Live sending requires
-          BREVO_API_KEY and a verified sending domain.
+          RESEND_API_KEY or BREVO_API_KEY, and a verified sending domain.
         </p>
       </div>
 
       {configured ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-6 py-4 text-sm text-emerald-800">
-          ✓ Brevo is configured — customer and admin emails are being sent
+          ✓ {emailProviderName()} is configured — customer and admin emails are being sent
           {process.env.EMAIL_FROM ? (
             <> from <strong>{process.env.EMAIL_FROM}</strong></>
           ) : (
@@ -38,9 +38,10 @@ export default async function EmailsPage() {
         </div>
       ) : (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-800">
-          ⚠️ Email sending is <strong>off</strong> — BREVO_API_KEY isn&apos;t set, so no emails go out
-          (orders still work). Get a key from Brevo → Settings → SMTP &amp; API, add it to the
-          environment, and set EMAIL_FROM to an address on your verified domain.
+          ⚠️ Email sending is <strong>off</strong> — neither RESEND_API_KEY nor BREVO_API_KEY is set,
+          so no emails go out (orders still work). Add a key from Resend (API Keys) or Brevo
+          (Settings → SMTP &amp; API) to the environment, and set EMAIL_FROM to an address on your
+          verified domain.
         </div>
       )}
 

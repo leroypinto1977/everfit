@@ -164,7 +164,7 @@ export async function sendStageEmailAction(
   if (!stage) return { error: "Unknown email type." };
 
   if (!emailConfigured()) {
-    return { error: "Email isn't configured (BREVO_API_KEY is missing), so nothing can be sent." };
+    return { error: "Email isn't configured (no RESEND_API_KEY or BREVO_API_KEY), so nothing can be sent." };
   }
   const order = await getOrder(id);
   if (!order) return { error: "Order not found." };
@@ -192,7 +192,7 @@ export async function sendRecoveryEmailAction(
   const id = String(formData.get("id"));
 
   if (!emailConfigured()) {
-    return { error: "Email isn't configured (BREVO_API_KEY is missing), so no nudge can be sent." };
+    return { error: "Email isn't configured (no RESEND_API_KEY or BREVO_API_KEY), so no nudge can be sent." };
   }
   const order = await getOrder(id);
   if (!order || !["created", "failed"].includes(order.status)) {
