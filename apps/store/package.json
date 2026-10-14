@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "//build:webpack": "For Hostinger web apps: its build sandbox kills the child process Turbopack starts for PostCSS, so the build has to use webpack there.",
+    "build:webpack": "next build --webpack",
     "start": "next start",
     "lint": "eslint"
   },
