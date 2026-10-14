@@ -6,6 +6,13 @@ const nextConfig: NextConfig = {
   // it as if it were app source rather than a prebuilt node_modules dependency.
   transpilePackages: ["@everfit/core"],
 
+  // Serve the files in public/ as they are instead of through /_next/image.
+  // On Hostinger's web-app hosting the optimiser is killed mid-resize on
+  // large sources and answers 503, and while the server restarts every other
+  // image fails with it. The source images are kept at display size (about
+  // 1600px wide, 100–250 KB), so there is little left for it to save.
+  images: { unoptimized: true },
+
   experimental: {
     // Ship the stylesheet inside the HTML instead of behind a <link>.
     //
