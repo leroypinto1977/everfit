@@ -129,10 +129,12 @@ const footerLinks = [
 /**
  * Wrap body HTML in the branded shell. `preheader` is the hidden inbox-preview
  * line. `accent` swaps the header bar colour (e.g. pink for delight moments).
+ * `team` marks an email to the Evherfit team (alerts, leads, admin access):
+ * its footer drops the customer links and the "you placed an order" line.
  */
 export function shell(
   bodyHtml: string,
-  opts: { preheader: string; headerBar?: string }
+  opts: { preheader: string; headerBar?: string; team?: boolean }
 ) {
   const bar = opts.headerBar ?? brand.indigo;
   // Sync read: shell() is a pure string builder called from deep inside the
@@ -173,17 +175,25 @@ export function shell(
         <!-- footer -->
         <tr><td style="padding:28px 40px;background:${brand.page};border-top:1px solid ${brand.line}">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td style="padding-bottom:14px">
+            ${
+              opts.team
+                ? ""
+                : `<tr><td style="padding-bottom:14px">
               ${footerLinks
                 .map(
                   ([label, path]) =>
                     `<a href="${siteUrl(path)}" target="_blank" style="font-family:${FONT};font-size:13px;color:${brand.indigo};text-decoration:none;margin-right:18px">${label}</a>`
                 )
                 .join("")}
-            </td></tr>
+            </td></tr>`
+            }
             <tr><td style="font-family:${FONT};font-size:12px;color:${brand.muted};line-height:1.6">
-              Questions? Email <a href="mailto:${support}" style="color:${brand.indigo}">${support}</a>.<br>
-              Evherfit · India · You're receiving this because you placed an order with us.<br>
+              ${
+                opts.team
+                  ? `Evherfit · India · You're receiving this because you're on the Evherfit team.<br>`
+                  : `Questions? Email <a href="mailto:${support}" style="color:${brand.indigo}">${support}</a>.<br>
+              Evherfit · India · You're receiving this because you placed an order with us.<br>`
+              }
               © ${new Date().getFullYear()} Evherfit. All rights reserved.
             </td></tr>
           </table>

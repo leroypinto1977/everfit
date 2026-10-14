@@ -65,6 +65,13 @@ describe("leadNotification", () => {
     expect(email.html).not.toContain("<script>");
     expect(email.html).toContain("&lt;b&gt;Mallory&lt;/b&gt;");
   });
+
+  it("carries the team footer, not the customer one", () => {
+    const email = leadNotification(lead, { subject: "{{name}}", body: "{{answers}}" });
+    expect(email.html).toContain("on the Evherfit team");
+    expect(email.html).not.toContain("placed an order");
+    expect(email.html).not.toContain("/track");
+  });
 });
 
 describe("lead email settings", () => {

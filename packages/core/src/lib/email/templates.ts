@@ -172,7 +172,7 @@ export function newOrderAdmin(o: Order): Email {
           Order ${mono(o.id)}<br>Payment ${mono(o.paymentId ?? "—")}`),
         button("Open in admin panel", adminUrl(`/orders/${o.id}`)),
       ].join(""),
-      { preheader: `${c.name} ordered ${o.item ?? "an Infinity Band"} — ${inr(o.amount)}.` }
+      { preheader: `${c.name} ordered ${o.item ?? "an Infinity Band"} — ${inr(o.amount)}.`, team: true }
     ),
   };
 }
@@ -196,7 +196,7 @@ export function lowStockAdmin(items: { weight: string; sku: string; stock: numbe
         ),
         button("Manage products", adminUrl("/products")),
       ].join(""),
-      { preheader: `Low stock: ${items.map((i) => `${i.weight} (${i.stock})`).join(", ")}.`, headerBar: brand.indigoDeep }
+      { preheader: `Low stock: ${items.map((i) => `${i.weight} (${i.stock})`).join(", ")}.`, headerBar: brand.indigoDeep, team: true }
     ),
   };
 }
@@ -215,7 +215,7 @@ export function passwordReset(input: { name: string; resetUrl: string }): Email 
           `If you didn't request this, you can safely ignore this email — your password won't change until you open the link and set a new one.`
         ),
       ].join(""),
-      { preheader: "Reset your EVHERFIT admin password (link valid for 1 hour).", headerBar: brand.indigoDeep }
+      { preheader: "Reset your EVHERFIT admin password (link valid for 1 hour).", headerBar: brand.indigoDeep, team: true }
     ),
   };
 }
@@ -233,7 +233,7 @@ export function teammateWelcome(input: { name: string; email: string; role: stri
         button("Go to admin sign-in", adminUrl("/login")),
         paragraph(`For security, please change your password from <strong style="color:${brand.ink}">Settings</strong> right after your first sign-in.`),
       ].join(""),
-      { preheader: "You've been given access to the EVHERFIT store admin.", headerBar: brand.indigoDeep }
+      { preheader: "You've been given access to the EVHERFIT store admin.", headerBar: brand.indigoDeep, team: true }
     ),
   };
 }
@@ -283,6 +283,6 @@ export function leadNotification(lead: NewLead, template: { subject: string; bod
 
   return {
     subject: fill(template.subject, plain).replace(/\s+/g, " ").trim().slice(0, 200),
-    html: shell(body, { preheader: `${lead.name} applied for the 1-to-1 program.` }),
+    html: shell(body, { preheader: `${lead.name} applied for the 1-to-1 program.`, team: true }),
   };
 }
