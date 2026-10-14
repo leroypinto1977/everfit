@@ -30,10 +30,37 @@ module.exports = function serve(app) {
   const handle = server.getRequestHandler();
 
   server.prepare().then(
-    () => createServer((req, res) => handle(req, res)).listen(process.env.PORT || 3000),
+    () => createServer((req, res) => handle(req, uncachedByCdn(res))).listen(process.env.PORT || 3000),
     (err) => {
       console.error(`[hostinger] ${app} failed to start:`, err);
       process.exit(1);
     },
   );
 };
+
+/**
+ * Next marks prerendered pages `s-maxage=31536000` and relies on the host to
+ * purge its edge cache when a page is revalidated. Hostinger's CDN honours the
+ * header but is never told to purge, so a price or stock edit in the admin
+ * panel would keep showing the old page. Shared caches are told to revalidate
+ * instead; Next's own cache still answers them quickly. Hashed assets under
+ * /_next/static carry `max-age` + `immutable`, not `s-maxage`, and stay cached.
+ */
+const NOT_SHARED = "public, max-age=0, must-revalidate";
+const shared = (value) => /s-maxage/i.test(String(value));
+
+function uncachedByCdn(res) {
+  const setHeader = res.setHeader.bind(res);
+  res.setHeader = (name, value) =>
+    setHeader(name, String(name).toLowerCase() === "cache-control" && shared(value) ? NOT_SHARED : value);
+
+  const writeHead = res.writeHead.bind(res);
+  res.writeHead = (status, ...rest) => {
+    const headers = rest.find((arg) => arg && typeof arg === "object" && !Array.isArray(arg));
+    for (const key of Object.keys(headers ?? {})) {
+      if (key.toLowerCase() === "cache-control" && shared(headers[key])) headers[key] = NOT_SHARED;
+    }
+    return writeHead(status, ...rest);
+  };
+  return res;
+}
