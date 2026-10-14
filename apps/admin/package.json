@@ -6,9 +6,8 @@
   "scripts": {
     "dev": "next dev --port 3001",
     "dev:port": "next dev",
-    "build": "next build",
-    "//build:webpack": "For Hostinger web apps: its build sandbox kills the child process Turbopack starts for PostCSS, so the build has to use webpack there.",
-    "build:webpack": "next build --webpack",
+    "//build": "NEXT_BUILD_FLAGS is unset everywhere except Hostinger web apps, where it is --webpack: Hostinger only runs `npm run build`, and its build sandbox kills the child process Turbopack starts for PostCSS.",
+    "build": "next build $NEXT_BUILD_FLAGS",
     "start": "next start --port 3001",
     "lint": "eslint"
   },
