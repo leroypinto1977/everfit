@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listCustomers } from "@everfit/core/lib/customers";
+import { requireScreen } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export default async function CustomersPage({
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
+  await requireScreen("customers");
   const { q = "", page: pageParam = "1" } = await searchParams;
   const page = Math.max(1, parseInt(pageParam, 10) || 1);
   const { customers, total } = await listCustomers({ q, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE });

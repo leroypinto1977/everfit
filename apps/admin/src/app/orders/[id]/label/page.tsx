@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { getOrder } from "@everfit/core/lib/orders";
 import { getSettings } from "@everfit/core/lib/settings";
 import { courierName } from "@everfit/core/lib/couriers";
@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
  * paper size so the browser's print dialog defaults correctly.
  */
 export default async function LabelPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireAdmin();
+  await requireScreen("orders");
   const { id } = await params;
   const order = await getOrder(id);
   // labels are for orders that will ship — must have reached payment

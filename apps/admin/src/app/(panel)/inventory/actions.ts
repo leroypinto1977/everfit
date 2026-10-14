@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { revalidateStorefront } from "@/lib/revalidate-store";
 import { applyStockDelta } from "@everfit/core/lib/inventory";
 
 /** Apply a signed stock change (positive = add, negative = subtract). */
 export async function adjustStockAction(formData: FormData) {
-  const me = await requireOwner();
+  const me = await requireScreen("inventory");
 
   const variantId = String(formData.get("variantId") ?? "").trim();
   const delta = parseInt(String(formData.get("delta") ?? "0"), 10);

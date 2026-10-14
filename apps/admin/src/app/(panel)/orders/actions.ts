@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin, requireOwner } from "@/lib/admin-auth";
+import { requireOwner, requireScreen } from "@/lib/admin-auth";
 import {
   addOrderNote,
   cancelOrder,
@@ -33,7 +33,7 @@ export async function markShippedAction(
   _prev: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const user = await requireAdmin();
+  const user = await requireScreen("orders");
   const id = String(formData.get("id"));
   const order = await markShipped(id, {
     courier: String(formData.get("courier") ?? "").trim() || undefined,
@@ -54,7 +54,7 @@ export async function markShippedAction(
  * email. markShipped is status-guarded, so non-paid ids are simply skipped.
  */
 export async function bulkShipAction(formData: FormData) {
-  const user = await requireAdmin();
+  const user = await requireScreen("orders");
   const ids = formData.getAll("ids").map(String);
   const courier = String(formData.get("courier") ?? "").trim() || undefined;
 
@@ -73,7 +73,7 @@ export async function markDeliveredAction(
   _prev: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const user = await requireAdmin();
+  const user = await requireScreen("orders");
   const id = String(formData.get("id"));
   const order = await markDelivered(id, user.email);
   refresh(id);
@@ -88,7 +88,7 @@ export async function cancelOrderAction(
   _prev: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const user = await requireAdmin();
+  const user = await requireScreen("orders");
   const id = String(formData.get("id"));
   const order = await cancelOrder(id, user.email);
   refresh(id);
@@ -158,7 +158,7 @@ export async function sendStageEmailAction(
   _prev: EmailSendResult,
   formData: FormData
 ): Promise<EmailSendResult> {
-  const user = await requireAdmin();
+  const user = await requireScreen("orders");
   const id = String(formData.get("id"));
   const stage = STAGE_EMAILS[String(formData.get("stage")) as keyof typeof STAGE_EMAILS];
   if (!stage) return { error: "Unknown email type." };
@@ -188,7 +188,7 @@ export async function sendRecoveryEmailAction(
   _prev: ActionResult,
   formData: FormData
 ): Promise<ActionResult> {
-  const user = await requireAdmin();
+  const user = await requireScreen("orders");
   const id = String(formData.get("id"));
 
   if (!emailConfigured()) {
@@ -208,7 +208,7 @@ export async function sendRecoveryEmailAction(
 }
 
 export async function addNoteAction(formData: FormData) {
-  const user = await requireAdmin();
+  const user = await requireScreen("orders");
   const id = String(formData.get("id"));
   const note = String(formData.get("note") ?? "").trim();
   if (note) await addOrderNote(id, note, user.email);

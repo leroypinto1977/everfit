@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InfinityMark } from "@everfit/core/components/Logo";
+import type { ScreenAccess } from "@/lib/screens";
 import AdminNav from "./AdminNav";
 
 /**
@@ -7,7 +8,7 @@ import AdminNav from "./AdminNav";
  * mobile drawer. The right border only shows from `lg` up so on desktop the
  * brand row merges into the top navbar, while the drawer stays borderless.
  */
-export default function Sidebar({ role, onNavigate }: { role?: string; onNavigate?: () => void }) {
+export default function Sidebar({ access, onNavigate }: { access: ScreenAccess; onNavigate?: () => void }) {
   return (
     <>
       <Link
@@ -25,7 +26,7 @@ export default function Sidebar({ role, onNavigate }: { role?: string; onNavigat
       </Link>
 
       <div className="flex min-h-0 flex-1 flex-col lg:border-r lg:border-[#e3e5f0]">
-        <AdminNav role={role} onNavigate={onNavigate} />
+        <AdminNav access={access} onNavigate={onNavigate} />
       </div>
     </>
   );

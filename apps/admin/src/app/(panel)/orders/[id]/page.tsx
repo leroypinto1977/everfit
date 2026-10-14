@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getOrder, getOrderEvents, getOrderRefunds } from "@everfit/core/lib/orders";
-import { getAdminUser } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { courierName, trackingUrl } from "@everfit/core/lib/couriers";
 import AutoRefresh from "@/components/AutoRefresh";
 import StatusBadge from "@/components/StatusBadge";
@@ -37,7 +37,7 @@ export default async function OrderDetail({
     getOrder(id),
     getOrderEvents(id),
     getOrderRefunds(id),
-    getAdminUser(),
+    requireScreen("orders"),
   ]);
   if (!order) notFound();
 

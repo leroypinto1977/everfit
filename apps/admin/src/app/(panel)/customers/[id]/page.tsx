@@ -4,10 +4,12 @@ import { getCustomer } from "@everfit/core/lib/customers";
 import StatusBadge from "@/components/StatusBadge";
 import type { OrderStatus } from "@everfit/core/lib/orders";
 import { saveNotesAction } from "../actions";
+import { requireScreen } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function CustomerDetail({ params }: { params: Promise<{ id: string }> }) {
+  await requireScreen("customers");
   const { id } = await params;
   const customer = await getCustomer(id);
   if (!customer) notFound();

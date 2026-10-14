@@ -1,4 +1,4 @@
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { getFunnel, getCustomerInsights } from "@everfit/core/lib/insights";
 import { istAddDays, resolveRange } from "@everfit/core/lib/report-time";
 import KpiCard from "@/components/KpiCard";
@@ -16,7 +16,7 @@ export default async function AnalyticsPage({
 }: {
   searchParams: Promise<{ range?: string; from?: string; to?: string }>;
 }) {
-  await requireOwner();
+  await requireScreen("analytics");
   const sp = await searchParams;
 
   const range = resolveRange(sp); // ?range= preset, or explicit from/to

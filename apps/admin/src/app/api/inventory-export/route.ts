@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getAdminUser } from "@/lib/admin-auth";
+import { canSee } from "@/lib/screens";
 import { getMovementsForExport } from "@everfit/core/lib/inventory";
 import { toCsv } from "@everfit/core/lib/revenue";
 
@@ -7,7 +8,7 @@ import { toCsv } from "@everfit/core/lib/revenue";
 export async function GET() {
   const user = await getAdminUser();
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
-  if (user.role !== "owner") return NextResponse.json({ error: "Owner only" }, { status: 403 });
+  if (!canSee(user, "inventory")) return NextResponse.json({ error: "No access to this screen" }, { status: 403 });
 
   try {
     const rows = await getMovementsForExport();

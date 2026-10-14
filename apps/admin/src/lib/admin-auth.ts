@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@everfit/core/db";
 import { adminSessions, adminUsers, loginAttempts, passwordResets } from "@everfit/core/db/schema";
+import { canSee, homeFor, type ScreenKey } from "./screens";
 
 /**
  * Per-user admin auth, self-hosted:
@@ -25,6 +26,7 @@ export interface AdminUser {
   email: string;
   name: string;
   role: AdminRole;
+  screens: string[];
 }
 
 /* ---------- passwords ---------- */
@@ -123,6 +125,7 @@ export async function getAdminUser(): Promise<AdminUser | null> {
       email: adminUsers.email,
       name: adminUsers.name,
       role: adminUsers.role,
+      screens: adminUsers.screens,
       active: adminUsers.active,
     })
     .from(adminSessions)
@@ -132,7 +135,7 @@ export async function getAdminUser(): Promise<AdminUser | null> {
 
   const u = rows[0];
   if (!u?.active) return null;
-  return { id: u.id, email: u.email, name: u.name, role: u.role as AdminRole };
+  return { id: u.id, email: u.email, name: u.name, role: u.role as AdminRole, screens: u.screens };
 }
 
 /** Call at the top of every admin page/action. Returns the signed-in user. */
@@ -142,10 +145,21 @@ export async function requireAdmin(): Promise<AdminUser> {
   return user;
 }
 
-/** For destructive/financial actions: products, refunds, team, exports. */
+/** For what no screen grant covers: refunds, the team and the store settings. */
 export async function requireOwner(): Promise<AdminUser> {
   const user = await requireAdmin();
   if (user.role !== "owner") redirect("/");
+  return user;
+}
+
+/**
+ * For every page, action and export that belongs to a screen. Owners pass;
+ * staff pass only for the screens ticked for them in Settings → Team, and are
+ * otherwise sent to the first screen they may open.
+ */
+export async function requireScreen(key: ScreenKey): Promise<AdminUser> {
+  const user = await requireAdmin();
+  if (!canSee(user, key)) redirect(homeFor(user));
   return user;
 }
 

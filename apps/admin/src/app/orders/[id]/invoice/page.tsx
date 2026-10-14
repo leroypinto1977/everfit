@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { getOrder } from "@everfit/core/lib/orders";
 import { inr } from "@everfit/core/lib/product";
 import { gstBreakdown, HSN_CODE, LEGACY_GST_RATE } from "@everfit/core/lib/tax";
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
  * sidebar doesn't print. Cmd/Ctrl+P → "Save as PDF" to attach or share.
  */
 export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
-  await requireAdmin();
+  await requireScreen("orders");
   const { id } = await params;
   const order = await getOrder(id);
   if (!order?.invoiceNo) notFound();

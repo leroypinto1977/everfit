@@ -1,4 +1,4 @@
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { getProductSales } from "@everfit/core/lib/revenue";
 import { istAddDays, istInput, resolveRange } from "@everfit/core/lib/report-time";
 import KpiCard from "@/components/KpiCard";
@@ -19,7 +19,7 @@ export default async function ProductSalesPage({
 }: {
   searchParams: Promise<{ range?: string; from?: string; to?: string }>;
 }) {
-  await requireOwner(); // sales reporting is owner-only, like Revenue and Analytics
+  await requireScreen("product-sales"); // sales reporting is owner-only, like Revenue and Analytics
   const sp = await searchParams;
 
   const range = resolveRange(sp);

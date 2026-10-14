@@ -1,4 +1,4 @@
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import {
   getDailyRevenue,
   getMonthlyRevenue,
@@ -44,7 +44,7 @@ export default async function RevenuePage({
 }: {
   searchParams: Promise<{ range?: string; from?: string; to?: string }>;
 }) {
-  await requireOwner(); // revenue analytics are owner-only
+  await requireScreen("revenue"); // revenue analytics are owner-only
   const sp = await searchParams;
 
   // All boundaries are IST-midnight instants so buckets and filters agree.

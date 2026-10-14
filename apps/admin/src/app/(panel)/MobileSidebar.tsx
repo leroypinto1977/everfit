@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { MenuIcon, CloseIcon } from "@/components/icons";
+import type { ScreenAccess } from "@/lib/screens";
 import Sidebar from "./Sidebar";
 
 /** Hamburger + off-canvas drawer for the admin sidebar on < lg screens. */
-export default function MobileSidebar({ role }: { role?: string }) {
+export default function MobileSidebar({ access }: { access: ScreenAccess }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -65,7 +66,7 @@ export default function MobileSidebar({ role }: { role?: string }) {
               >
                 <CloseIcon className="h-5 w-5" />
               </button>
-              <Sidebar role={role} onNavigate={() => setOpen(false)} />
+              <Sidebar access={access} onNavigate={() => setOpen(false)} />
             </motion.aside>
           </div>
         )}

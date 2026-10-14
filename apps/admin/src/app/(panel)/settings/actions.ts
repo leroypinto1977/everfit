@@ -8,7 +8,9 @@ import {
   listAdminUsers,
   setAdminUserActive,
   setAdminUserRole,
+  setAdminUserScreens,
 } from "@/lib/team";
+import { isScreenKey } from "@/lib/screens";
 import { sendTeammateWelcome } from "@everfit/core/lib/notify";
 import {
   getSettings,
@@ -30,13 +32,14 @@ export async function addUserAction(_prev: FormState, formData: FormData): Promi
   const email = String(formData.get("email") ?? "").toLowerCase().trim();
   const password = String(formData.get("password") ?? "");
   const role = formData.get("role") === "owner" ? "owner" : "staff";
+  const screens = formData.getAll("screens").filter(isScreenKey);
 
   if (!name || !email || password.length < 8) {
     return { error: "Name, email and a password of at least 8 characters are required." };
   }
 
   try {
-    await createAdminUser({ name, email, password, role });
+    await createAdminUser({ name, email, password, role, screens });
   } catch {
     return { error: "Couldn't create the account — is that email already in use?" };
   }
@@ -65,6 +68,13 @@ export async function setRoleAction(formData: FormData) {
     if (owners.length === 1 && owners[0].id === id) return;
   }
   await setAdminUserRole(id, role);
+  revalidatePath("/settings");
+}
+
+/** Which screens a staff member may open. Owners see everything, so this only matters for staff. */
+export async function setScreensAction(formData: FormData) {
+  await requireOwner();
+  await setAdminUserScreens(String(formData.get("id")), formData.getAll("screens").filter(isScreenKey));
   revalidatePath("/settings");
 }
 

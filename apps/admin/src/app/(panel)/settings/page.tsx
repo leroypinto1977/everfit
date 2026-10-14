@@ -2,8 +2,8 @@ import { checkEnv, type EnvCheckEntry } from "@everfit/core/lib/env";
 import { listSettings } from "@everfit/core/lib/settings";
 import { requireAdmin } from "@/lib/admin-auth";
 import { listAdminUsers } from "@/lib/team";
-import { setRoleAction, toggleActiveAction } from "./actions";
-import { AddUserForm, ChangePasswordForm } from "./SettingsForms";
+import { setRoleAction, setScreensAction, toggleActiveAction } from "./actions";
+import { AddUserForm, ChangePasswordForm, ScreenChecklist } from "./SettingsForms";
 import { StoreSettingsForm } from "./StoreSettingsForm";
 
 export const dynamic = "force-dynamic";
@@ -59,8 +59,8 @@ export default async function SettingsPage() {
           <div className="rounded-2xl border border-[#e3e5f0] bg-white p-6">
             <h2 className="font-semibold">Add a team member</h2>
             <p className="mt-1 text-sm text-[#6b7194]">
-              Staff can manage and fulfil orders. Owners can also edit products, issue refunds, export data
-              and manage this team.
+              Staff open only the screens you tick, and can use everything on them. Owners see every screen
+              and are the only ones who can issue refunds, change store settings and manage this team.
             </p>
             <AddUserForm />
           </div>
@@ -151,11 +151,12 @@ export default async function SettingsPage() {
           <div className="px-6 py-4">
             <h2 className="font-semibold">Team</h2>
           </div>
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[880px] text-left text-sm">
             <thead className="border-y border-[#e3e5f0] text-xs uppercase tracking-wider text-[#9aa0c3]">
               <tr>
                 <th className="px-6 py-4">Member</th>
                 <th className="px-6 py-4">Role</th>
+                <th className="px-6 py-4">Screens</th>
                 <th className="px-6 py-4">Last login</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4" />
@@ -183,6 +184,22 @@ export default async function SettingsPage() {
                         </button>
                       )}
                     </form>
+                  </td>
+                  <td className="px-6 py-4">
+                    {u.role === "owner" ? (
+                      <span className="text-xs text-[#9aa0c3]">Every screen</span>
+                    ) : (
+                      <form action={setScreensAction} key={u.screens.join()} className="max-w-md space-y-2">
+                        <input type="hidden" name="id" value={u.id} />
+                        <ScreenChecklist selected={u.screens} />
+                        <button
+                          type="submit"
+                          className="text-xs font-semibold text-[#2b337d] underline-offset-2 hover:underline"
+                        >
+                          Save access
+                        </button>
+                      </form>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-xs text-[#9aa0c3]">
                     {u.lastLoginAt

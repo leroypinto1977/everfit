@@ -1,4 +1,4 @@
-import { getAdminUser } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { getProductAdmin, listVariantsAdmin } from "@everfit/core/lib/catalog";
 import { updateProductAction, updateVariantAction } from "./actions";
 
@@ -11,9 +11,9 @@ export default async function ProductsPage() {
   const [product, variants, user] = await Promise.all([
     getProductAdmin(),
     listVariantsAdmin(),
-    getAdminUser(),
+    requireScreen("products"),
   ]);
-  const canEdit = user?.role === "owner";
+  const canEdit = user.role === "owner"; // prices and stock are live on the storefront
 
   if (!product) {
     return <p className="text-sm text-[#6b7194]">No product found — run the database migration first.</p>;

@@ -20,35 +20,35 @@ import {
   ExternalIcon,
 } from "@/components/icons";
 
-type Item = {
-  href: string;
-  label: string;
-  icon: (p: SVGProps<SVGSVGElement>) => React.ReactElement;
-  ownerOnly?: boolean;
+import { canSee, SCREENS, type ScreenAccess, type ScreenKey } from "@/lib/screens";
+
+type Icon = (p: SVGProps<SVGSVGElement>) => React.ReactElement;
+
+const icons: Record<ScreenKey, Icon> = {
+  dashboard: DashboardIcon,
+  orders: OrdersIcon,
+  customers: CustomersIcon,
+  "one-to-one": LeadsIcon,
+  products: ProductsIcon,
+  inventory: InventoryIcon,
+  coupons: CouponsIcon,
+  revenue: RevenueIcon,
+  "product-sales": ProductSalesIcon,
+  analytics: AnalyticsIcon,
+  emails: EmailsIcon,
 };
 
-const items: Item[] = [
-  { href: "/", label: "Dashboard", icon: DashboardIcon },
-  { href: "/orders", label: "Orders", icon: OrdersIcon },
-  { href: "/customers", label: "Customers", icon: CustomersIcon },
-  { href: "/one-to-one", label: "1-to-1", icon: LeadsIcon },
-  { href: "/products", label: "Products", icon: ProductsIcon },
-  { href: "/inventory", label: "Inventory", icon: InventoryIcon, ownerOnly: true },
-  { href: "/coupons", label: "Coupons", icon: CouponsIcon, ownerOnly: true },
-  { href: "/revenue", label: "Revenue", icon: RevenueIcon, ownerOnly: true },
-  { href: "/product-sales", label: "Products sold", icon: ProductSalesIcon, ownerOnly: true },
-  { href: "/analytics", label: "Analytics", icon: AnalyticsIcon, ownerOnly: true },
-  { href: "/emails", label: "Emails", icon: EmailsIcon, ownerOnly: true },
-  { href: "/settings", label: "Settings", icon: SettingsIcon },
-];
-
-export default function AdminNav({ role, onNavigate }: { role?: string; onNavigate?: () => void }) {
+export default function AdminNav({ access, onNavigate }: { access: ScreenAccess; onNavigate?: () => void }) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  const visible = items.filter((item) => !item.ownerOnly || role === "owner");
+  // Settings is always there: everyone can change their own password.
+  const visible = [
+    ...SCREENS.filter((s) => canSee(access, s.key)).map((s) => ({ ...s, icon: icons[s.key] })),
+    { href: "/settings", label: "Settings", icon: SettingsIcon },
+  ];
 
   return (
     <nav className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 py-2">

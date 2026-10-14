@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listOrders, type OrderStatus } from "@everfit/core/lib/orders";
 import AutoRefresh from "@/components/AutoRefresh";
 import OrdersTable from "./OrdersTable";
+import { requireScreen } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default async function OrdersPage({
 }: {
   searchParams: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
+  await requireScreen("orders");
   const { status = "", q = "", page: pageParam = "1" } = await searchParams;
   const page = Math.max(1, parseInt(pageParam, 10) || 1);
 

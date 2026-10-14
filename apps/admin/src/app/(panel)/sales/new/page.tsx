@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { listVariantsAdmin } from "@everfit/core/lib/catalog";
 import ManualSaleForm from "./ManualSaleForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewManualSalePage() {
-  await requireOwner();
+  await requireScreen("orders");
   const variants = (await listVariantsAdmin()).filter((v) => v.active);
 
   return (

@@ -1,4 +1,4 @@
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { listVariantsAdmin } from "@everfit/core/lib/catalog";
 import { listMovements, REASON_LABEL } from "@everfit/core/lib/inventory";
 import { DownloadIcon } from "@/components/icons";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 const LOW = 5;
 
 export default async function InventoryPage() {
-  await requireOwner();
+  await requireScreen("inventory");
   const [variants, movements] = await Promise.all([listVariantsAdmin(), listMovements(60)]);
   const tracked = variants.filter((v) => v.stock !== null);
 

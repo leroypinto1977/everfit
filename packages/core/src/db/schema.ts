@@ -8,6 +8,7 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 /**
  * Relational schema (Neon Postgres). The original single-table JSONB store
@@ -22,6 +23,8 @@ export const adminUsers = pgTable("admin_users", {
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
   role: text("role").notNull().default("staff"), // "owner" | "staff"
+  // Admin screens a staff member may open (keys in apps/admin/src/lib/screens.ts). Owners see everything.
+  screens: text("screens").array().notNull().default(sql`'{}'::text[]`),
   passwordHash: text("password_hash").notNull(), // scrypt: salt$hash
   active: boolean("active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

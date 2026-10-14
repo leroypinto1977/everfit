@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LEAD_STATUSES, isLeadStatus, leadStats, listLeads, type LeadStatus } from "@everfit/core/lib/leads";
 import KpiCard from "@/components/KpiCard";
 import { saveFollowUpAction } from "./actions";
+import { requireScreen } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +34,7 @@ export default async function OneToOnePage({
 }: {
   searchParams: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
+  await requireScreen("one-to-one");
   const { status: statusParam = "", q = "", page: pageParam = "1" } = await searchParams;
   const status = isLeadStatus(statusParam) ? statusParam : "";
   const page = Math.max(1, parseInt(pageParam, 10) || 1);
@@ -150,6 +152,12 @@ export default async function OneToOnePage({
                 {lead.summary && (
                   <span className="mt-2 line-clamp-2 text-[#4a5072]">
                     <span className="font-semibold">Conclusion:</span> {lead.summary}
+                  </span>
+                )}
+                {lead.updatedAt && (
+                  <span className="mt-1 block text-xs text-[#6b7194]">
+                    Updated by <span className="font-semibold">{lead.updatedBy}</span> ·{" "}
+                    {lead.updatedAt.toLocaleString("en-IN", IST)}
                   </span>
                 )}
               </summary>

@@ -1,13 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { createCoupon, setCouponActive } from "@everfit/core/lib/coupons";
 
 type FormState = { error?: string; ok?: string } | undefined;
 
 export async function createCouponAction(_prev: FormState, formData: FormData): Promise<FormState> {
-  await requireOwner();
+  await requireScreen("coupons");
 
   const code = String(formData.get("code") ?? "").trim();
   const type = formData.get("type") === "flat" ? "flat" : "percent";
@@ -37,7 +37,7 @@ export async function createCouponAction(_prev: FormState, formData: FormData): 
 }
 
 export async function toggleCouponAction(formData: FormData) {
-  await requireOwner();
+  await requireScreen("coupons");
   await setCouponActive(String(formData.get("id")), formData.get("active") === "true");
   revalidatePath("/coupons");
 }

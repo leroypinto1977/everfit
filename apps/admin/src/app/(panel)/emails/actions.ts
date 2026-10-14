@@ -1,6 +1,6 @@
 "use server";
 
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { emailPreviews } from "@everfit/core/lib/email/samples";
 import { sendTestEmail } from "@everfit/core/lib/notify";
 import { getSettings } from "@everfit/core/lib/settings";
@@ -12,7 +12,7 @@ export async function sendTestEmailAction(
   _prev: TestSendResult,
   formData: FormData
 ): Promise<TestSendResult> {
-  await requireOwner();
+  await requireScreen("emails");
 
   const to = String(formData.get("to") ?? "").trim();
   const key = String(formData.get("template") ?? "");

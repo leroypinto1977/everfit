@@ -8,10 +8,12 @@ import KpiCard from "@/components/KpiCard";
 import RevenueChart, { type DayPoint } from "@/components/RevenueChart";
 import StatusBadge from "@/components/StatusBadge";
 import { inr } from "@everfit/core/lib/product";
+import { requireScreen } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboard() {
+  await requireScreen("dashboard");
   // Windows are IST-aligned so "last 30 days" matches how the store's day rolls over.
   const tomorrow = istAddDays(istDayStart(), 1); // exclusive end = start of tomorrow (IST)
   const days30 = istAddDays(tomorrow, -30);

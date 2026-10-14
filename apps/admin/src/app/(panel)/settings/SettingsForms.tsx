@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { DEFAULT_STAFF_SCREENS, SCREENS } from "@/lib/screens";
 import { addUserAction, changePasswordAction } from "./actions";
 
 const inputCls =
@@ -19,8 +20,29 @@ function Feedback({ state }: { state: { error?: string; ok?: string } | undefine
   );
 }
 
+/** One checkbox per admin screen, posted as repeated `screens` fields. */
+export function ScreenChecklist({ selected }: { selected: readonly string[] }) {
+  return (
+    <div className="flex flex-wrap gap-x-5 gap-y-2">
+      {SCREENS.map((s) => (
+        <label key={s.key} className="flex items-center gap-2 text-sm text-[#4a5072]">
+          <input
+            type="checkbox"
+            name="screens"
+            value={s.key}
+            defaultChecked={selected.includes(s.key)}
+            className="h-4 w-4 accent-[#2b337d]"
+          />
+          {s.label}
+        </label>
+      ))}
+    </div>
+  );
+}
+
 export function AddUserForm() {
   const [state, action, pending] = useActionState(addUserAction, undefined);
+  const [role, setRole] = useState("staff");
   return (
     <form action={action} className="mt-4 space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
@@ -34,11 +56,19 @@ export function AddUserForm() {
           autoComplete="new-password"
           className={inputCls}
         />
-        <select name="role" className={inputCls} defaultValue="staff">
-          <option value="staff">Staff — fulfil orders</option>
-          <option value="owner">Owner — full access</option>
+        <select name="role" className={inputCls} value={role} onChange={(e) => setRole(e.target.value)}>
+          <option value="staff">Staff — only the screens ticked below</option>
+          <option value="owner">Owner — every screen, the team and store settings</option>
         </select>
       </div>
+      {role === "staff" && (
+        <fieldset className="rounded-xl border border-[#e3e5f0] px-4 py-3">
+          <legend className="px-1 text-xs font-medium uppercase tracking-[0.15em] text-[#6b7194]">
+            Screens they can open
+          </legend>
+          <ScreenChecklist selected={DEFAULT_STAFF_SCREENS} />
+        </fieldset>
+      )}
       <Feedback state={state} />
       <button
         type="submit"

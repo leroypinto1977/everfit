@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { recordManualSale } from "@everfit/core/lib/orders";
 import { getPurchasableVariant } from "@everfit/core/lib/catalog";
 import { istNoon } from "@everfit/core/lib/report-time";
@@ -15,7 +15,7 @@ export async function recordManualSaleAction(
   _prev: ManualSaleState,
   formData: FormData
 ): Promise<ManualSaleState> {
-  const me = await requireOwner();
+  const me = await requireScreen("orders");
 
   const variantKey = String(formData.get("variantKey") ?? "").trim();
   if (!variantKey) return { error: "Pick a product." };

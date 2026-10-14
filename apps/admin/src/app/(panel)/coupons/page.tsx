@@ -1,4 +1,4 @@
-import { requireOwner } from "@/lib/admin-auth";
+import { requireScreen } from "@/lib/admin-auth";
 import { listCoupons } from "@everfit/core/lib/coupons";
 import { inr } from "@everfit/core/lib/product";
 import { toggleCouponAction } from "./actions";
@@ -7,7 +7,7 @@ import CouponForm from "./CouponForm";
 export const dynamic = "force-dynamic";
 
 export default async function CouponsPage() {
-  await requireOwner();
+  await requireScreen("coupons");
   const coupons = await listCoupons();
   const now = new Date().getTime();
 
