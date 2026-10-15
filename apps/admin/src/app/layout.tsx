@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Exo_2, Poppins, Inter } from "next/font/google";
+import { Exo_2, Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 // Brand faces, kept so the sign-in screen still reads as EVHERFIT:
@@ -17,10 +18,14 @@ const body = Poppins({
 });
 
 // The dashboard itself uses a clean, neutral UI face (Inter) — see .admin-ui.
-const admin = Inter({
+// Self-hosted (Google's latin variable file, OFL): on Hostinger's build server
+// Google Fonts started answering Inter with a URL next/font can't parse, which
+// failed every admin build. Exo 2 and Poppins still load from Google, as in the store.
+const admin = localFont({
+  src: "./fonts/inter-latin-wght.woff2",
   variable: "--font-admin",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: "400 700",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
