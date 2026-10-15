@@ -6,6 +6,7 @@ import {
   changePassword,
   createAdminUser,
   listAdminUsers,
+  resetAdminUserPassword,
   setAdminUserActive,
   setAdminUserRole,
   setAdminUserScreens,
@@ -88,6 +89,26 @@ export async function changePasswordAction(_prev: FormState, formData: FormData)
   if (!ok) return { error: "Current password didn't match." };
   await signOutOtherSessions(me.id);
   return { ok: "Password updated. You've been signed out everywhere else." };
+}
+
+/**
+ * An owner sets a temporary password for a team member, who is signed out
+ * everywhere and must choose their own at next sign-in. Not for your own row:
+ * use Change password, so nobody locks themselves out.
+ */
+export async function resetUserPasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const me = await requireOwner();
+  const id = String(formData.get("id") ?? "");
+  const password = String(formData.get("password") ?? "");
+  if (id === me.id) return { error: "Use Change password for your own account." };
+  if (password.length < 8) return { error: "The temporary password must be at least 8 characters." };
+
+  const user = (await listAdminUsers()).find((u) => u.id === id);
+  if (!user) return { error: "That team member no longer exists." };
+
+  await resetAdminUserPassword(id, password);
+  revalidatePath("/settings");
+  return { ok: `Signed ${user.name} out. They choose a new password after signing in with this one.` };
 }
 
 /**

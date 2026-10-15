@@ -3,7 +3,7 @@ import { listSettings } from "@everfit/core/lib/settings";
 import { requireAdmin } from "@/lib/admin-auth";
 import { listAdminUsers } from "@/lib/team";
 import { setRoleAction, setScreensAction, toggleActiveAction } from "./actions";
-import { AddUserForm, ChangePasswordForm, ScreenChecklist } from "./SettingsForms";
+import { AddUserForm, ChangePasswordForm, ResetPasswordForm, ScreenChecklist } from "./SettingsForms";
 import { StoreSettingsForm } from "./StoreSettingsForm";
 
 export const dynamic = "force-dynamic";
@@ -214,6 +214,9 @@ export default async function SettingsPage() {
                     >
                       {u.active ? "active" : "deactivated"}
                     </span>
+                    {u.mustChangePassword && (
+                      <span className="mt-1 block text-xs text-[#9aa0c3]">temporary password</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-right">
                     {u.id !== me.id && (
@@ -230,6 +233,8 @@ export default async function SettingsPage() {
                         </button>
                       </form>
                     )}
+                    {/* your own password: "Your password" above, so you can't lock yourself out */}
+                    {u.id !== me.id && <ResetPasswordForm id={u.id} />}
                   </td>
                 </tr>
               ))}

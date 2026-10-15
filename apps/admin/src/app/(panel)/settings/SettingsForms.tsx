@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { DEFAULT_STAFF_SCREENS, SCREENS } from "@/lib/screens";
-import { addUserAction, changePasswordAction } from "./actions";
+import { addUserAction, changePasswordAction, resetUserPasswordAction } from "./actions";
 
 const inputCls =
   "w-full rounded-xl border border-[#dcdfee] bg-white px-4 py-2.5 text-sm outline-none focus:border-[#2b337d]";
@@ -110,5 +110,37 @@ export function ChangePasswordForm() {
         {pending ? "Saving…" : "Change password"}
       </button>
     </form>
+  );
+}
+
+/** Team row: the owner types a temporary password; the member must replace it at next sign-in. */
+export function ResetPasswordForm({ id }: { id: string }) {
+  const [state, action, pending] = useActionState(resetUserPasswordAction, undefined);
+  return (
+    <details className="mt-2 text-left">
+      <summary className="cursor-pointer list-none text-right text-xs text-[#2b337d] underline-offset-2 hover:underline">
+        reset password
+      </summary>
+      <form action={action} className="mt-2 w-56 space-y-2">
+        <input type="hidden" name="id" value={id} />
+        <input
+          name="password"
+          type="password"
+          required
+          minLength={8}
+          placeholder="Temporary password, 8+"
+          autoComplete="new-password"
+          className={inputCls}
+        />
+        <Feedback state={state} />
+        <button
+          type="submit"
+          disabled={pending}
+          className="w-full rounded-xl bg-[#2b337d] px-4 py-2 text-xs font-semibold text-white hover:bg-[#232a68] disabled:opacity-60"
+        >
+          {pending ? "Resetting…" : "Reset & sign them out"}
+        </button>
+      </form>
+    </details>
   );
 }

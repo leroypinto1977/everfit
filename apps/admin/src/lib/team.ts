@@ -75,3 +75,14 @@ export async function setOwnPassword(userId: string, password: string) {
     .where(eq(adminUsers.id, userId));
 }
 
+/**
+ * An owner sets a temporary password for someone else. Every session of theirs
+ * ends, and the panel stays closed until they choose their own password.
+ */
+export async function resetAdminUserPassword(id: string, password: string) {
+  await db()
+    .update(adminUsers)
+    .set({ passwordHash: hashPassword(password), mustChangePassword: true })
+    .where(eq(adminUsers.id, id));
+  await db().delete(adminSessions).where(eq(adminSessions.userId, id));
+}
