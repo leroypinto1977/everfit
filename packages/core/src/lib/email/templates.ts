@@ -231,7 +231,7 @@ export function teammateWelcome(input: { name: string; email: string; role: stri
         ),
         panel(`<strong style="color:${brand.ink}">Your sign-in email</strong><br>${mono(input.email)}`),
         button("Go to admin sign-in", adminUrl("/login")),
-        paragraph(`For security, please change your password from <strong style="color:${brand.ink}">Settings</strong> right after your first sign-in.`),
+        paragraph(`The first time you sign in, you'll be asked to choose your own password before the admin opens.`),
       ].join(""),
       { preheader: "You've been given access to the EVHERFIT store admin.", headerBar: brand.indigoDeep, team: true }
     ),
