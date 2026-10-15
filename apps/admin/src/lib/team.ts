@@ -15,6 +15,7 @@ export async function listAdminUsers() {
       role: adminUsers.role,
       screens: adminUsers.screens,
       active: adminUsers.active,
+      mustChangePassword: adminUsers.mustChangePassword,
       createdAt: adminUsers.createdAt,
       lastLoginAt: adminUsers.lastLoginAt,
     })
@@ -28,6 +29,7 @@ export async function createAdminUser(input: {
   password: string;
   role: AdminRole;
   screens?: ScreenKey[]; // staff only; owners see every screen
+  mustChangePassword?: boolean; // true when an owner chose the password for them
 }) {
   const [user] = await db()
     .insert(adminUsers)
@@ -37,6 +39,7 @@ export async function createAdminUser(input: {
       role: input.role,
       screens: input.screens ?? [],
       passwordHash: hashPassword(input.password),
+      mustChangePassword: input.mustChangePassword ?? false,
     })
     .returning({ id: adminUsers.id });
   return user;
@@ -56,9 +59,19 @@ export async function setAdminUserScreens(id: string, screens: ScreenKey[]) {
   await db().update(adminUsers).set({ screens }).where(eq(adminUsers.id, id));
 }
 
+/** The caller signs out the user's other sessions once this returns true. */
 export async function changePassword(userId: string, current: string, next: string) {
   const rows = await db().select().from(adminUsers).where(eq(adminUsers.id, userId)).limit(1);
   if (!rows[0] || !verifyPassword(current, rows[0].passwordHash)) return false;
-  await db().update(adminUsers).set({ passwordHash: hashPassword(next) }).where(eq(adminUsers.id, userId));
+  await setOwnPassword(userId, next);
   return true;
 }
+
+/** The user chose this password themselves, so the owner-set-password hold lifts. */
+export async function setOwnPassword(userId: string, password: string) {
+  await db()
+    .update(adminUsers)
+    .set({ passwordHash: hashPassword(password), mustChangePassword: false })
+    .where(eq(adminUsers.id, userId));
+}
+

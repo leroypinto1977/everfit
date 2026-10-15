@@ -1,5 +1,5 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
-import { and, count, eq, gt, lt, sql } from "drizzle-orm";
+import { and, count, eq, gt, lt, ne, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@everfit/core/db";
@@ -113,8 +113,16 @@ export async function destroySession() {
   store.delete(COOKIE);
 }
 
-/** The signed-in admin, or null. */
-export async function getAdminUser(): Promise<AdminUser | null> {
+/** Every other session of this user ends; the browser making the request stays signed in. */
+export async function signOutOtherSessions(userId: string) {
+  const token = (await cookies()).get(COOKIE)?.value ?? "";
+  await db()
+    .delete(adminSessions)
+    .where(and(eq(adminSessions.userId, userId), ne(adminSessions.tokenHash, sha256(token))));
+}
+
+/** The session's user, including one who still has to replace an owner-set password. */
+async function sessionUser(): Promise<(AdminUser & { mustChangePassword: boolean }) | null> {
   const store = await cookies();
   const token = store.get(COOKIE)?.value;
   if (!token) return null;
@@ -127,6 +135,7 @@ export async function getAdminUser(): Promise<AdminUser | null> {
       role: adminUsers.role,
       screens: adminUsers.screens,
       active: adminUsers.active,
+      mustChangePassword: adminUsers.mustChangePassword,
     })
     .from(adminSessions)
     .innerJoin(adminUsers, eq(adminSessions.userId, adminUsers.id))
@@ -135,13 +144,42 @@ export async function getAdminUser(): Promise<AdminUser | null> {
 
   const u = rows[0];
   if (!u?.active) return null;
-  return { id: u.id, email: u.email, name: u.name, role: u.role as AdminRole, screens: u.screens };
+  return {
+    id: u.id,
+    email: u.email,
+    name: u.name,
+    role: u.role as AdminRole,
+    screens: u.screens,
+    mustChangePassword: u.mustChangePassword,
+  };
 }
 
-/** Call at the top of every admin page/action. Returns the signed-in user. */
+/**
+ * The signed-in admin, or null. Someone still on an owner-set password counts
+ * as signed out here (the CSV exports answer 401) until they change it.
+ */
+export async function getAdminUser(): Promise<AdminUser | null> {
+  const user = await sessionUser();
+  return user && !user.mustChangePassword ? user : null;
+}
+
+/**
+ * Call at the top of every admin page/action. Returns the signed-in user.
+ * Everything in the panel comes through here (requireOwner and requireScreen
+ * too), so this is the one place that holds back an owner-set password.
+ */
 export async function requireAdmin(): Promise<AdminUser> {
-  const user = await getAdminUser();
+  const user = await sessionUser();
   if (!user) redirect("/login");
+  if (user.mustChangePassword) redirect("/change-password");
+  return user;
+}
+
+/** Only for /change-password: the signed-in user who must replace an owner-set password. */
+export async function requirePasswordChange(): Promise<AdminUser> {
+  const user = await sessionUser();
+  if (!user) redirect("/login");
+  if (!user.mustChangePassword) redirect(homeFor(user));
   return user;
 }
 
@@ -232,7 +270,10 @@ export async function resetPasswordWithToken(token: string, newPassword: string)
   const userId = rows[0]?.userId;
   if (!userId) return false;
 
-  await db().update(adminUsers).set({ passwordHash: hashPassword(newPassword) }).where(eq(adminUsers.id, userId));
+  await db()
+    .update(adminUsers)
+    .set({ passwordHash: hashPassword(newPassword), mustChangePassword: false })
+    .where(eq(adminUsers.id, userId));
   await db().delete(passwordResets).where(eq(passwordResets.userId, userId));
   await db().delete(adminSessions).where(eq(adminSessions.userId, userId));
   return true;
