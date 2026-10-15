@@ -92,6 +92,13 @@
       "when": 1786940000000,
       "tag": "0012_admin_screens",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1786950000000,
+      "tag": "0013_admin_must_change_password",
+      "breakpoints": true
     }
   ]
 }
