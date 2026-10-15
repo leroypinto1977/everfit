@@ -242,3 +242,13 @@ export function LeadsIcon(p: SVGProps<SVGSVGElement>) {
     </Base>
   );
 }
+
+export function TeamIcon(p: SVGProps<SVGSVGElement>) {
+  return (
+    <Base {...p}>
+      <circle cx="9" cy="7" r="4" />
+      <path d="M2 21v-2a4 4 0 0 1 4-4h6" />
+      <path d="M18 13l3 1.2v2.6c0 2.1-1.4 3.6-3 4.2-1.6-.6-3-2.1-3-4.2v-2.6z" />
+    </Base>
+  );
+}

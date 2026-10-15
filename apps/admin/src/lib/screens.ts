@@ -1,8 +1,8 @@
 /**
  * The admin panel's screens — the unit of access control. An owner sees every
- * screen; a staff member sees only the screens the owner ticked for them in
- * Settings → Team. Settings itself is always open (everyone can change their
- * own password); its team and store sections stay owner-only.
+ * screen; a staff member sees only the screens the owner ticked for them on
+ * the Team page (owner-only). Settings itself is always open (everyone can
+ * change their own password); its store sections stay owner-only.
  *
  * No server imports: the sidebar (a client component) reads this list too.
  */

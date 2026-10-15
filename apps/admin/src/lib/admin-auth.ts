@@ -192,7 +192,7 @@ export async function requireOwner(): Promise<AdminUser> {
 
 /**
  * For every page, action and export that belongs to a screen. Owners pass;
- * staff pass only for the screens ticked for them in Settings → Team, and are
+ * staff pass only for the screens ticked for them on the Team page, and are
  * otherwise sent to the first screen they may open.
  */
 export async function requireScreen(key: ScreenKey): Promise<AdminUser> {

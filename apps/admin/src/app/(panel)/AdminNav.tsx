@@ -16,6 +16,7 @@ import {
   AnalyticsIcon,
   EmailsIcon,
   SettingsIcon,
+  TeamIcon,
   CardIcon,
   ExternalIcon,
 } from "@/components/icons";
@@ -44,9 +45,10 @@ export default function AdminNav({ access, onNavigate }: { access: ScreenAccess;
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
 
-  // Settings is always there: everyone can change their own password.
+  // Team is owner-only. Settings is always there: everyone can change their own password.
   const visible = [
     ...SCREENS.filter((s) => canSee(access, s.key)).map((s) => ({ ...s, icon: icons[s.key] })),
+    ...(access.role === "owner" ? [{ href: "/team", label: "Team", icon: TeamIcon }] : []),
     { href: "/settings", label: "Settings", icon: SettingsIcon },
   ];
 
