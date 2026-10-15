@@ -10,11 +10,11 @@ import { sendLowStockAlert, sendOrderNotifications } from "@everfit/core/lib/not
  * Payment reconciliation — a safety net for the (rare) case where Razorpay's
  * webhook AND the browser verify call both failed to confirm a real payment, so
  * an order is stuck in "created" while the customer was actually charged. Runs
- * on a Vercel Cron (see vercel.json). For each stuck online order it asks
+ * nightly from GitHub Actions (.github/workflows/reconcile.yml). For each stuck online order it asks
  * Razorpay whether a payment was captured and, if so, marks it paid exactly
  * like the webhook would (markPaid is transition-aware, so no double emails).
  *
- * Protected by CRON_SECRET: Vercel Cron sends `Authorization: Bearer <secret>`.
+ * Protected by CRON_SECRET: the workflow sends `Authorization: Bearer <secret>`.
  * Fails closed — without CRON_SECRET set, every request is rejected.
  */
 
