@@ -1,0 +1,24 @@
+# Nightly payment reconciliation for the store (apps/store/src/app/api/cron/reconcile).
+# Used to be a Vercel Cron; the store now runs on Hostinger, which has no cron
+# for web apps, so GitHub calls it instead at the same time (00:00 UTC, 05:30 IST).
+# CRON_SECRET must match the store web app's CRON_SECRET env var.
+name: Payment reconciliation
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Reconcile stuck orders with Razorpay
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          STORE_URL: ${{ vars.STORE_URL || 'https://evherfit.com' }}
+        run: |
+          curl --fail-with-body --silent --show-error --max-time 150 \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "$STORE_URL/api/cron/reconcile"
