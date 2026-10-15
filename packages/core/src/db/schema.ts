@@ -27,6 +27,9 @@ export const adminUsers = pgTable("admin_users", {
   screens: text("screens").array().notNull().default(sql`'{}'::text[]`),
   passwordHash: text("password_hash").notNull(), // scrypt: salt$hash
   active: boolean("active").notNull().default(true),
+  // Set when an owner chose the password (new member, or a reset); the panel stays
+  // closed until they pick their own on /change-password.
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
 });

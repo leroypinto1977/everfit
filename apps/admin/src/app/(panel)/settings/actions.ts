@@ -1,11 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { requireAdmin, requireOwner } from "@/lib/admin-auth";
+import { requireAdmin, requireOwner, signOutOtherSessions } from "@/lib/admin-auth";
 import {
   changePassword,
   createAdminUser,
   listAdminUsers,
+  resetAdminUserPassword,
   setAdminUserActive,
   setAdminUserRole,
   setAdminUserScreens,
@@ -39,13 +40,13 @@ export async function addUserAction(_prev: FormState, formData: FormData): Promi
   }
 
   try {
-    await createAdminUser({ name, email, password, role, screens });
+    await createAdminUser({ name, email, password, role, screens, mustChangePassword: true });
   } catch {
     return { error: "Couldn't create the account — is that email already in use?" };
   }
   await sendTeammateWelcome({ name, email, role: role === "owner" ? "Owner" : "Staff" });
   revalidatePath("/settings");
-  return { ok: `${name} can now sign in with that email and password. Ask them to change it after first login.` };
+  return { ok: `${name} can now sign in with that email and password, and will be asked to choose their own.` };
 }
 
 export async function toggleActiveAction(formData: FormData) {
@@ -85,7 +86,29 @@ export async function changePasswordAction(_prev: FormState, formData: FormData)
   if (next.length < 8) return { error: "New password must be at least 8 characters." };
 
   const ok = await changePassword(me.id, current, next);
-  return ok ? { ok: "Password updated." } : { error: "Current password didn't match." };
+  if (!ok) return { error: "Current password didn't match." };
+  await signOutOtherSessions(me.id);
+  return { ok: "Password updated. You've been signed out everywhere else." };
+}
+
+/**
+ * An owner sets a temporary password for a team member, who is signed out
+ * everywhere and must choose their own at next sign-in. Not for your own row:
+ * use Change password, so nobody locks themselves out.
+ */
+export async function resetUserPasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const me = await requireOwner();
+  const id = String(formData.get("id") ?? "");
+  const password = String(formData.get("password") ?? "");
+  if (id === me.id) return { error: "Use Change password for your own account." };
+  if (password.length < 8) return { error: "The temporary password must be at least 8 characters." };
+
+  const user = (await listAdminUsers()).find((u) => u.id === id);
+  if (!user) return { error: "That team member no longer exists." };
+
+  await resetAdminUserPassword(id, password);
+  revalidatePath("/settings");
+  return { ok: `Signed ${user.name} out. They choose a new password after signing in with this one.` };
 }
 
 /**

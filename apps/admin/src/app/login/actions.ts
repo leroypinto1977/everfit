@@ -7,13 +7,17 @@ import { adminUsers } from "@everfit/core/db/schema";
 import {
   createPasswordReset,
   createSession,
+  destroySession,
   isValidSetupKey,
   loginRateLimited,
   needsSetup,
+  requirePasswordChange,
   resetPasswordWithToken,
+  signOutOtherSessions,
   verifyPassword,
 } from "@/lib/admin-auth";
-import { createAdminUser } from "@/lib/team";
+import { homeFor } from "@/lib/screens";
+import { createAdminUser, setOwnPassword } from "@/lib/team";
 import { sendPasswordResetEmail } from "@everfit/core/lib/notify";
 import { adminUrl } from "@everfit/core/lib/email/render";
 
@@ -92,4 +96,25 @@ export async function resetPassword(_prev: ResetState, formData: FormData): Prom
   const ok = await resetPasswordWithToken(token, password);
   if (!ok) return { error: "This reset link is invalid or has expired. Request a new one." };
   redirect("/login?reset=1");
+}
+
+/**
+ * Replace an owner-set password. No current password: they have just signed
+ * in with it. This browser stays signed in, every other session ends.
+ */
+export async function choosePassword(_prev: FormState, formData: FormData): Promise<FormState> {
+  const me = await requirePasswordChange();
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+  if (password.length < 8) return { error: "Password must be at least 8 characters." };
+  if (password !== confirm) return { error: "Those passwords don't match." };
+
+  await setOwnPassword(me.id, password);
+  await signOutOtherSessions(me.id);
+  redirect(homeFor(me));
+}
+
+export async function logout() {
+  await destroySession();
+  redirect("/login");
 }
