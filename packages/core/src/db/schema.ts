@@ -234,7 +234,7 @@ export const leads = pgTable("leads", {
   answers: jsonb("answers").$type<{ id?: string; label: string; value: string }[]>().notNull(),
   // Hot / warm / cold from the answers (lib/lead-score.ts); the team may change it after the call.
   temperature: text("temperature"),
-  score: integer("score"), // out of RATING_MAX; kept when the team changes the temperature
+  score: integer("score"), // points from lib/lead-score.ts; kept when the team changes the temperature
   scoreReasons: jsonb("score_reasons").$type<string[]>(),
   // Follow-up, edited by the team in the admin panel's 1-to-1 screen.
   status: text("status").notNull().default("new"), // see LEAD_STATUSES in lib/leads.ts

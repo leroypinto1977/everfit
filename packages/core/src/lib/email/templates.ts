@@ -1,6 +1,6 @@
 import type { Order } from "../orders";
 import type { NewLead } from "../leads";
-import { RATING_MAX, type LeadTemperature } from "../lead-score";
+import type { LeadTemperature } from "../lead-score";
 import { courierName, trackingUrl } from "../couriers";
 import {
   adminUrl,
@@ -285,7 +285,7 @@ export function leadNotification(lead: NewLead, template: { subject: string; bod
     .join("");
 
   // The rating leads the subject so the inbox itself says whom to call first.
-  const rating = lead.rating ? `${RATING_TAG[lead.rating.temperature]} ${lead.rating.score}/${RATING_MAX} · ` : "";
+  const rating = lead.rating ? `${RATING_TAG[lead.rating.temperature]} ${lead.rating.score} pts · ` : "";
   return {
     subject: (rating + fill(template.subject, plain)).replace(/\s+/g, " ").trim().slice(0, 200),
     html: shell(body, { preheader: `${lead.name} applied for the 1-to-1 program.`, team: true }),

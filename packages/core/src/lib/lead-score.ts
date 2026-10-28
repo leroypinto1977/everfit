@@ -28,9 +28,10 @@ export interface LeadRating {
   reasons: string[];
 }
 
-export const RATING_MAX = 13;
-const HOT = 9;
-const WARM = 5;
+// Out of 10 on the current form: 4 + 3 + 1 from the readiness questions, 2 bonus.
+// Leads from earlier forms were scored out of 12 or 13 and keep their score.
+const HOT = 7;
+const WARM = 4;
 
 const norm = (s: string) =>
   s.toLowerCase().replace(/[‘’]/g, "'").replace(/[–—]/g, "-").replace(/\s+/g, " ").trim();
@@ -63,6 +64,7 @@ const READINESS: Readiness[] = [
     cold: ["₹35,000–₹40,000 is currently outside my budget", "I am only exploring options right now"],
   },
   {
+    // Removed from the form on 28 October 2026; earlier leads still answer it.
     id: "decision",
     legacy: ["Who will make the final decision about joining Evherfit?"],
     name: "On the call",
