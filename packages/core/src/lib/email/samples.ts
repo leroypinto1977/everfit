@@ -69,20 +69,24 @@ export const sampleLead: NewLead = {
     { id: "kg", label: "How many kg would you like to lose?", value: "12 kg" },
     { id: "health", label: "Do you have any of these health concerns?", value: "Thyroid" },
     {
+      id: "afford",
+      label: "Are you willing to invest ₹35,000 in your health?",
+      value: "Yes, my health is worth it. I’m ready to invest ₹35,000",
+    },
+    {
       id: "invest",
       label: "How would you like to move forward?",
       value: "I'm ready to invest in myself and start right away",
     },
-    { id: "decision", label: "Who would you like on your discovery call?", value: "Just me. I make my own decisions about my health" },
     { id: "start", label: "When would you like to start your 90 days?", value: "Within the next 2 weeks" },
   ],
   rating: {
     temperature: "hot",
-    score: 10,
+    score: 8,
     reasons: [
       "Moving forward: I'm ready to invest in myself and start right away (+4)",
-      "On the call: Just me. I make my own decisions about my health (+3)",
       "Start: Within the next 2 weeks (+2)",
+      "₹35,000: Yes, my health is worth it. I’m ready to invest ₹35,000 (+1)",
       "Has a medical concern (PCOS, thyroid, diabetes or BP) (+1)",
     ],
   },

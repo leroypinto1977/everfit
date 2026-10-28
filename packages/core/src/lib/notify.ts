@@ -98,7 +98,7 @@ async function brevoPost(path: string, payload: unknown): Promise<PostResult> {
   return post(`https://api.brevo.com/v3${path}`, { "api-key": apiKey }, payload);
 }
 
-type Message = { from: string; to: string; subject: string; html: string; replyTo?: string };
+type Message = { from: string; to: string; subject: string; html: string; text?: string; replyTo?: string };
 
 /** The body Resend's POST /emails expects. Exported for the tests. */
 export function resendPayload(m: Message) {
@@ -107,6 +107,7 @@ export function resendPayload(m: Message) {
     to: [m.to],
     subject: m.subject,
     html: m.html,
+    ...(m.text ? { text: m.text } : {}),
     ...(m.replyTo ? { reply_to: m.replyTo } : {}),
   };
 }
@@ -118,6 +119,7 @@ export function brevoPayload(m: Message) {
     to: [{ email: m.to }],
     subject: m.subject,
     htmlContent: m.html,
+    ...(m.text ? { textContent: m.text } : {}),
     ...(m.replyTo ? { replyTo: { email: m.replyTo } } : {}),
   };
 }
@@ -144,7 +146,14 @@ async function send(
       : opts?.replyTo === false
         ? ""
         : (await getSettings()).support_email;
-  const result = await deliver({ from: await from(), to, subject: email.subject, html: email.html, replyTo });
+  const result = await deliver({
+    from: await from(),
+    to,
+    subject: email.subject,
+    html: email.html,
+    text: email.text,
+    replyTo,
+  });
   if (!result.ok) {
     console.error(`Email "${email.subject}" failed (${result.status ?? "network"}):`, result.body);
     return "failed";

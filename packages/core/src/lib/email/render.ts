@@ -117,6 +117,15 @@ export function mono(text: string) {
   return `<span style="font-family:'SFMono-Regular',Consolas,Menlo,monospace;font-size:13px;color:${brand.ink}">${esc(text)}</span>`;
 }
 
+/**
+ * A message that looks written by a person: no header bar, logo, buttons or
+ * footer links. For one-to-one notes the reader should see in Gmail's Primary
+ * tab; the branded shell() reads as a newsletter.
+ */
+export function plainEmail(bodyHtml: string) {
+  return `<!doctype html><html><body style="margin:0;padding:16px"><div style="font-family:${FONT};font-size:15px;color:${brand.ink};line-height:1.6;max-width:600px">${bodyHtml}</div></body></html>`;
+}
+
 /* ---------- shell ---------- */
 
 const footerLinks = [

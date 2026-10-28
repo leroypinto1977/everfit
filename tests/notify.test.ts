@@ -50,6 +50,8 @@ describe("email provider", () => {
       reply_to: "lead@example.com",
     });
     expect(resendPayload(message)).not.toHaveProperty("reply_to");
+    expect(resendPayload({ ...message, text: "Thanks" })).toMatchObject({ text: "Thanks" });
+    expect(brevoPayload({ ...message, text: "Thanks" })).toMatchObject({ textContent: "Thanks" });
     expect(brevoPayload({ ...message, replyTo: "" })).toEqual({
       sender: { name: "EVHERFIT", email: "orders@evherfit.com" },
       to: [{ email: "buyer@example.com" }],

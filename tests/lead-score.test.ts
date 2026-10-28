@@ -82,6 +82,6 @@ describe("rateLead", () => {
       answers: lead({ start: "This week", invest: "I'm ready to invest in myself and start right away" }),
     })!;
     expect(parsed.answers[0].id).toBe("start");
-    expect(leadNotification(parsed, { subject: "New lead {{name}}", body: "x" }).subject).toBe("🔥 Hot 7 pts · New lead Priya");
+    expect(leadNotification(parsed, { subject: "New lead {{name}}", body: "x" }).subject).toBe("Hot lead, 7 pts: New lead Priya");
   });
 });

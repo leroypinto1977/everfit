@@ -12,13 +12,15 @@ import {
   mono,
   panel,
   paragraph,
+  plainEmail,
   row,
   shell,
   siteUrl,
   summary,
 } from "./render";
 
-const RATING_TAG: Record<LeadTemperature, string> = { hot: "🔥 Hot", warm: "🟠 Warm", cold: "🔵 Cold" };
+// Words, not emoji: an emoji-led subject is one of the signals Gmail uses to file mail under Promotions.
+const RATING_TAG: Record<LeadTemperature, string> = { hot: "Hot lead", warm: "Warm lead", cold: "Cold lead" };
 
 /**
  * Each template returns { subject, html }. Templates are pure — all sending,
@@ -27,6 +29,8 @@ const RATING_TAG: Record<LeadTemperature, string> = { hot: "🔥 Hot", warm: "�
 export interface Email {
   subject: string;
   html: string;
+  /** Plain-text alternative. Mail with only an HTML part reads as a newsletter to Gmail's tabbing. */
+  text?: string;
 }
 
 function shipTo(o: Order) {
@@ -251,43 +255,77 @@ function fill(text: string, values: Record<string, string>) {
 /**
  * The team's alert for a new 1-to-1 application. Subject and body are written
  * by the owner in Settings as plain text with {{placeholders}}; this turns that
- * text into the branded HTML. Everything the lead typed arrived through a
- * public form, so each value is escaped before it meets the markup.
+ * text into a plain, personal-looking message with a text part. It used the
+ * branded shell (header bar, footer links) until the team found these alerts
+ * filed under Gmail's Promotions tab. Everything the lead typed arrived
+ * through a public form, so each value is escaped before it meets the markup.
  */
 export function leadNotification(lead: NewLead, template: { subject: string; body: string }): Email {
   const link = adminUrl(`/one-to-one?q=${encodeURIComponent(lead.ref)}`);
   const plain = { name: lead.name, phone: lead.phone, email: lead.email, ref: lead.ref, link, answers: "" };
+  const uses = (key: string) => new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`).test(template.body);
 
   const answers = lead.answers
     .map(
       (a) =>
-        `<span style="font-size:12px;color:${brand.muted}">${esc(a.label)}</span><br>` +
-        `<span style="color:${brand.ink}">${esc(a.value).replace(/\n/g, "<br>")}</span>`
+        `<span style="color:${brand.muted}">${esc(a.label)}</span><br>` +
+        `${esc(a.value).replace(/\n/g, "<br>")}`
     )
     .join("<br><br>");
+  const answersText = lead.answers.map((a) => `${a.label}\n${a.value}`).join("\n\n");
   const html: Record<string, string> = {
     name: esc(lead.name),
     phone: esc(lead.phone),
     email: esc(lead.email),
     ref: esc(lead.ref),
-    link: `<a href="${link}" style="color:${brand.indigo}">${esc(link)}</a>`,
+    link: `<a href="${link}">${esc(link)}</a>`,
     answers,
   };
+  const p = (inner: string) => `<p style="margin:0 0 16px">${inner}</p>`;
 
-  const body = template.body
+  // The rating and every detail of the lead are always in the email, whatever
+  // the owner's wording in Settings leaves out: the team decides whom to call
+  // from the email alone. The owner's text sits between them.
+  const r = lead.rating;
+  const ratingLine = r ? `${RATING_TAG[r.temperature]} (${r.score} pts)` : "Not rated (no readiness answers)";
+  const ratingHtml =
+    p(`<b>Rating: ${esc(ratingLine)}</b>`) +
+    (r?.reasons.length
+      ? `<ul style="margin:0 0 16px;padding-left:20px">${r.reasons.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`
+      : "");
+  const ratingText = [`Rating: ${ratingLine}`, ...(r?.reasons ?? []).map((x) => `- ${x}`)].join("\n");
+
+  const contact = { html: `Name: ${html.name}<br>WhatsApp: ${html.phone}<br>Email: ${html.email}<br>Reference: #${html.ref}`,
+    text: `Name: ${lead.name}\nWhatsApp: ${lead.phone}\nEmail: ${lead.email}\nReference: #${lead.ref}` };
+  const needsContact = !(uses("phone") && uses("email"));
+
+  const ownerHtml = template.body
     .split(/\n{2,}/)
-    .map((block) =>
-      // On a line of its own the answers get the tinted box; inline they just flow.
-      block.trim() === "{{answers}}"
-        ? panel(answers)
-        : paragraph(fill(esc(block), html).replace(/\n/g, "<br>"))
-    )
+    .map((block) => p(fill(esc(block), html).replace(/\n/g, "<br>")))
     .join("");
 
+  const bodyHtml = [
+    ratingHtml,
+    ownerHtml,
+    needsContact ? p(contact.html) : "",
+    uses("answers") ? "" : p(answers),
+    uses("link") ? "" : p(html.link),
+  ].join("");
+  const bodyText = [
+    ratingText,
+    fill(template.body, { ...plain, answers: answersText }),
+    needsContact ? contact.text : "",
+    uses("answers") ? "" : answersText,
+    uses("link") ? "" : link,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
+
   // The rating leads the subject so the inbox itself says whom to call first.
-  const rating = lead.rating ? `${RATING_TAG[lead.rating.temperature]} ${lead.rating.score} pts · ` : "";
+  const rating = r ? `${RATING_TAG[r.temperature]}, ${r.score} pts: ` : "";
   return {
     subject: (rating + fill(template.subject, plain)).replace(/\s+/g, " ").trim().slice(0, 200),
-    html: shell(body, { preheader: `${lead.name} applied for the 1-to-1 program.`, team: true }),
+    html: plainEmail(bodyHtml),
+    text: bodyText,
   };
 }
