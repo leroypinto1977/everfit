@@ -59,17 +59,33 @@ export const sampleLead: NewLead = {
   phone: "+91 98765 43210",
   email: "priya@example.com",
   answers: [
-    { label: "Full Name", value: "Priya Raman" },
-    { label: "Age", value: "34" },
-    { label: "What is your primary transformation goal?", value: "Fat loss / weight loss" },
-    { label: "What is your current weight?", value: "72 kg" },
-    { label: "What is your target weight?", value: "62 kg" },
+    { id: "name", label: "Full Name", value: "Priya Raman" },
+    { id: "age", label: "Age", value: "34" },
     {
-      label: "If Evherfit is the right fit for your goals, which best describes you?",
-      value: "I am financially ready to invest ₹35,000–₹40,000 and begin",
+      id: "goal",
+      label: "What would you most love to change about your body and health?",
+      value: "Lose the weight I gained after pregnancy",
     },
-    { label: "If selected for Evherfit, when would you be ready to start?", value: "Within 2 weeks" },
+    { id: "kg", label: "How many kg would you like to lose?", value: "12 kg" },
+    { id: "health", label: "Do you have any of these health concerns?", value: "Thyroid" },
+    {
+      id: "invest",
+      label: "How would you like to move forward?",
+      value: "I'm ready to invest in myself and start right away",
+    },
+    { id: "decision", label: "Who would you like on your discovery call?", value: "Just me. I make my own decisions about my health" },
+    { id: "start", label: "When would you like to start your 90 days?", value: "Within the next 2 weeks" },
   ],
+  rating: {
+    temperature: "hot",
+    score: 10,
+    reasons: [
+      "Moving forward: I'm ready to invest in myself and start right away (+4)",
+      "On the call: Just me. I make my own decisions about my health (+3)",
+      "Start: Within the next 2 weeks (+2)",
+      "Has a medical concern (PCOS, thyroid, diabetes or BP) (+1)",
+    ],
+  },
 };
 
 export interface EmailPreview {

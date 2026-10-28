@@ -18,7 +18,13 @@ const valid = {
 
 describe("parseLead", () => {
   it("normalises a well-formed application", () => {
-    expect(parseLead(valid)).toEqual({ ...valid, ref: "K7Q2X9AB", name: "Test", email: "test@example.com" });
+    expect(parseLead(valid)).toEqual({
+      ...valid,
+      ref: "K7Q2X9AB",
+      name: "Test",
+      email: "test@example.com",
+      rating: null,
+    });
   });
 
   it("rejects bodies that are not a usable application", () => {
