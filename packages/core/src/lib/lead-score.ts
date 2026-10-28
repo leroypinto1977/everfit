@@ -28,7 +28,7 @@ export interface LeadRating {
   reasons: string[];
 }
 
-export const RATING_MAX = 12;
+export const RATING_MAX = 13;
 const HOT = 9;
 const WARM = 5;
 
@@ -95,6 +95,17 @@ const READINESS: Readiness[] = [
       "After one month",
     ],
     cold: ["I am only exploring right now"],
+  },
+  {
+    id: "afford",
+    legacy: [],
+    name: "₹35,000",
+    points: {
+      "Yes, my health is worth it. I'm ready to invest ₹35,000": 1,
+      "Yes, once Manjula explains my personalised plan on the call": 0,
+      "Yes, after I discuss it with my family": 0,
+    },
+    notHot: ["Yes, after I discuss it with my family"],
   },
   {
     // Only on the old form; it can rule a lead out but earns nothing.

@@ -60,6 +60,16 @@ describe("rateLead", () => {
     expect(rateLead(old)?.temperature).toBe("cold");
   });
 
+  it("scores the ₹35,000 question: +1 when ready, never hot after a family talk", () => {
+    const base = {
+      decision: "Just me. I make my own decisions about my health",
+      invest: "I'd like Manjula to walk me through my personalised plan on the call, then start",
+      start: "Within the next 2 weeks",
+    };
+    expect(rateLead(lead({ ...base, afford: "Yes, my health is worth it. I’m ready to invest ₹35,000" }))).toMatchObject({ temperature: "hot", score: 9 });
+    expect(rateLead(lead({ ...base, health: "Thyroid", afford: "Yes, after I discuss it with my family" }))).toMatchObject({ temperature: "warm", score: 9 });
+  });
+
   it("leaves a lead it can't rate unrated", () => {
     expect(rateLead([{ label: "Age", value: "28" }])).toBeNull();
   });
@@ -73,6 +83,6 @@ describe("rateLead", () => {
       answers: lead({ start: "This week", invest: "I'm ready to invest in myself and start right away", decision: "Me and my husband" }),
     })!;
     expect(parsed.answers[0].id).toBe("start");
-    expect(leadNotification(parsed, { subject: "New lead {{name}}", body: "x" }).subject).toBe("🟠 Warm 8/12 · New lead Priya");
+    expect(leadNotification(parsed, { subject: "New lead {{name}}", body: "x" }).subject).toBe("🟠 Warm 8/13 · New lead Priya");
   });
 });
