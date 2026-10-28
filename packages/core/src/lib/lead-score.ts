@@ -113,20 +113,29 @@ const BONUSES: { id: string; reason: string; earns: (value: string) => boolean }
   {
     id: "health",
     reason: "Has a medical concern (PCOS, thyroid, diabetes or BP)",
-    earns: (v) => ticked(v, ["PCOS / PCOD", "Thyroid", "Diabetes or pre-diabetes", "High BP / cholesterol"]) > 0,
+    earns: (v) =>
+      ticked(v, [
+        "PCOS / PCOD",
+        "Thyroid",
+        "Diabetes, high BP or cholesterol",
+        // the two options it replaced, still on leads from before 28 October 2026
+        "Diabetes or pre-diabetes",
+        "High BP / cholesterol",
+      ]) > 0,
   },
   {
     id: "impact",
-    reason: "It affects her day to day in 3+ ways",
+    reason: "It affects her day to day in 2+ ways",
     earns: (v) =>
       ticked(v, [
         "I avoid photos or don't like what I see in the mirror",
-        "My clothes don't fit and I hide my body",
         "I feel tired and low on energy most days",
         "My health reports or doctor have warned me",
-        "I can't keep up with my kids and family",
         "I worry about my long-term health",
-      ]) >= 3,
+        // dropped from the form on 28 October 2026, still on earlier leads
+        "My clothes don't fit and I hide my body",
+        "I can't keep up with my kids and family",
+      ]) >= 2,
   },
 ];
 
