@@ -2,7 +2,6 @@ import Link from "next/link";
 import { LEAD_STATUSES, isLeadStatus, leadStats, listLeads, type LeadStatus } from "@everfit/core/lib/leads";
 import {
   LEAD_TEMPERATURES,
-  RATING_MAX,
   isLeadTemperature,
   type LeadTemperature,
 } from "@everfit/core/lib/lead-score";
@@ -181,7 +180,7 @@ export default async function OneToOnePage({
                     {temperature
                       ? `${ratingIcon[temperature]} ${LEAD_TEMPERATURES.find((t) => t.value === temperature)?.label}`
                       : "Not rated"}
-                    {lead.score !== null && <span className="ml-1 font-normal opacity-70">{lead.score}/{RATING_MAX}</span>}
+                    {lead.score !== null && <span className="ml-1 font-normal opacity-70">{lead.score} pts</span>}
                   </span>
                   <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badge[leadStatus]}`}>
                     {LEAD_STATUSES.find((s) => s.value === leadStatus)?.label}
@@ -209,7 +208,7 @@ export default async function OneToOnePage({
                   {lead.scoreReasons && lead.scoreReasons.length > 0 && (
                     <div className="rounded-xl bg-[#f6f7fb] px-4 py-3 text-sm">
                       <p className="text-xs font-medium uppercase tracking-[0.15em] text-[#6b7194]">
-                        Why this rating · {lead.score}/{RATING_MAX}
+                        Why this rating · {lead.score} pts
                       </p>
                       <ul className="mt-2 list-disc space-y-1 pl-5 text-[#4a5072]">
                         {lead.scoreReasons.map((r) => (
