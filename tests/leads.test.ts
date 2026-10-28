@@ -72,11 +72,39 @@ describe("leadNotification", () => {
     expect(email.html).toContain("&lt;b&gt;Mallory&lt;/b&gt;");
   });
 
-  it("carries the team footer, not the customer one", () => {
-    const email = leadNotification(lead, { subject: "{{name}}", body: "{{answers}}" });
-    expect(email.html).toContain("on the Evherfit team");
-    expect(email.html).not.toContain("placed an order");
+  it("is a plain note with a text part, not the branded newsletter shell", () => {
+    const email = leadNotification(parseLead(valid)!, { subject: "{{name}}", body: "Call {{name}}." });
     expect(email.html).not.toContain("/track");
+    expect(email.html).not.toContain("<table");
+    expect(email.text).toContain("Call Test.");
+    expect(email.text).toContain("/one-to-one?q=K7Q2X9AB");
+  });
+
+  it("always carries the rating, its reasons and every detail of the lead", () => {
+    const rated = parseLead({
+      ...valid,
+      answers: [
+        { id: "start", label: "When would you like to start?", value: "This week" },
+        { id: "invest", label: "Move forward", value: "I'm ready to invest in myself and start right away" },
+      ],
+    })!;
+    // The owner's wording mentions nothing but the name.
+    const email = leadNotification(rated, { subject: "{{name}}", body: "New lead: {{name}}" });
+    for (const part of [email.html, email.text!]) {
+      expect(part).toContain("Rating: Hot lead (7 pts)");
+      expect(part).toContain("Start: This week (+3)");
+      expect(part).toContain("+91 98765 43210");
+      expect(part).toContain("test@example.com");
+      expect(part).toContain("K7Q2X9AB");
+      expect(part).toContain("When would you like to start?");
+    }
+    // The default wording already lists them, so they are not repeated.
+    const withAll = leadNotification(rated, {
+      subject: "x",
+      body: "Name: {{name}}\nWhatsApp: {{phone}}\nEmail: {{email}}\n\n{{answers}}\n\n{{link}}",
+    });
+    expect(withAll.text!.split("+91 98765 43210").length).toBe(2);
+    expect(withAll.text!.split("When would you like to start?").length).toBe(2);
   });
 });
 
