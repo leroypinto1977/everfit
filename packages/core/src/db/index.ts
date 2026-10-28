@@ -15,7 +15,15 @@ export function db() {
   if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is not set — the store now requires Postgres (Neon).");
   }
-  pool ??= new Pool({ connectionString: process.env.DATABASE_URL, max: 5 });
+  // Keep connections open between requests. With pg's default 10-second idle
+  // timeout every quiet spell closed them, and the next page paid a fresh TCP +
+  // TLS + auth handshake to the database (about a second, cross-region).
+  pool ??= new Pool({
+    connectionString: process.env.DATABASE_URL,
+    max: 5,
+    idleTimeoutMillis: 5 * 60_000,
+    keepAlive: true,
+  });
   client ??= drizzle(pool, { schema });
   return client;
 }

@@ -18,7 +18,7 @@ function SuccessContent() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
-      <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full bg-brand/10 blur-[140px]" />
+      <div className="absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 rounded-full glow text-brand/10 scale-150" />
 
       <m.div
         initial={{ opacity: 0, y: 32 }}

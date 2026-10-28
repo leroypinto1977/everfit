@@ -25,7 +25,7 @@ export default function GearTeaser({
         {/* band visual */}
         <Reveal className="order-2 lg:order-1">
           <div className="relative mx-auto w-72 sm:w-96">
-            <div className="animate-breathe absolute inset-8 -z-10 rounded-full bg-accent/15 blur-[70px]" />
+            <div className="animate-breathe absolute inset-8 -z-10 rounded-full glow text-accent/15 scale-125" />
             <m.div
               initial={{ opacity: 0, y: 40, rotate: -6 }}
               whileInView={{ opacity: 1, y: 0, rotate: 0 }}

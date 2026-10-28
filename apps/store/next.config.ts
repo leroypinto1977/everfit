@@ -13,6 +13,19 @@ const nextConfig: NextConfig = {
   // 1600px wide, 100–250 KB), so there is little left for it to save.
   images: { unoptimized: true },
 
+  // Next serves public/ files with `max-age=0`, so every product photo went
+  // back to the Node process on every view. A day in browsers and the CDN,
+  // then a week of serving the old copy while it revalidates; rename a file
+  // when its content changes.
+  async headers() {
+    return [
+      {
+        source: "/:path*.:ext(jpg|jpeg|png|webp|avif|svg)",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }],
+      },
+    ];
+  },
+
   experimental: {
     // Ship the stylesheet inside the HTML instead of behind a <link>.
     //

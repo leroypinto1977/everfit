@@ -23,7 +23,7 @@ export default function BrandStory() {
         {/* big drawn infinity mark */}
         <Reveal className="order-2 lg:order-1">
           <div className="relative mx-auto w-full max-w-md">
-            <div className="animate-breathe absolute inset-10 -z-10 rounded-full bg-brand/10 blur-[80px]" />
+            <div className="animate-breathe absolute inset-10 -z-10 rounded-full glow text-brand/10 scale-125" />
             <m.div
               initial={{ scale: 0.9, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}

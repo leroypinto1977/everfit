@@ -1,6 +1,7 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { and, count, eq, gt, lt, ne, sql } from "drizzle-orm";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { db } from "@everfit/core/db";
 import { adminSessions, adminUsers, loginAttempts, passwordResets } from "@everfit/core/db/schema";
@@ -121,8 +122,12 @@ export async function signOutOtherSessions(userId: string) {
     .where(and(eq(adminSessions.userId, userId), ne(adminSessions.tokenHash, sha256(token))));
 }
 
-/** The session's user, including one who still has to replace an owner-set password. */
-async function sessionUser(): Promise<(AdminUser & { mustChangePassword: boolean }) | null> {
+/**
+ * The session's user, including one who still has to replace an owner-set password.
+ * Cached per request: the panel layout and the page both check the session, and
+ * each lookup is a round trip to the database.
+ */
+const sessionUser = cache(async (): Promise<(AdminUser & { mustChangePassword: boolean }) | null> => {
   const store = await cookies();
   const token = store.get(COOKIE)?.value;
   if (!token) return null;
@@ -152,7 +157,7 @@ async function sessionUser(): Promise<(AdminUser & { mustChangePassword: boolean
     screens: u.screens,
     mustChangePassword: u.mustChangePassword,
   };
-}
+});
 
 /**
  * The signed-in admin, or null. Someone still on an owner-set password counts

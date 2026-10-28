@@ -20,7 +20,7 @@ export default function MythBreak() {
       <div className="pointer-events-none absolute -left-40 bottom-0 w-[620px] text-white opacity-[0.06]">
         <InfinityMark className="w-full" />
       </div>
-      <div className="absolute right-0 top-0 h-[360px] w-[520px] rounded-full bg-white/10 blur-[150px]" />
+      <div className="absolute right-0 top-0 h-[360px] w-[520px] rounded-full glow text-white/10 scale-150" />
 
       <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-32">
         <Reveal>

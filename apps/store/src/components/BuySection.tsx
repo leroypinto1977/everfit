@@ -13,7 +13,7 @@ export default function BuySection() {
       <div className="pointer-events-none absolute -right-40 bottom-0 hidden w-[640px] text-white opacity-[0.07] sm:block">
         <InfinityMark className="w-full" />
       </div>
-      <div className="absolute left-1/2 top-0 h-[400px] w-[700px] max-w-full -translate-x-1/2 rounded-full bg-white/10 blur-[160px]" />
+      <div className="absolute left-1/2 top-0 h-[400px] w-[700px] max-w-full -translate-x-1/2 rounded-full glow text-white/10 scale-150" />
 
       <div className="relative mx-auto flex max-w-5xl flex-col items-center px-6 py-24 text-center sm:py-32">
         <m.div
