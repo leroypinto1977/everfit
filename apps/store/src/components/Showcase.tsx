@@ -44,7 +44,7 @@ export default function Showcase() {
             <Reveal key={panel.img}>
               <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
                 <div className={`relative mx-auto w-64 sm:w-80 ${flip ? "lg:order-2" : ""}`}>
-                  <div className="absolute inset-8 -z-10 rounded-full bg-brand-soft blur-[60px]" />
+                  <div className="absolute inset-8 -z-10 rounded-full glow text-brand-soft scale-125" />
                   <Image
                     src={panel.img}
                     alt={panel.title}

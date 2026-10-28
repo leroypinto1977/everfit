@@ -34,8 +34,8 @@ export default function Hero() {
       </div>
 
       {/* soft brand glows */}
-      <div className="animate-breathe absolute -left-40 top-1/4 h-[480px] w-[480px] rounded-full bg-brand/10 blur-[140px]" />
-      <div className="absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full bg-accent/15 blur-[120px]" />
+      <div className="animate-breathe absolute -left-40 top-1/4 h-[480px] w-[480px] rounded-full glow text-brand/10 scale-150" />
+      <div className="absolute -right-32 bottom-0 h-[400px] w-[400px] rounded-full glow text-accent/15 scale-150" />
 
       <div className="relative mx-auto grid w-full max-w-7xl items-center gap-12 px-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
         {/* copy */}
@@ -135,7 +135,7 @@ export default function Hero() {
           {/* floating credibility chip */}
           <div
             style={{ animationDelay: "0.7s" }}
-            className="anim-rise absolute -left-2 top-8 hidden rounded-2xl border border-line bg-card/95 px-5 py-3 shadow-[0_12px_36px_rgba(43,51,125,0.16)] backdrop-blur sm:block lg:-left-8"
+            className="anim-rise absolute -left-2 top-8 hidden rounded-2xl border border-line bg-card/95 px-5 py-3 shadow-[0_12px_36px_rgba(43,51,125,0.16)] sm:block lg:-left-8"
           >
             <p className="font-display text-sm font-bold text-brand">Tamil Nadu&apos;s trusted coach</p>
             <p className="mt-0.5 text-xs text-muted">for women&apos;s fitness at home</p>
@@ -151,13 +151,7 @@ export default function Hero() {
         style={{ opacity: textOpacity }}
         className="absolute bottom-6 left-1/2 hidden -translate-x-1/2 text-xs uppercase tracking-[0.3em] text-muted lg:block"
       >
-        <m.span
-          animate={{ y: [0, 6, 0] }}
-          transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
-          className="block"
-        >
-          Scroll ↓
-        </m.span>
+        <span className="animate-nudge block">Scroll ↓</span>
       </m.div>
     </section>
   );

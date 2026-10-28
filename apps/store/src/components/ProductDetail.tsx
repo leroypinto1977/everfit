@@ -71,7 +71,7 @@ export default function ProductDetail({
       <Reveal>
         <div>
           <div className="relative overflow-hidden rounded-3xl border border-line bg-card p-6 shadow-[0_2px_24px_rgba(43,51,125,0.06)]">
-            <div className="absolute inset-12 -z-0 rounded-full bg-brand-soft blur-[60px]" />
+            <div className="absolute inset-12 -z-0 rounded-full glow text-brand-soft scale-125" />
             <m.div
               key={active}
               initial={{ opacity: 0, scale: 0.98 }}

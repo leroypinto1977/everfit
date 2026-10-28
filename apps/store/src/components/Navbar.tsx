@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { m, AnimatePresence } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useLenis } from "lenis/react";
 import Magnetic from "./Magnetic";
 import { InfinityMark } from "@everfit/core/components/Logo";
 import { PROGRAMS } from "@everfit/core/lib/programs";
@@ -41,7 +40,6 @@ export default function Navbar() {
     setActiveSection((prev) => (prev === current ? prev : current));
   }, [pathname]);
 
-  const lenis = useLenis(refresh, [refresh]);
   useEffect(() => {
     // initial sync deferred to a frame so the effect body stays setState-free
     const raf = requestAnimationFrame(refresh);
@@ -61,15 +59,15 @@ export default function Navbar() {
           ? activeSection
           : null;
 
-  // --- in-page anchor navigation (smooth via Lenis, no full reload) ---
+  // --- in-page anchor navigation (smooth, no full reload) ---
   function goToSection(id: string, e?: React.MouseEvent) {
     e?.preventDefault();
     setMenuOpen(false);
     if (pathname === "/") {
       const el = document.getElementById(id);
       if (el) {
-        if (lenis) lenis.scrollTo(el, { offset: SCROLL_OFFSET });
-        else el.scrollIntoView({ behavior: "smooth" });
+        const top = el.getBoundingClientRect().top + window.scrollY + SCROLL_OFFSET;
+        window.scrollTo({ top, behavior: "smooth" });
         window.history.replaceState(null, "", `/#${id}`);
       }
     } else {
@@ -80,8 +78,7 @@ export default function Navbar() {
   function goTop(e?: React.MouseEvent) {
     if (pathname === "/") {
       e?.preventDefault();
-      if (lenis) lenis.scrollTo(0);
-      else window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
       window.history.replaceState(null, "", "/");
     }
   }
@@ -106,19 +103,16 @@ export default function Navbar() {
     setMobileOpen(false);
   }
 
-  // Lock background scroll while the mobile drawer is open. Lenis owns the
-  // scroll, so pause it (stop/start) and hide overflow as a belt-and-braces.
+  // Lock background scroll while the mobile drawer is open.
   useEffect(() => {
     if (!mobileOpen) return;
-    lenis?.stop();
     const html = document.documentElement;
     const prevOverflow = html.style.overflow;
     html.style.overflow = "hidden";
     return () => {
-      lenis?.start();
       html.style.overflow = prevOverflow;
     };
-  }, [mobileOpen, lenis]);
+  }, [mobileOpen]);
 
   const linkBase = "group relative text-sm transition-colors";
   const underline = (on: boolean) =>
@@ -133,7 +127,7 @@ export default function Navbar() {
     <header
       className={`anim-drop fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-card/90 backdrop-blur-md border-b border-line shadow-[0_1px_24px_rgba(43,51,125,0.06)]"
+          ? "bg-card border-b border-line shadow-[0_1px_24px_rgba(43,51,125,0.06)]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
@@ -256,7 +250,7 @@ export default function Navbar() {
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.28, ease: [0.21, 0.65, 0.36, 1] }}
-            className="overflow-hidden border-b border-line bg-card/95 backdrop-blur-xl md:hidden"
+            className="overflow-hidden border-b border-line bg-card md:hidden"
           >
             <div className="mx-auto max-w-7xl px-6 pb-5 pt-1">
               <p className="px-3 pb-1 pt-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
