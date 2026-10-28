@@ -1,5 +1,11 @@
 import Link from "next/link";
 import { LEAD_STATUSES, isLeadStatus, leadStats, listLeads, type LeadStatus } from "@everfit/core/lib/leads";
+import {
+  LEAD_TEMPERATURES,
+  RATING_MAX,
+  isLeadTemperature,
+  type LeadTemperature,
+} from "@everfit/core/lib/lead-score";
 import KpiCard from "@/components/KpiCard";
 import { saveFollowUpAction } from "./actions";
 import { requireScreen } from "@/lib/admin-auth";
@@ -18,11 +24,19 @@ const badge: Record<LeadStatus, string> = {
   not_joining: "bg-red-50 text-red-600 border-red-200",
 };
 
+const ratingBadge: Record<LeadTemperature, string> = {
+  hot: "bg-red-50 text-red-600 border-red-200",
+  warm: "bg-amber-50 text-amber-700 border-amber-200",
+  cold: "bg-sky-50 text-sky-700 border-sky-200",
+};
+const ratingIcon: Record<LeadTemperature, string> = { hot: "🔥", warm: "🟠", cold: "🔵" };
+
 const IST = { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Kolkata" } as const;
 
-function pageUrl(status: string, q: string, page: number) {
+function pageUrl(status: string, rating: string, q: string, page: number) {
   const params = new URLSearchParams();
   if (status) params.set("status", status);
+  if (rating) params.set("rating", rating);
   if (q) params.set("q", q);
   if (page > 1) params.set("page", String(page));
   const qs = params.toString();
@@ -32,15 +46,16 @@ function pageUrl(status: string, q: string, page: number) {
 export default async function OneToOnePage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string; page?: string }>;
+  searchParams: Promise<{ status?: string; rating?: string; q?: string; page?: string }>;
 }) {
   await requireScreen("one-to-one");
-  const { status: statusParam = "", q = "", page: pageParam = "1" } = await searchParams;
+  const { status: statusParam = "", rating: ratingParam = "", q = "", page: pageParam = "1" } = await searchParams;
   const status = isLeadStatus(statusParam) ? statusParam : "";
+  const rating = isLeadTemperature(ratingParam) ? ratingParam : "";
   const page = Math.max(1, parseInt(pageParam, 10) || 1);
 
   const [{ leads, total }, stats] = await Promise.all([
-    listLeads({ status, q, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
+    listLeads({ status, temperature: rating, q, limit: PAGE_SIZE, offset: (page - 1) * PAGE_SIZE }),
     leadStats(),
   ]);
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -51,6 +66,20 @@ export default async function OneToOnePage({
     { label: "All", value: "", n: stats.total },
     ...LEAD_STATUSES.map((s) => ({ label: s.label, value: s.value as string, n: count(s.value) })),
   ];
+  const ratingFilters = [
+    { label: "Any rating", value: "", n: stats.total },
+    ...LEAD_TEMPERATURES.map((t) => ({
+      label: `${ratingIcon[t.value]} ${t.label}`,
+      value: t.value as string,
+      n: stats.byTemperature[t.value] ?? 0,
+    })),
+  ];
+  const chip = (active: boolean) =>
+    `rounded-full border px-4 py-1.5 text-sm transition-colors ${
+      active
+        ? "border-[#2b337d] bg-[#2b337d] text-white"
+        : "border-[#dcdfee] bg-white text-[#4a5072] hover:border-[#2b337d]/40"
+    }`;
 
   return (
     <div className="space-y-6">
@@ -73,7 +102,7 @@ export default async function OneToOnePage({
           index={1}
           label="To contact"
           value={String(count("new"))}
-          hint="new, nobody has reached out yet"
+          hint={`${stats.hotToContact} hot, call these first`}
         />
         <KpiCard
           index={2}
@@ -92,23 +121,25 @@ export default async function OneToOnePage({
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap gap-2">
-          {filters.map((f) => (
-            <Link
-              key={f.value}
-              href={pageUrl(f.value, q, 1)}
-              className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-                status === f.value
-                  ? "border-[#2b337d] bg-[#2b337d] text-white"
-                  : "border-[#dcdfee] bg-white text-[#4a5072] hover:border-[#2b337d]/40"
-              }`}
-            >
-              {f.label} <span className="opacity-60">{f.n}</span>
-            </Link>
-          ))}
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-2">
+            {filters.map((f) => (
+              <Link key={f.value} href={pageUrl(f.value, rating, q, 1)} className={chip(status === f.value)}>
+                {f.label} <span className="opacity-60">{f.n}</span>
+              </Link>
+            ))}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {ratingFilters.map((f) => (
+              <Link key={f.value} href={pageUrl(status, f.value, q, 1)} className={chip(rating === f.value)}>
+                {f.label} <span className="opacity-60">{f.n}</span>
+              </Link>
+            ))}
+          </div>
         </div>
         <form>
           {status && <input type="hidden" name="status" value={status} />}
+          {rating && <input type="hidden" name="rating" value={rating} />}
           <label htmlFor="lead-search" className="sr-only">
             Search leads
           </label>
@@ -126,11 +157,12 @@ export default async function OneToOnePage({
       <div className="space-y-3">
         {leads.length === 0 && (
           <p className="rounded-2xl border border-[#e3e5f0] bg-white px-6 py-14 text-center text-sm text-[#9aa0c3]">
-            {status || q ? "No leads match." : "No leads yet."}
+            {status || rating || q ? "No leads match." : "No leads yet."}
           </p>
         )}
         {leads.map((lead) => {
           const leadStatus = isLeadStatus(lead.status) ? lead.status : "new";
+          const temperature = isLeadTemperature(lead.temperature) ? lead.temperature : null;
           return (
             <details key={lead.id} className="rounded-2xl border border-[#e3e5f0] bg-white">
               <summary className="cursor-pointer px-6 py-4 text-sm">
@@ -140,6 +172,16 @@ export default async function OneToOnePage({
                     <span className="block truncate text-xs text-[#9aa0c3]">
                       {lead.phone} · {lead.email}
                     </span>
+                  </span>
+                  <span
+                    className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                      temperature ? ratingBadge[temperature] : "border-gray-200 bg-gray-50 text-gray-400"
+                    }`}
+                  >
+                    {temperature
+                      ? `${ratingIcon[temperature]} ${LEAD_TEMPERATURES.find((t) => t.value === temperature)?.label}`
+                      : "Not rated"}
+                    {lead.score !== null && <span className="ml-1 font-normal opacity-70">{lead.score}/{RATING_MAX}</span>}
                   </span>
                   <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badge[leadStatus]}`}>
                     {LEAD_STATUSES.find((s) => s.value === leadStatus)?.label}
@@ -163,14 +205,28 @@ export default async function OneToOnePage({
               </summary>
 
               <div className="grid gap-8 border-t border-[#eef0f7] px-6 py-5 lg:grid-cols-[1fr_20rem]">
-                <dl className="grid content-start gap-x-8 gap-y-4 text-sm sm:grid-cols-2">
-                  {lead.answers.map((a) => (
-                    <div key={a.label}>
-                      <dt className="text-xs text-[#9aa0c3]">{a.label}</dt>
-                      <dd className="mt-0.5 whitespace-pre-wrap break-words">{a.value}</dd>
+                <div className="space-y-5">
+                  {lead.scoreReasons && lead.scoreReasons.length > 0 && (
+                    <div className="rounded-xl bg-[#f6f7fb] px-4 py-3 text-sm">
+                      <p className="text-xs font-medium uppercase tracking-[0.15em] text-[#6b7194]">
+                        Why this rating · {lead.score}/{RATING_MAX}
+                      </p>
+                      <ul className="mt-2 list-disc space-y-1 pl-5 text-[#4a5072]">
+                        {lead.scoreReasons.map((r) => (
+                          <li key={r}>{r}</li>
+                        ))}
+                      </ul>
                     </div>
-                  ))}
-                </dl>
+                  )}
+                  <dl className="grid content-start gap-x-8 gap-y-4 text-sm sm:grid-cols-2">
+                    {lead.answers.map((a) => (
+                      <div key={a.label}>
+                        <dt className="text-xs text-[#9aa0c3]">{a.label}</dt>
+                        <dd className="mt-0.5 whitespace-pre-wrap break-words">{a.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
 
                 <form action={saveFollowUpAction} className="space-y-3">
                   <input type="hidden" name="id" value={lead.id} />
@@ -184,6 +240,21 @@ export default async function OneToOnePage({
                       {LEAD_STATUSES.map((s) => (
                         <option key={s.value} value={s.value}>
                           {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="block text-xs font-medium uppercase tracking-[0.15em] text-[#6b7194]">
+                    Rating
+                    <select
+                      name="temperature"
+                      defaultValue={temperature ?? ""}
+                      className="mt-1.5 w-full rounded-xl border border-[#dcdfee] bg-white px-4 py-2 text-sm font-normal normal-case tracking-normal text-[#22242c] outline-none focus:border-[#2b337d]"
+                    >
+                      {!temperature && <option value="">Not rated</option>}
+                      {LEAD_TEMPERATURES.map((t) => (
+                        <option key={t.value} value={t.value}>
+                          {ratingIcon[t.value]} {t.label}
                         </option>
                       ))}
                     </select>
@@ -234,7 +305,7 @@ export default async function OneToOnePage({
           <div className="flex gap-2">
             {page > 1 && (
               <Link
-                href={pageUrl(status, q, page - 1)}
+                href={pageUrl(status, rating, q, page - 1)}
                 className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 hover:border-[#2b337d]/40"
               >
                 ← Previous
@@ -242,7 +313,7 @@ export default async function OneToOnePage({
             )}
             {page < pages && (
               <Link
-                href={pageUrl(status, q, page + 1)}
+                href={pageUrl(status, rating, q, page + 1)}
                 className="rounded-xl border border-[#dcdfee] bg-white px-4 py-2 hover:border-[#2b337d]/40"
               >
                 Next →
