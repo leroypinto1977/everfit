@@ -13,7 +13,7 @@ describe("rateLead", () => {
         decision: "Just me. I make my own decisions about my health",
         invest: "I’d like Manjula to walk me through my personalised plan on the call, then start", // curly quote, as forms type it
         start: "Within the next 2 weeks",
-        health: "Thyroid, Knee, back or joint pain",
+        health: "Diabetes, high BP or cholesterol, Knee, back or joint pain",
       })
     );
     expect(hot).toMatchObject({ temperature: "hot", score: 9 });
@@ -23,8 +23,7 @@ describe("rateLead", () => {
         decision: "Me and my husband",
         invest: "I'd like Manjula to walk me through my personalised plan on the call, then start",
         start: "Within the next month",
-        impact:
-          "I feel tired and low on energy most days, I can't keep up with my kids and family, I worry about my long-term health",
+        impact: "I feel tired and low on energy most days, I worry about my long-term health",
       })
     );
     expect(warm).toMatchObject({ temperature: "warm", score: 6 });
