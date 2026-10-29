@@ -10,7 +10,7 @@ import { SITE_URL, BRAND, SUPPORT_EMAIL } from "@everfit/core/lib/site";
 // Brand faces: Renoric (slanted display) ≈ Exo 2 italic,
 // URW Geometric (body) ≈ Poppins.
 // Preloaded on purpose, but only because the stylesheet is inlined
-// (`experimental.inlineCss` in next.config.ts). These six faces are 114 KB at
+// (`experimental.inlineCss` in next.config.mjs). These six faces are 114 KB at
 // High priority, and while the CSS was still a separate <link> they starved
 // it — it took 2.25 s to arrive and the first screen stayed blank behind it.
 // With no render-blocking request left to starve, preloading is free on first

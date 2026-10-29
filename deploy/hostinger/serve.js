@@ -12,11 +12,11 @@
  * port below only matters when this is run by hand.
  */
 // Hostinger counts every thread against the account's process limit (200), and
-// the server has 64 cores. Native libraries Next loads size their thread pools
-// to the core count — Rust's Rayon and Tokio inside Next's SWC bindings, libvips
-// inside sharp — so each app started 60-70 threads and two apps filled the
-// limit on their own (measured 2026-10-29 via /api/cron/processes). Each pool
-// reads its size from the environment when it starts, so these must be set
+// the server has 64 cores, so any pool sized to the core count is expensive.
+// The big one was the Tokio runtime in Next's SWC binding (64 threads per app),
+// which the apps no longer load at runtime now that next.config is plain
+// JavaScript (see apps/store/next.config.mjs). These caps keep the remaining
+// pools small and cover the binding if anything does load it; they must be set
 // before Next is required.
 process.env.UV_THREADPOOL_SIZE ??= "2";
 process.env.RAYON_NUM_THREADS ??= "2";

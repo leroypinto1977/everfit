@@ -1,7 +1,12 @@
+// Plain JavaScript on purpose, not next.config.ts: to read a TypeScript config
+// `next start` loads Next's native SWC binding, whose Tokio runtime starts one
+// thread per CPU — 64 on Hostinger — and Hostinger counts every thread against
+// the account's 200-process limit. With a .mjs config the running app never
+// loads it: about 9 threads per app instead of 73 (measured 2026-10-29).
 import path from "node:path";
-import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+/** @type {import("next").NextConfig} */
+const nextConfig = {
   // @everfit/core ships raw TypeScript from the workspace — Next has to compile
   // it as if it were app source rather than a prebuilt node_modules dependency.
   transpilePackages: ["@everfit/core"],
@@ -54,7 +59,7 @@ const nextConfig: NextConfig = {
     // The monorepo root, so Turbopack resolves and watches the workspace
     // packages that live outside this app directory. Without it Next guesses
     // from the nearest lockfile and can pick the wrong directory.
-    root: path.join(__dirname, "..", ".."),
+    root: path.join(import.meta.dirname, "..", ".."),
   },
 };
 
