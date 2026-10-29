@@ -44,6 +44,16 @@ export async function GET(req: Request) {
       const field = (name: string) => status.match(new RegExp(`^${name}:\\s*(.+)$`, "m"))?.[1]?.trim() ?? "";
       // Only the program and its first argument: later arguments could carry configuration.
       const cmd = read(`/proc/${pid}/cmdline`).split("\0").filter(Boolean).slice(0, 2).join(" ").slice(0, 120);
+      // Thread names show which runtime owns them (tokio-runtime-w, rayon, V8 Worker, libuv-worker…).
+      const threadNames: Record<string, number> = {};
+      try {
+        for (const tid of readdirSync(`/proc/${pid}/task`)) {
+          const name = read(`/proc/${pid}/task/${tid}/comm`).trim().replace(/\d+$/, "#") || "?";
+          threadNames[name] = (threadNames[name] ?? 0) + 1;
+        }
+      } catch {
+        // The process ended while being read.
+      }
       return {
         pid: Number(pid),
         ppid: Number(field("PPid")),
@@ -51,6 +61,7 @@ export async function GET(req: Request) {
         threads: Number(field("Threads")) || 1,
         rssMb: Math.round((parseInt(field("VmRSS")) || 0) / 1024),
         cmd,
+        threadNames,
       };
     })
     .filter((p) => p.name);
@@ -58,7 +69,11 @@ export async function GET(req: Request) {
   return NextResponse.json({
     self: process.pid,
     hostCpus: cpus().length,
-    uvThreadpool: process.env.UV_THREADPOOL_SIZE ?? "default (4)",
+    caps: {
+      UV_THREADPOOL_SIZE: process.env.UV_THREADPOOL_SIZE ?? null,
+      RAYON_NUM_THREADS: process.env.RAYON_NUM_THREADS ?? null,
+      TOKIO_WORKER_THREADS: process.env.TOKIO_WORKER_THREADS ?? null,
+    },
     processCount: processes.length,
     threadTotal: processes.reduce((n, p) => n + p.threads, 0),
     processes: processes.sort((a, b) => b.threads - a.threads),

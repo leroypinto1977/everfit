@@ -11,10 +11,17 @@
  * Hostinger's Node runner hands the server its socket through `listen`, so the
  * port below only matters when this is run by hand.
  */
-// Hostinger counts every thread against the account's process limit, and
-// libuv starts 4 for its pool by default; 2 is plenty for this traffic. Must
-// be set before anything touches the pool, so it comes first.
+// Hostinger counts every thread against the account's process limit (200), and
+// the server has 64 cores. Native libraries Next loads size their thread pools
+// to the core count — Rust's Rayon and Tokio inside Next's SWC bindings, libvips
+// inside sharp — so each app started 60-70 threads and two apps filled the
+// limit on their own (measured 2026-10-29 via /api/cron/processes). Each pool
+// reads its size from the environment when it starts, so these must be set
+// before Next is required.
 process.env.UV_THREADPOOL_SIZE ??= "2";
+process.env.RAYON_NUM_THREADS ??= "2";
+process.env.TOKIO_WORKER_THREADS ??= "2";
+process.env.VIPS_CONCURRENCY ??= "1";
 
 const { createServer } = require("node:http");
 const path = require("node:path");
