@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   // it as if it were app source rather than a prebuilt node_modules dependency.
   transpilePackages: ["@everfit/core"],
 
+  // One build worker; see apps/store/next.config.ts for why.
+  experimental: { cpus: 1 },
+
   turbopack: {
     // The monorepo root, so Turbopack resolves and watches the workspace
     // packages that live outside this app directory. Without it Next guesses
