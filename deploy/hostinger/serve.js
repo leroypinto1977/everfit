@@ -11,6 +11,11 @@
  * Hostinger's Node runner hands the server its socket through `listen`, so the
  * port below only matters when this is run by hand.
  */
+// Hostinger counts every thread against the account's process limit, and
+// libuv starts 4 for its pool by default; 2 is plenty for this traffic. Must
+// be set before anything touches the pool, so it comes first.
+process.env.UV_THREADPOOL_SIZE ??= "2";
+
 const { createServer } = require("node:http");
 const path = require("node:path");
 

@@ -27,6 +27,12 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
+    // One build worker. By default Next starts one per CPU it can see, which on
+    // Hostinger is the whole host's core count, and every worker's threads
+    // count against the account's process limit while the live apps keep
+    // running: builds filled the limit and the apps could not restart.
+    cpus: 1,
+
     // Ship the stylesheet inside the HTML instead of behind a <link>.
     //
     // The storefront's CSS is one 10.6 KB Tailwind file, and as a separate
